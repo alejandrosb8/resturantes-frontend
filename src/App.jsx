@@ -2,6 +2,7 @@ import { MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import Home from './pages/Home';
 import { Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <ModalsProvider>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </ModalsProvider>
     </MantineProvider>
