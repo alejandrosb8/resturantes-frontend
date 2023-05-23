@@ -1,8 +1,10 @@
 import React from 'react';
 import Layout from '../layouts/Default';
-import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text } from '@mantine/core';
+import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, useMantineTheme, rem } from '@mantine/core';
 
 function Login() {
+  const theme = useMantineTheme();
+
   return (
     <>
       <Container
@@ -60,7 +62,13 @@ function Login() {
               <Button type="submit" fullWidth>
                 Iniciar sesión
               </Button>
-              <Anchor href="/" align="center">
+              <Anchor 
+                href="/" 
+                align="center"
+                sx={(style) => ({
+                  [style.fn.smallerThan('sm')]: { fontSize: rem(13)}
+                })}
+              >
                 ¿Olvidaste tu contraseña?
               </Anchor>
               <Divider
