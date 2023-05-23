@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppShell, Navbar, Header, Footer, Text, MediaQuery, Burger, useMantineTheme } from '@mantine/core';
-import colors from '../utils/colors';
+import foodbg from './../assets/foodbg.svg';
 
 export default function Layout({ children, header, footer, navbar }) {
   const theme = useMantineTheme();
@@ -9,7 +9,9 @@ export default function Layout({ children, header, footer, navbar }) {
     <AppShell
       styles={{
         main: {
-          background: colors.background,
+          backgroundImage: `url(${foodbg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         },
       }}
       navbarOffsetBreakpoint="sm"
