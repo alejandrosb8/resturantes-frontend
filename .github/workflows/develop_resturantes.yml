@@ -51,6 +51,10 @@ jobs:
           npm ci
           npm run build
 
+      - name: Move staticwebapp.config.json
+        run: |
+          mv staticwebapp.config.json dist
+
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -69,7 +73,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: build
-          path: dist
 
       - name: Deploy to Azure Static Web Apps
         id: deploy-to-webapp
