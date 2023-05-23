@@ -1,10 +1,8 @@
 import React from 'react';
 import Layout from '../layouts/Default';
-import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, useMantineTheme, rem } from '@mantine/core';
+import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, rem } from '@mantine/core';
 
 function Login() {
-  const theme = useMantineTheme();
-
   return (
     <>
       <Container
