@@ -1,7 +1,7 @@
 import React from 'react';
-import Layout from '../layouts/Default';
-import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, PasswordInput } from '@mantine/core';
-import { Link } from 'react-router-dom';
+import Layout from '../../layouts/Default';
+import { Button, TextInput, Container, Title, Stack, PasswordInput, Text } from '@mantine/core';
+//import { Link } from 'react-router-dom';
 
 function Login() {
   return (
@@ -47,31 +47,17 @@ function Login() {
           <Title order={1} color="gray.8">
             Inicia sesión
           </Title>
+          <Text color="gray.6" mt={5} mb={20}>
+            Ingrese sus credenciales para iniciar sesión como administrador.
+          </Text>
           <form>
             <Stack spacing="xs" mt={20}>
-              <TextInput
-                label="Correo electrónico"
-                type="email"
-                required
-                placeholder="Ingrese su correo electrónico..."
-              />
+              <TextInput label="Nombre de usuario" type="text" required placeholder="Ingrese su nombre de usuario..." />
               <PasswordInput label="Contraseña" required placeholder="Ingrese su contraseña..." />
             </Stack>
             <Stack spacing="xs" mt={15}>
               <Button type="submit" fullWidth>
                 Iniciar sesión
-              </Button>
-              <Anchor href="/" align="center" size="sm">
-                ¿Olvidaste tu contraseña?
-              </Anchor>
-              <Divider
-                orientation="horizontal"
-                labelPosition="center"
-                label={<Text color="#666">¿No tienes una cuenta?</Text>}
-              />
-
-              <Button component={Link} to="/register" variant="outline" fullWidth>
-                Regístrate
               </Button>
             </Stack>
           </form>

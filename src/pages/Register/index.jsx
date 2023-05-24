@@ -1,9 +1,12 @@
 import React from 'react';
-import Layout from '../layouts/Default';
-import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, PasswordInput } from '@mantine/core';
+import Layout from '../../layouts/Default';
+import { Button, TextInput, Container, Divider, Title, Stack, Text, PasswordInput, SimpleGrid } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { Link } from 'react-router-dom';
+import { size } from '../../utils/breakpoints';
 
-function Login() {
+function Register() {
+  const isMobile = useMediaQuery(`(max-width: ${size.mobileL})`);
   return (
     <>
       <Container
@@ -38,40 +41,46 @@ function Login() {
             minWidth: '340px',
             width: '100%',
             maxWidth: 'min(90%, 540px)',
-            transform: 'translate(-50%, min(-40vh, -200px))',
+            transform: 'translate(-50%, -45vh)',
             backgroundColor: 'white',
             borderRadius: '0.25rem',
             boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.25)',
+            maxHeight: '80vh',
+            overflowY: 'auto',
           }}
         >
           <Title order={1} color="gray.8">
-            Inicia sesión
+            Regístrate
           </Title>
           <form>
             <Stack spacing="xs" mt={20}>
+              <SimpleGrid cols={isMobile ? 1 : 2}>
+                <TextInput label="Nombre" type="text" required placeholder="Ingrese su nombre..." />
+                <TextInput label="Apellido" type="text" required placeholder="Ingrese su apellido..." />
+              </SimpleGrid>
+
               <TextInput
                 label="Correo electrónico"
                 type="email"
                 required
                 placeholder="Ingrese su correo electrónico..."
               />
+              <TextInput label="DNI" type="number" required placeholder="Ingrese su DNI..." />
+              <TextInput label="Número telefónico" type="tel" required placeholder="Ingrese su número telefónico..." />
               <PasswordInput label="Contraseña" required placeholder="Ingrese su contraseña..." />
+              <PasswordInput label="Confirmar contraseña" required placeholder="Ingrese su contraseña..." />
             </Stack>
             <Stack spacing="xs" mt={15}>
               <Button type="submit" fullWidth>
-                Iniciar sesión
+                Regístrate
               </Button>
-              <Anchor href="/" align="center" size="sm">
-                ¿Olvidaste tu contraseña?
-              </Anchor>
               <Divider
                 orientation="horizontal"
                 labelPosition="center"
-                label={<Text color="#666">¿No tienes una cuenta?</Text>}
+                label={<Text color="#666">¿Ya tienes una cuenta?</Text>}
               />
-
-              <Button component={Link} to="/register" variant="outline" fullWidth>
-                Regístrate
+              <Button component={Link} to="/login" variant="outline" fullWidth>
+                Inicia sesión
               </Button>
             </Stack>
           </form>
@@ -81,4 +90,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
