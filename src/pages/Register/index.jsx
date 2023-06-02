@@ -1,12 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../../layouts/Default';
-import { Button, TextInput, Container, Divider, Title, Stack, Text, PasswordInput, SimpleGrid } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
+import { Button, TextInput, Container, Divider, Title, Stack, Text, PasswordInput, Anchor } from '@mantine/core';
 import { Link } from 'react-router-dom';
-import { size } from '../../utils/breakpoints';
+import useAuth from '../../hooks/useAuth';
+import { useForm } from '@mantine/form';
+//import { useNavigate } from 'react-router-dom';
 
 function Register() {
-  const isMobile = useMediaQuery(`(max-width: ${size.mobileL})`);
+  const form = useForm({
+    initialValues: {
+      fullName: '',
+      email: '',
+      dni: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+    },
+
+    validate: {
+      fullName: (value) => (/^[A-Za-zÀ-ÿ\s']+$/.test(value) ? null : 'El nombre solo debe contener letras'),
+      email: (value) =>
+        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value) ? null : 'El correo electrónico no es válido',
+      dni: (value) => (/^[0-9]{7,}$/.test(value) ? null : 'El DNI debe contener al menos 7 dígitos'),
+      phone: (value) =>
+        /^\+?\d{1,3}[-.\s]?\(?\d{1,3}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}$/.test(value)
+          ? null
+          : 'El número telefónico no es válido',
+      password: (value) => (/^[\s\S]{8,}$/.test(value) ? null : 'La contraseña debe contener al menos 8 caracteres'),
+      confirmPassword: (value) =>
+        value === form.values.password
+          ? value !== ''
+            ? null
+            : 'La contraseña debe contener al menos 8 caracteres'
+          : 'Las contraseñas no coinciden',
+    },
+  });
+
+  const { register } = useAuth();
+
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState(false);
+
+  //const navigate = useNavigate();
+
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    const { fullName, email, dni, phone, password } = values;
+
+    const response = await register(fullName, email, dni, phone, password);
+
+    if (response.status === 201) {
+      setConfirmEmail(true);
+    } else {
+      setErrorMsg(response.message);
+    }
+
+    setLoading(false);
+
+    console.log(response); // eslint-disable-line
+  };
+
   return (
     <>
       <Container
@@ -49,41 +103,80 @@ function Register() {
             overflowY: 'auto',
           }}
         >
-          <Title order={1} color="gray.8">
-            Regístrate
-          </Title>
-          <form>
-            <Stack spacing="xs" mt={20}>
-              <SimpleGrid cols={isMobile ? 1 : 2}>
-                <TextInput label="Nombre" type="text" required placeholder="Ingrese su nombre..." />
-                <TextInput label="Apellido" type="text" required placeholder="Ingrese su apellido..." />
-              </SimpleGrid>
-
-              <TextInput
-                label="Correo electrónico"
-                type="email"
-                required
-                placeholder="Ingrese su correo electrónico..."
-              />
-              <TextInput label="DNI" type="number" required placeholder="Ingrese su DNI..." />
-              <TextInput label="Número telefónico" type="tel" required placeholder="Ingrese su número telefónico..." />
-              <PasswordInput label="Contraseña" required placeholder="Ingrese su contraseña..." />
-              <PasswordInput label="Confirmar contraseña" required placeholder="Ingrese su contraseña..." />
-            </Stack>
-            <Stack spacing="xs" mt={15}>
-              <Button type="submit" fullWidth>
+          {confirmEmail ? (
+            <>
+              <Stack>
+                <Title order={2} align="center">
+                  Confirma tu correo electrónico
+                </Title>
+                <Text align="center">
+                  Te hemos enviado un correo electrónico a <b>{form.values.email}</b> con un enlace para confirmar tu
+                  cuenta. Cuando lo hayas hecho, podrás iniciar sesión.
+                </Text>
+                <Anchor component={Link} to="/login" align="center" size="lg">
+                  Inicia sesión
+                </Anchor>{' '}
+              </Stack>
+            </>
+          ) : (
+            <>
+              <Title order={1} color="gray.8">
                 Regístrate
-              </Button>
-              <Divider
-                orientation="horizontal"
-                labelPosition="center"
-                label={<Text color="#666">¿Ya tienes una cuenta?</Text>}
-              />
-              <Button component={Link} to="/login" variant="outline" fullWidth>
-                Inicia sesión
-              </Button>
-            </Stack>
-          </form>
+              </Title>
+              <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
+                <Stack spacing="xs" mt={20}>
+                  <TextInput
+                    label="Nombre"
+                    type="text"
+                    placeholder="Ingrese su nombre completo..."
+                    {...form.getInputProps('fullName')}
+                  />
+
+                  <TextInput
+                    label="Correo electrónico"
+                    type="email"
+                    placeholder="Ingrese su correo electrónico..."
+                    {...form.getInputProps('email')}
+                  />
+                  <TextInput label="DNI" type="number" placeholder="Ingrese su DNI..." {...form.getInputProps('dni')} />
+                  <TextInput
+                    label="Número telefónico"
+                    type="tel"
+                    placeholder="Ingrese su número telefónico..."
+                    {...form.getInputProps('phone')}
+                  />
+                  <PasswordInput
+                    label="Contraseña"
+                    placeholder="Ingrese su contraseña..."
+                    {...form.getInputProps('password')}
+                  />
+                  <PasswordInput
+                    label="Confirmar contraseña"
+                    placeholder="Ingrese su contraseña..."
+                    {...form.getInputProps('confirmPassword')}
+                  />
+                </Stack>
+                <Stack spacing="xs" mt={15}>
+                  {errorMsg && (
+                    <Text color="red" size="xs">
+                      {errorMsg}
+                    </Text>
+                  )}
+                  <Button type="submit" fullWidth loading={loading}>
+                    Regístrate
+                  </Button>
+                  <Divider
+                    orientation="horizontal"
+                    labelPosition="center"
+                    label={<Text color="#666">¿Ya tienes una cuenta?</Text>}
+                  />
+                  <Button component={Link} to="/login" variant="outline" fullWidth>
+                    Inicia sesión
+                  </Button>
+                </Stack>
+              </form>
+            </>
+          )}
         </Container>
       </Layout>
     </>

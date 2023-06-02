@@ -5,8 +5,13 @@ import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminLogin from './pages/Admin/Login';
+import { useState } from 'react';
+import { AuthContext } from './contexts/AuthContext';
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authTokens, setAuthTokens] = useState(null);
+
   return (
     <MantineProvider
       withGlobalStyles
@@ -18,14 +23,16 @@ export default function App() {
         primaryColor: 'orange',
       }}
     >
-      <ModalsProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-        </Routes>
-      </ModalsProvider>
+      <AuthContext.Provider value={{ user, setUser, authTokens, setAuthTokens }}>
+        <ModalsProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+          </Routes>
+        </ModalsProvider>
+      </AuthContext.Provider>
     </MantineProvider>
   );
 }
