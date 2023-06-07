@@ -4,6 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 const REGISTRATION_URL = '/auth/signup';
 const LOGIN_URL = '/auth/login';
+const VERIFY_URL = '/auth/verify';
 
 function useAuth() {
   const { authTokens, setAuthTokens, setUser } = useContext(AuthContext);
@@ -18,15 +19,29 @@ function useAuth() {
         return response;
       })
       .catch((error) => {
-        console.log(error); // eslint-disable-line
-
         return error;
       });
   }
 
   function login(email, password) {
-    return axios.post(LOGIN_URL, { email, password }).then((response) => {
-      setAuthTokens(response.data);
+    return axios
+      .post(LOGIN_URL, { email, password })
+      .then((response) => {
+        setAuthTokens(response.data);
+        setUser(response.data);
+
+        localStorage.setItem('tokens', JSON.stringify(response.data.data));
+
+        return response;
+      })
+      .catch((error) => {
+        return error;
+      });
+  }
+
+  function verifyAccount(token) {
+    return axios.get(`${VERIFY_URL}/${token}`).then((response) => {
+      return response;
     });
   }
 
@@ -39,6 +54,7 @@ function useAuth() {
     login,
     logout,
     register,
+    verifyAccount,
   };
 }
 
