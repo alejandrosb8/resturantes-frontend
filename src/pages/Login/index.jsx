@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import Layout from '../layouts/Default';
+import Layout from '../../layouts/Default';
 import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, PasswordInput } from '@mantine/core';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import useAuth from '../../hooks/useAuth';
 import { useForm } from '@mantine/form';
+import RecoverPassword from './RecoverPassword';
 
 function Login() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,14 +12,16 @@ function Login() {
   const [tokenLoading, setTokenLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRecoverPassword, setShowRecoverPassword] = useState(false);
 
   const { verifyAccount, login } = useAuth();
   const navigate = useNavigate();
 
   const token = searchParams.get('token');
+  const recoverPassword = searchParams.get('recoverPassword');
 
   useEffect(() => {
-    if (token) {
+    if (token && !recoverPassword) {
       setIsToken(true);
       setTokenLoading(true);
       setSearchParams({});
@@ -28,6 +31,10 @@ function Login() {
           setTokenLoading(false);
         }
       });
+    }
+
+    if (recoverPassword) {
+      setShowRecoverPassword(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
@@ -39,8 +46,9 @@ function Login() {
     },
 
     validate: {
-      email: (value) => (value !== '' ? null : 'El correo electrónico es requerido'),
-      password: (value) => (value !== '' ? null : 'La contraseña es requerida'),
+      email: (value) =>
+        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value) ? null : 'El correo electrónico no es válido',
+      password: (value) => (/^[\s\S]{8,}$/.test(value) ? null : 'La contraseña debe contener al menos 8 caracteres'),
     },
   });
 
@@ -51,17 +59,65 @@ function Login() {
     const responseRaw = await login(email, password);
     const response = responseRaw.response;
 
-    console.log(response);
+    console.log(responseRaw);
 
-    if (response.status === 200) {
+    if (responseRaw.status === 200) {
       navigate('/');
-    } else if (response.status === 400) {
+    } else if (response.status === 401) {
       setErrorMsg('Correo o contraseña incorrectos');
     } else {
-      setErrorMsg(response.message);
+      setErrorMsg(response.data.message);
     }
     setLoading(false);
   };
+
+  if (showRecoverPassword) {
+    return (
+      <>
+        <Container
+          style={{
+            minWidth: '100%',
+            maxWidth: '1320px',
+            padding: '0',
+            backgroundColor: 'transparent',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" style={{ backgroundColor: 'transparent' }}>
+            <path
+              fill="#FD7E14"
+              fillOpacity="1"
+              d="M0,64L80,101.3C160,139,320,213,480,213.3C640,213,800,139,960,128C1120,117,1280,171,1360,197.3L1440,224L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
+              max
+            ></path>
+          </svg>
+        </Container>
+        <Layout>
+          <Container
+            mt={50}
+            size="xs"
+            p={40}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              minWidth: '340px',
+              width: '100%',
+              maxWidth: 'min(90%, 540px)',
+              transform: 'translate(-50%, min(-40vh, -200px))',
+              backgroundColor: 'white',
+              borderRadius: '0.25rem',
+              boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.25)',
+            }}
+          >
+            <RecoverPassword token={token} setShowRecoverPassword={setShowRecoverPassword} />
+          </Container>
+        </Layout>
+      </>
+    );
+  }
 
   if (isToken) {
     return (

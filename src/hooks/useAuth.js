@@ -5,6 +5,8 @@ import { AuthContext } from '../contexts/AuthContext';
 const REGISTRATION_URL = '/auth/signup';
 const LOGIN_URL = '/auth/login';
 const VERIFY_URL = '/auth/verify';
+const RECOVER_PASSWORD_URL = '/auth/recover-password';
+const CHANGE_PASSWORD_URL = '/auth/change-password';
 
 function useAuth() {
   const { authTokens, setAuthTokens, setUser } = useContext(AuthContext);
@@ -49,12 +51,36 @@ function useAuth() {
     setAuthTokens(null);
   }
 
+  function recoverPassword(email) {
+    return axios
+      .post(RECOVER_PASSWORD_URL, { email })
+      .then((response) => {
+        return response;
+      })
+      .catch((error) => {
+        return error;
+      });
+  }
+
+  function changePassword(token, password) {
+    return axios
+      .patch(`${CHANGE_PASSWORD_URL}/${token}`, { password })
+      .then((response) => {
+        return response;
+      })
+      .catch((error) => {
+        return error;
+      });
+  }
+
   return {
     authTokens,
     login,
     logout,
     register,
     verifyAccount,
+    recoverPassword,
+    changePassword,
   };
 }
 
