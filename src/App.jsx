@@ -10,10 +10,11 @@ import { AuthContext } from './contexts/AuthContext';
 import AdminHome from './pages/Admin/Home';
 import AdminTables from './pages/Admin/Tables';
 import AdminSettings from './pages/Admin/Settings';
+import { PrivateRouteAdmin, PrivateRouteUser } from './utils/PrivateRoute';
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [authTokens, setAuthTokens] = useState(null);
+  const [user, setUser] = useState(localStorage.getItem('user') || null);
+  const [authTokens, setAuthTokens] = useState(localStorage.getItem('tokens') || null);
 
   return (
     <MantineProvider
@@ -29,13 +30,41 @@ export default function App() {
       <AuthContext.Provider value={{ user, setUser, authTokens, setAuthTokens }}>
         <ModalsProvider>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+              path="/"
+              element={
+                <PrivateRouteUser>
+                  <Home />
+                </PrivateRouteUser>
+              }
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/admin" element={<AdminHome />} />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRouteAdmin>
+                  <AdminHome />
+                </PrivateRouteAdmin>
+              }
+            />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/tables" element={<AdminTables />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route
+              path="/admin/tables"
+              element={
+                <PrivateRouteAdmin>
+                  <AdminTables />
+                </PrivateRouteAdmin>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <PrivateRouteAdmin>
+                  <AdminSettings />
+                </PrivateRouteAdmin>
+              }
+            />
           </Routes>
         </ModalsProvider>
       </AuthContext.Provider>
