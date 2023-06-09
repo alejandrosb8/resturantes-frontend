@@ -1,9 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../../layouts/Default';
-import { Button, TextInput, Container, Title, Stack, PasswordInput, Text } from '@mantine/core';
-//import { Link } from 'react-router-dom';
+import { Button, TextInput, Container, Title, Stack, PasswordInput, Text, Divider } from '@mantine/core';
+import { Link, useNavigate } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
+import { useForm } from '@mantine/form';
 
 function Login() {
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const { adminLogin } = useAuth();
+
+  const form = useForm({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+
+    validate: {
+      username: (value) => (/^[a-zA-Z0-9_]{3,16}$/.test(value) ? null : 'El nombre de usuario no es válido'),
+      password: (value) => (/^[\s\S]{5,}$/.test(value) ? null : 'La contraseña debe contener al menos 8 caracteres'),
+    },
+  });
+
+  const handleSubmit = async (values) => {
+    setLoading(true);
+
+    const { username, password } = values;
+    const responseRaw = await adminLogin(username, password);
+    const response = responseRaw.response;
+
+    if (responseRaw.status === 200) {
+      navigate('/admin');
+    } else if (response.data.message === 'USERNAME_NOT_FOUND') {
+      setErrorMsg('El nombre de usuario no existe');
+    } else if (response.data.message === 'WRONG_PASSWORD') {
+      setErrorMsg('La contraseña es incorrecta');
+    } else {
+      setErrorMsg(response.data.message);
+    }
+
+    setLoading(false);
+
+    return response;
+  };
+
   return (
     <>
       <Container
@@ -50,14 +93,32 @@ function Login() {
           <Text color="gray.6" mt={5} mb={20}>
             Ingrese sus credenciales para iniciar sesión como administrador.
           </Text>
-          <form>
+          <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
             <Stack spacing="xs" mt={20}>
-              <TextInput label="Nombre de usuario" type="text" required placeholder="Ingrese su nombre de usuario..." />
-              <PasswordInput label="Contraseña" required placeholder="Ingrese su contraseña..." />
+              <TextInput
+                label="Nombre de usuario"
+                type="text"
+                placeholder="Ingrese su nombre de usuario..."
+                {...form.getInputProps('username')}
+              />
+              <PasswordInput
+                label="Contraseña"
+                placeholder="Ingrese su contraseña..."
+                {...form.getInputProps('password')}
+              />
             </Stack>
+            {errorMsg && (
+              <Text color="red" mt={15}>
+                {errorMsg}
+              </Text>
+            )}
             <Stack spacing="xs" mt={15}>
-              <Button type="submit" fullWidth>
+              <Button type="submit" fullWidth loading={loading}>
                 Iniciar sesión
+              </Button>
+              <Divider label="o" labelPosition="center" />
+              <Button component={Link} to="/login" fullWidth variant="outline">
+                Iniciar sesión como usuario
               </Button>
             </Stack>
           </form>

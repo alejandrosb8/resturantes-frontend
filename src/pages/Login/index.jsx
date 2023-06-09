@@ -59,14 +59,16 @@ function Login() {
     const responseRaw = await login(email, password);
     const response = responseRaw.response;
 
-    console.log(responseRaw);
-
     if (responseRaw.status === 200) {
       navigate('/');
-    } else if (response.status === 401) {
-      setErrorMsg('Correo o contraseña incorrectos');
+    } else if (response.data.message === 'EMAIL_NOT_FOUND') {
+      setErrorMsg('El correo electrónico no está registrado');
+    } else if (response.data.message === 'WRONG_PASSWORD') {
+      setErrorMsg('La contraseña es incorrecta');
+    } else if (response.data.message === 'USER_NOT_VERIFIED') {
+      setErrorMsg('La cuenta no está verificada');
     } else {
-      setErrorMsg(response.data.message);
+      setErrorMsg('Ha ocurrido un error');
     }
     setLoading(false);
   };

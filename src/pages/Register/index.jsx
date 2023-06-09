@@ -48,12 +48,17 @@ function Register() {
     setLoading(true);
     const { fullName, email, dni, phone, password } = values;
 
-    const response = await register(fullName, email, dni, phone, password);
+    const responseRaw = await register(fullName, email, dni, phone, password);
+    const response = responseRaw.response;
 
-    if (response.status === 201) {
+    if (responseRaw.status === 201) {
       setConfirmEmail(true);
+    } else if (response.data.message === 'EMAIL_IN_USE') {
+      form.setFieldError('email', 'El correo electrónico ya está en uso');
+    } else if (response.data.message === 'DNI_IN_USE') {
+      form.setFieldError('dni', 'El DNI ya está en uso');
     } else {
-      setErrorMsg(response.message);
+      setErrorMsg('Ha ocurrido un error al registrar el usuario');
     }
 
     setLoading(false);

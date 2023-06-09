@@ -2,11 +2,20 @@ import axios from '../utils/axios';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 
-const REGISTRATION_URL = '/auth/signup';
-const LOGIN_URL = '/auth/login';
-const VERIFY_URL = '/auth/verify';
-const RECOVER_PASSWORD_URL = '/auth/recover-password';
-const CHANGE_PASSWORD_URL = '/auth/change-password';
+const USER_AUTH = '/auth';
+const ADMIN_AUTH = '/admin/auth';
+
+// user auth
+
+const REGISTRATION_URL = `${USER_AUTH}/signup`;
+const LOGIN_URL = `${USER_AUTH}/login`;
+const VERIFY_URL = `${USER_AUTH}/verify`;
+const RECOVER_PASSWORD_URL = `${USER_AUTH}/recover-password`;
+const CHANGE_PASSWORD_URL = `${USER_AUTH}/change-password`;
+
+// admin auth
+
+const ADMIN_LOGIN_URL = `${ADMIN_AUTH}/login`;
 
 function useAuth() {
   const { authTokens, setAuthTokens, setUser } = useContext(AuthContext);
@@ -73,6 +82,22 @@ function useAuth() {
       });
   }
 
+  function adminLogin(username, password) {
+    return axios
+      .post(ADMIN_LOGIN_URL, { username, password })
+      .then((response) => {
+        setAuthTokens(response.data);
+        setUser(response.data);
+
+        localStorage.setItem('tokens', JSON.stringify(response.data.data));
+
+        return response;
+      })
+      .catch((error) => {
+        return error;
+      });
+  }
+
   return {
     authTokens,
     login,
@@ -81,6 +106,7 @@ function useAuth() {
     verifyAccount,
     recoverPassword,
     changePassword,
+    adminLogin,
   };
 }
 

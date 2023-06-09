@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import AdminLogin from './pages/Admin/Login';
 import { useState } from 'react';
 import { AuthContext } from './contexts/AuthContext';
+import AdminHome from './pages/Admin/Home';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/admin" element={<AdminHome />} />
             <Route path="/admin/login" element={<AdminLogin />} />
           </Routes>
         </ModalsProvider>
