@@ -42,7 +42,7 @@ function AdminSettings() {
   };
 
   return (
-    <Layout navbar="admin" navbarActive="admin-settings">
+    <Layout navbar="admin" navbarActive="admin-settings" header>
       <Container>
         <Stack align="flex-start">
           <Box>

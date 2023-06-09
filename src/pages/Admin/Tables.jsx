@@ -2,7 +2,7 @@ import Layout from '../../layouts/Default';
 
 function AdminTables() {
   return (
-    <Layout navbar="admin" navbarActive="admin-tables">
+    <Layout navbar="admin" navbarActive="admin-tables" header>
       <div>Mesas</div>
     </Layout>
   );

@@ -33,7 +33,7 @@ function AdminNavbar({ opened, currentActive }) {
   const navigate = useNavigate();
 
   return (
-    <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
+    <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} zIndex={50}>
       {linksData.map((link, index) => (
         <NavLink
           label={link.label}
@@ -50,7 +50,7 @@ function AdminNavbar({ opened, currentActive }) {
         mt={20}
         onClick={() => {
           logout();
-          navigate('/admin');
+          navigate('/admin/login');
         }}
       >
         Cerrar sesión

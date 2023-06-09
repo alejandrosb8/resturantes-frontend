@@ -27,7 +27,7 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
       }
       header={
         header && (
-          <Header height={{ base: 50, md: 70 }} p="md">
+          <Header height={{ base: 50, md: 70 }} p="md" sx={{ backgroundColor: theme.colors.orange[6] }} zIndex={100}>
             <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
               {navbar && (
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
@@ -35,13 +35,15 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
                     opened={opened}
                     onClick={() => setOpened((o) => !o)}
                     size="sm"
-                    color={theme.colors.gray[6]}
+                    color={theme.colors.orange[0]}
                     mr="xl"
                   />
                 </MediaQuery>
               )}
 
-              <Text>Application header</Text>
+              <Text size="xl" color="white" weight="bold">
+                Resturantes
+              </Text>
             </div>
           </Header>
         )
