@@ -8,6 +8,8 @@ import AdminLogin from './pages/Admin/Login';
 import { useState } from 'react';
 import { AuthContext } from './contexts/AuthContext';
 import AdminHome from './pages/Admin/Home';
+import AdminTables from './pages/Admin/Tables';
+import AdminSettings from './pages/Admin/Settings';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -32,6 +34,8 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<AdminHome />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/tables" element={<AdminTables />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Routes>
         </ModalsProvider>
       </AuthContext.Provider>

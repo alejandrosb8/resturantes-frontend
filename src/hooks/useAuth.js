@@ -16,6 +16,7 @@ const CHANGE_PASSWORD_URL = `${USER_AUTH}/change-password`;
 // admin auth
 
 const ADMIN_LOGIN_URL = `${ADMIN_AUTH}/login`;
+const ADMIN_UPDATE_URL = `${ADMIN_AUTH}/change-username-password `;
 
 function useAuth() {
   const { authTokens, setAuthTokens, setUser } = useContext(AuthContext);
@@ -34,7 +35,7 @@ function useAuth() {
       });
   }
 
-  function login(email, password) {
+  async function login(email, password) {
     return axios
       .post(LOGIN_URL, { email, password })
       .then((response) => {
@@ -50,7 +51,7 @@ function useAuth() {
       });
   }
 
-  function verifyAccount(token) {
+  async function verifyAccount(token) {
     return axios.get(`${VERIFY_URL}/${token}`).then((response) => {
       return response;
     });
@@ -58,9 +59,11 @@ function useAuth() {
 
   function logout() {
     setAuthTokens(null);
+    setUser(null);
+    localStorage.removeItem('tokens');
   }
 
-  function recoverPassword(email) {
+  async function recoverPassword(email) {
     return axios
       .post(RECOVER_PASSWORD_URL, { email })
       .then((response) => {
@@ -71,7 +74,7 @@ function useAuth() {
       });
   }
 
-  function changePassword(token, password) {
+  async function changePassword(token, password) {
     return axios
       .patch(`${CHANGE_PASSWORD_URL}/${token}`, { password })
       .then((response) => {
@@ -82,7 +85,7 @@ function useAuth() {
       });
   }
 
-  function adminLogin(username, password) {
+  async function adminLogin(username, password) {
     return axios
       .post(ADMIN_LOGIN_URL, { username, password })
       .then((response) => {
@@ -91,6 +94,17 @@ function useAuth() {
 
         localStorage.setItem('tokens', JSON.stringify(response.data.data));
 
+        return response;
+      })
+      .catch((error) => {
+        return error;
+      });
+  }
+
+  async function adminUpdate(username, password) {
+    return axios
+      .patch(ADMIN_UPDATE_URL, { username, password })
+      .then((response) => {
         return response;
       })
       .catch((error) => {
@@ -107,6 +121,7 @@ function useAuth() {
     recoverPassword,
     changePassword,
     adminLogin,
+    adminUpdate,
   };
 }
 
