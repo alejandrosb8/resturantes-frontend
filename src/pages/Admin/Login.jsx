@@ -116,7 +116,14 @@ function Login() {
               <Button type="submit" fullWidth loading={loading}>
                 Iniciar sesión
               </Button>
-              <Divider label="o" labelPosition="center" />
+              <Divider
+                label={
+                  <Text size={12} color="gray.6">
+                    O
+                  </Text>
+                }
+                labelPosition="center"
+              />
               <Button component={Link} to="/login" fullWidth variant="outline">
                 Iniciar sesión como usuario
               </Button>
