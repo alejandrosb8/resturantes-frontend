@@ -13,8 +13,8 @@ import AdminSettings from './pages/Admin/Settings';
 import { PrivateRouteAdmin, PrivateRouteUser } from './utils/PrivateRoute';
 
 export default function App() {
-  const [user, setUser] = useState(localStorage.getItem('user') || null);
-  const [authTokens, setAuthTokens] = useState(localStorage.getItem('tokens') || null);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+  const [authTokens, setAuthTokens] = useState(JSON.parse(localStorage.getItem('tokens')) || null);
 
   return (
     <MantineProvider
