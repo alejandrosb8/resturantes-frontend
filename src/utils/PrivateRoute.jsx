@@ -12,20 +12,8 @@ export const PrivateRouteUser = ({ children }) => {
 
 export const PrivateRouteAdmin = ({ children }) => {
   let { user } = useAuth();
-  let role = null;
-  try {
-    role = JSON.parse(user);
-  } catch (error) {
-    console.log(error);
-  }
 
-  if (role) {
-    role = role.role;
-  } else {
-    role = null;
-  }
-
-  if (role !== 'admin' || !user) {
+  if (user.role !== 'admin' || !user) {
     return <Navigate to="/admin/login" />;
   }
 
