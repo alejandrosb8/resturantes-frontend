@@ -132,6 +132,8 @@ function useAuth() {
     changePassword,
     adminLogin,
     adminUpdate,
+    setAuthTokens,
+    setUser,
   };
 }
 
