@@ -117,7 +117,7 @@ function AdminTables() {
         }}
         title="Código QR"
       >
-        <Center>{tableId && <QRCode value={`${DOMAIN}/qr/${tableId}`} size={256} />}</Center>
+        <Center>{tableId && <QRCode value={`${DOMAIN}/${tableId}`} size={256} />}</Center>
       </Modal>
       <Layout navbar="admin" navbarActive="admin-tables" header>
         <Title order={1}>Mesas</Title>
