@@ -11,6 +11,7 @@ import AdminHome from './pages/Admin/Home';
 import AdminTables from './pages/Admin/Tables';
 import AdminSettings from './pages/Admin/Settings';
 import { PrivateRouteAdmin, PrivateRouteUser } from './utils/PrivateRoute';
+import NotQr from './pages/NotQr';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -38,8 +39,25 @@ export default function App() {
                 </PrivateRouteUser>
               }
             />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/not-qr" element={<NotQr />} />
+            <Route path="/login" element={<NotQr />} />
+            <Route path="/register" element={<NotQr />} />
+            <Route
+              path="/login/:tableId"
+              element={
+                <PrivateRouteUser loginOrRegister>
+                  <Login />
+                </PrivateRouteUser>
+              }
+            />
+            <Route
+              path="/register/:tableId"
+              element={
+                <PrivateRouteUser loginOrRegister>
+                  <Register />
+                </PrivateRouteUser>
+              }
+            />
             <Route
               path="/admin"
               element={
