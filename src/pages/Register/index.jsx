@@ -4,7 +4,7 @@ import { Button, TextInput, Container, Divider, Title, Stack, Text, PasswordInpu
 import { Link } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { useForm } from '@mantine/form';
-//import { useNavigate } from 'react-router-dom';
+import useTable from '../../hooks/useTable';
 
 function Register() {
   const form = useForm({
@@ -38,6 +38,8 @@ function Register() {
 
   const { register } = useAuth();
 
+  const { table } = useTable();
+
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState(false);
@@ -62,8 +64,6 @@ function Register() {
     }
 
     setLoading(false);
-
-    console.log(response); // eslint-disable-line
   };
 
   return (
@@ -118,7 +118,7 @@ function Register() {
                   Te hemos enviado un correo electrónico a <b>{form.values.email}</b> con un enlace para confirmar tu
                   cuenta. Cuando lo hayas hecho, podrás iniciar sesión.
                 </Text>
-                <Anchor component={Link} to="/login" align="center" size="lg">
+                <Anchor component={Link} to={`/login/${table}`} align="center" size="lg">
                   Inicia sesión
                 </Anchor>{' '}
               </Stack>
@@ -175,7 +175,7 @@ function Register() {
                     labelPosition="center"
                     label={<Text color="#666">¿Ya tienes una cuenta?</Text>}
                   />
-                  <Button component={Link} to="/login" variant="outline" fullWidth>
+                  <Button component={Link} to={`/login/${table}`} variant="outline" fullWidth>
                     Inicia sesión
                   </Button>
                 </Stack>

@@ -31,8 +31,9 @@ export default function App() {
       <AuthContext.Provider value={{ user, setUser, authTokens, setAuthTokens }}>
         <ModalsProvider>
           <Routes>
+            <Route path="/" element={<NotQr />} />
             <Route
-              path="/"
+              path="/:tableId"
               element={
                 <PrivateRouteUser>
                   <Home />

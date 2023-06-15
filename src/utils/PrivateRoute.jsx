@@ -45,7 +45,7 @@ export const PrivateRouteUser = ({ children, loginOrRegister }) => {
     return <LoadingView />;
   }
 
-  if (!user && !loginOrRegister) {
+  if (!user && !loginOrRegister && user?.role !== 'customer') {
     return <Navigate to={`/login/${table}`} />;
   }
 
