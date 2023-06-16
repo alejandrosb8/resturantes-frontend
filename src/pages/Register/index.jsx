@@ -50,7 +50,7 @@ function Register() {
     setLoading(true);
     const { fullName, email, dni, phone, password } = values;
 
-    const responseRaw = await register(fullName, email, dni, phone, password);
+    const responseRaw = await register(fullName, email, dni, phone, password, table);
     const response = responseRaw.response;
 
     if (responseRaw.status === 201) {

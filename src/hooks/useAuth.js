@@ -22,9 +22,9 @@ const ADMIN_UPDATE_URL = `${ADMIN_AUTH}/change-username-password `;
 function useAuth() {
   const { authTokens, setAuthTokens, setUser, user } = useContext(AuthContext);
 
-  async function register(fullName, email, dni, phone, password) {
+  async function register(fullName, email, dni, phone, password, tableId) {
     return axios
-      .post(REGISTRATION_URL, { fullName, email, dni, phone, password })
+      .post(REGISTRATION_URL, { fullName, email, dni, phone, password, tableId })
       .then((response) => {
         setAuthTokens(response.data);
         setUser(response.data.user);
