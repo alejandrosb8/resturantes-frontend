@@ -6,11 +6,11 @@ import Layout from '../layouts/Default';
 function NotQr() {
   return (
     <Layout>
-      <Container size="xs">
+      <Container size="sm" sx={{ minWidth: '320px', padding: '15px', textWrap: 'balance' }}>
         <Title align="center" order={1} mt={40}>
           Escanea un código QR
         </Title>
-        <Text align="center" mt={10}>
+        <Text align="center" mt={10} sx={{ textWrap: 'balance' }}>
           Para poder acceder a la carta de un restaurante, debes escanear el código QR que se encuentra en la mesa.
         </Text>
         <Center mt={20}>
