@@ -52,7 +52,7 @@ function OrderPage() {
 
   return (
     <Layout>
-      <Container>
+      <Container p={0}>
         <Title order={1}>Ordenar pedido</Title>
         <Text mt={10}>Revisa el pedido con los platos que has agregado y confírmelo</Text>
 
