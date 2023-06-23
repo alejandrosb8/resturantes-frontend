@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import axios from './axios';
 import { TableContext } from '../contexts/TableContext';
 import LoadingView from '../components/LoadingView';
+import { ShoppingProvider } from '../contexts/ShoppingContext';
 
 const GET_TABLE_URL = '/tables';
 
@@ -49,7 +50,11 @@ export const PrivateRouteUser = ({ children, loginOrRegister }) => {
     return <Navigate to={`/login/${table}`} />;
   }
 
-  return <TableContext.Provider value={{ table, setTable }}>{children}</TableContext.Provider>;
+  return (
+    <TableContext.Provider value={{ table, setTable }}>
+      <ShoppingProvider>{children}</ShoppingProvider>
+    </TableContext.Provider>
+  );
 };
 
 export const PrivateRouteAdmin = ({ children }) => {

@@ -8,10 +8,10 @@ import { IconPencil, IconTrash, IconQrcode } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { QRCode } from 'react-qrcode-logo';
 
-const ENVIROMENT = import.meta.env.VITE_ENV;
+const ENVIRONMENT = import.meta.env.VITE_ENV;
 
 const DOMAIN =
-  ENVIROMENT === 'development' ? 'http://localhost:5173' : 'https://green-stone-04b86be10.3.azurestaticapps.net';
+  ENVIRONMENT === 'development' ? 'http://localhost:5173' : 'https://green-stone-04b86be10.3.azurestaticapps.net';
 
 function AdminTables() {
   const [tables, setTables] = useState([]);
@@ -117,7 +117,7 @@ function AdminTables() {
         }}
         title="Código QR"
       >
-        <Center>{tableId && <QRCode value={`${DOMAIN}/${tableId}`} size={256} />}</Center>
+        <Center>{tableId && <QRCode value={`${DOMAIN}/login/${tableId}`} size={256} />}</Center>
       </Modal>
       <Layout navbar="admin" navbarActive="admin-tables" header>
         <Title order={1}>Mesas</Title>

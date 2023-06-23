@@ -2,6 +2,7 @@ import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 
 const BASE_URL = 'https://api-resturantes.azurewebsites.net/api/v1';
+const REFRESH_TOKEN_URL = `${BASE_URL}/auth/refresh-token`;
 const REFRESH_TOKEN_ADMIN_URL = `${BASE_URL}/admin/auth/refresh-token`;
 
 export default axios.create({
@@ -9,7 +10,7 @@ export default axios.create({
 });
 
 // Crear una función que recibe el token como parámetro y devuelve una instancia de axios con el interceptor
-export function axiosPrivate(authTokens, setAuthTokens, setUser) {
+export function axiosPrivate(authTokens, setAuthTokens, setUser, role = 'admin') {
   // Crear la instancia de axios con la base URL
   const instance = axios.create({
     baseURL: BASE_URL,
@@ -41,7 +42,7 @@ export function axiosPrivate(authTokens, setAuthTokens, setUser) {
       // refresh token
 
       return axios
-        .get(REFRESH_TOKEN_ADMIN_URL, {
+        .get(role === 'customer' ? REFRESH_TOKEN_ADMIN_URL : REFRESH_TOKEN_URL, {
           headers: {
             Authorization: `Bearer ${authTokens.refreshToken}`,
           },

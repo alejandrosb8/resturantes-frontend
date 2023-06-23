@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AppShell, Header, Footer, Text, MediaQuery, Burger, useMantineTheme } from '@mantine/core';
 import foodbg from './../assets/foodbg.svg';
 import AdminNavbar from '../components/NavBars/AdminNavbar';
+import UserNavbar from '../components/NavBars/UserNavbar';
 
 export default function Layout({ children, header, footer, navbar, navbarActive }) {
   const theme = useMantineTheme();
@@ -17,7 +18,13 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
       }}
       navbarOffsetBreakpoint="sm"
       asideOffsetBreakpoint="sm"
-      navbar={navbar === 'admin' ? <AdminNavbar opened={opened} currentActive={navbarActive} /> : null}
+      navbar={
+        navbar === 'admin' ? (
+          <AdminNavbar opened={opened} currentActive={navbarActive} />
+        ) : navbar === 'user' ? (
+          <UserNavbar opened={opened} currentActive={navbarActive} />
+        ) : null
+      }
       footer={
         footer && (
           <Footer height={60} p="md">

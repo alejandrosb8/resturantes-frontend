@@ -12,6 +12,7 @@ import AdminTables from './pages/Admin/Tables';
 import AdminSettings from './pages/Admin/Settings';
 import { PrivateRouteAdmin, PrivateRouteUser } from './utils/PrivateRoute';
 import NotQr from './pages/NotQr';
+import UserOrder from './pages/Order';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -26,6 +27,7 @@ export default function App() {
         fontFamily: 'Open Sans, sans serif',
         spacing: { xs: '1rem', sm: '1.2rem', md: '1.8rem', lg: '2.2rem', xl: '2.8rem' },
         primaryColor: 'orange',
+        headings: { fontFamily: 'Architects Daughter, sans serif' },
       }}
     >
       <AuthContext.Provider value={{ user, setUser, authTokens, setAuthTokens }}>
@@ -65,6 +67,14 @@ export default function App() {
                 <PrivateRouteAdmin>
                   <AdminHome />
                 </PrivateRouteAdmin>
+              }
+            />
+            <Route
+              path="/order/:tableId"
+              element={
+                <PrivateRouteUser>
+                  <UserOrder />
+                </PrivateRouteUser>
               }
             />
             <Route path="/admin/login" element={<AdminLogin />} />
