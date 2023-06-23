@@ -5,7 +5,7 @@ import { axiosPrivate } from '../utils/axios';
 import Layout from '../layouts/Default';
 import LoadingView from '../components/LoadingView';
 import { useShopping } from '../contexts/ShoppingContext';
-import { IconShoppingCart, IconX } from '@tabler/icons-react';
+import { IconShoppingCart, IconX, IconTrash } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import useUserTable from '../hooks/useTable';
 import {
@@ -57,9 +57,9 @@ function Home() {
         setLoading(false);
       })
       .catch(() => {
-        navigate('/login');
+        navigate(`/login/${table}`);
       });
-  }, [authTokens, setAuthTokens, setUser, navigate]);
+  }, [authTokens, setAuthTokens, setUser, navigate, table]);
 
   if (loading) {
     return <LoadingView />;
@@ -125,7 +125,7 @@ function Home() {
           </Text>
         </Container>
 
-        <Container size="xl" p={0} mt={40} mb={60}>
+        <Container size="xl" p={0} mt={40} mb={80}>
           <Title order={2} color="dark.4">
             Platos
           </Title>
@@ -182,13 +182,14 @@ function Home() {
       <Affix position={{ bottom: rem(20), right: rem(20) }}>
         <Transition transition="slide-up" mounted={shoppingCart.length > 0}>
           {(transitionStyles) => (
-            <Flex justify="space-evenly" align="center" gap={20}>
+            <Flex justify="space-evenly" align="center" gap={10} direction="column">
               <Button
                 color="red"
-                leftIcon={<IconShoppingCart />}
+                leftIcon={<IconTrash />}
                 style={transitionStyles}
                 variant="light"
                 onClick={removeAllFromCart}
+                fullWidth
               >
                 Vaciar carrito
               </Button>
@@ -199,6 +200,7 @@ function Home() {
                 color="green.8"
                 leftIcon={<IconShoppingCart />}
                 style={transitionStyles}
+                fullWidth
               >
                 Realizar pedido
               </Button>
