@@ -109,7 +109,7 @@ export const DishesPage = () => {
           onChange={setDishQuantity}
           label={
             <Text size="sm">
-              ¿Cuantos platos de {dishes.filter((dish) => dish.id === dishId).map((dish) => dish.name)} quieres?
+              ¿Cuantas unidades de {dishes.filter((dish) => dish.id === dishId).map((dish) => dish.name)} quieres?
             </Text>
           }
         />
