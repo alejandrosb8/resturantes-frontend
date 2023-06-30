@@ -14,6 +14,8 @@ import { PrivateRouteAdmin, PrivateRouteUser } from './utils/PrivateRoute';
 import NotQr from './pages/NotQr';
 import UserOrder from './pages/Order';
 import { DishesPage } from './pages/DishesPage.jsx';
+import AdminDishes from './pages/Admin/Dishes';
+import AdminCategories from './pages/Admin/Categories';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -102,6 +104,22 @@ export default function App() {
                 <PrivateRouteAdmin>
                   <AdminSettings />
                 </PrivateRouteAdmin>
+              }
+            />
+            <Route
+              path="/admin/dishes"
+              element={
+                <PrivateRouteAdmin>
+                  <AdminDishes />
+                </PrivateRouteAdmin>
+              }
+            />
+            <Route
+              path="/admin/categories"
+              element={
+                <PrivateRouteAdmin>
+                  <AdminCategories/>
+                </PrivateRouteAdmin> 
               }
             />
           </Routes>
