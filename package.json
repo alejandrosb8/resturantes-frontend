@@ -25,7 +25,10 @@
     "react-dom": "^18.2.0",
     "react-qrcode-logo": "^2.9.0",
     "react-router-dom": "^6.10.0",
-    "socket.io-client": "^4.6.2"
+    "socket.io-client": "^4.6.2",
+    "@react-buddy/ide-toolbox": "^2.3.1",
+    "@react-buddy/palette-mantine-core": "^6.0.0",
+    "@react-buddy/palette-mantine-form": "^6.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",

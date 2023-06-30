@@ -41,33 +41,37 @@ export function axiosPrivate(authTokens, setAuthTokens, setUser, role = 'admin')
     async (error) => {
       // refresh token
 
-      return axios
-        .get(role === 'customer' ? REFRESH_TOKEN_ADMIN_URL : REFRESH_TOKEN_URL, {
-          headers: {
-            Authorization: `Bearer ${authTokens.refreshToken}`,
-          },
-        })
-        .then((response) => {
-          const tokens = response.data.data;
+      if (error.response.status === 403 || error.response.status === 401 || error.response.status === 498) {
+        return axios
+          .get(role === 'customer' ? REFRESH_TOKEN_ADMIN_URL : REFRESH_TOKEN_URL, {
+            headers: {
+              Authorization: `Bearer ${authTokens.refreshToken}`,
+            },
+          })
+          .then((response) => {
+            const tokens = response.data.data;
 
-          setAuthTokens(tokens);
+            setAuthTokens(tokens);
 
-          const userInfo = jwt_decode(tokens.accessToken);
+            const userInfo = jwt_decode(tokens.accessToken);
 
-          setUser(userInfo);
+            setUser(userInfo);
 
-          localStorage.setItem('tokens', JSON.stringify(tokens));
-          localStorage.setItem('user', JSON.stringify(userInfo));
+            localStorage.setItem('tokens', JSON.stringify(tokens));
+            localStorage.setItem('user', JSON.stringify(userInfo));
 
-          const config = error.config;
+            const config = error.config;
 
-          config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+            config.headers.Authorization = `Bearer ${tokens.accessToken}`;
 
-          return axios.request(config);
-        })
-        .catch((error) => {
-          return Promise.reject(error);
-        });
+            return axios.request(config);
+          })
+          .catch((error) => {
+            return Promise.reject(error);
+          });
+      } else {
+        return Promise.reject(error);
+      }
     },
   );
 

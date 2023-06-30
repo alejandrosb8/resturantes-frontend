@@ -2,6 +2,7 @@ import { Navbar, NavLink, Button } from '@mantine/core';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import useTable from '../../hooks/useTable.js';
 
 const linksData = [
   {
@@ -19,6 +20,12 @@ function UserNavbar({ opened, currentActive }) {
 
   const { logout } = useAuth();
   const navigate = useNavigate();
+
+  const { table } = useTable();
+  if (!table) {
+    return null;
+  }
+  linksData[0].to = `/${table}`;
 
   return (
     <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} zIndex={50}>

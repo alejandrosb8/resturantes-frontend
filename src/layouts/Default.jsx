@@ -1,12 +1,18 @@
 import { useState } from 'react';
-import { AppShell, Header, Footer, Text, MediaQuery, Burger, useMantineTheme } from '@mantine/core';
+import { AppShell, Header, Footer, Text, MediaQuery, Burger, useMantineTheme, rem } from '@mantine/core';
 import foodbg from './../assets/foodbg.svg';
 import AdminNavbar from '../components/NavBars/AdminNavbar';
 import UserNavbar from '../components/NavBars/UserNavbar';
+import { useHeadroom, useMediaQuery } from '@mantine/hooks';
 
 export default function Layout({ children, header, footer, navbar, navbarActive }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
+
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const pinned = useHeadroom({ fixedAt: '80px' });
+
   return (
     <AppShell
       styles={{
@@ -34,7 +40,16 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
       }
       header={
         header && (
-          <Header height={{ base: 50, md: 70 }} p="md" sx={{ backgroundColor: theme.colors.orange[6] }} zIndex={100}>
+          <Header
+            height={{ base: 50 }}
+            p="md"
+            sx={{
+              backgroundColor: theme.colors.orange[6],
+              transform: `translate3d(0, ${isMobile ? (pinned ? 0 : rem(-60)) : 0}, 0)`,
+              transition: 'transform 300ms ease',
+            }}
+            zIndex={100}
+          >
             <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
               {navbar && (
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>

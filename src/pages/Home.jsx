@@ -5,15 +5,12 @@ import { axiosPrivate } from '../utils/axios';
 import Layout from '../layouts/Default';
 import LoadingView from '../components/LoadingView';
 import { useShopping } from '../contexts/ShoppingContext';
-import { IconShoppingCart, IconX, IconTrash } from '@tabler/icons-react';
-import { useDisclosure, useInputState } from '@mantine/hooks';
+import { IconShoppingCart, IconTrash } from '@tabler/icons-react';
 import useUserTable from '../hooks/useTable';
 import {
-  Card,
+  Box,
   Title,
-  Text,
   Button,
-  Image,
   Grid,
   Divider,
   Flex,
@@ -21,9 +18,7 @@ import {
   Container,
   Affix,
   Transition,
-  Modal,
-  NumberInput,
-  ActionIcon,
+  BackgroundImage,
 } from '@mantine/core';
 
 const EXAMPLE_IMAGE_URL =
@@ -33,27 +28,19 @@ function Home() {
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
 
-  const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
 
-  const { shoppingCart, addToCart, removeFromCart, removeAllFromCart } = useShopping();
-
-  const [openedAddDish, { open: openDish, close: closeDish }] = useDisclosure(false);
-
-  const [dishId, setDishId] = useState(null);
-  const [dishQuantity, setDishQuantity] = useInputState(() => {
-    const quantity = shoppingCart.filter((dish) => dish.id === dishId).map((dish) => dish.quantity);
-    return quantity.length > 0 ? quantity[0] : 1;
-  });
+  const { shoppingCart, removeAllFromCart } = useShopping();
 
   const { table } = useUserTable();
 
   useEffect(() => {
     setLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
-      .get('/dishes')
+      .get('/categories')
       .then((response) => {
-        setDishes(response.data.data);
+        setCategories(response.data.data);
         setLoading(false);
       })
       .catch(() => {
@@ -67,113 +54,60 @@ function Home() {
 
   return (
     <>
-      {/*Dish Modal*/}
-
-      <Modal
-        opened={openedAddDish}
-        onClose={() => {
-          setDishQuantity(1);
-          closeDish();
-        }}
-        title="Añadir plato al carrito"
-      >
-        <NumberInput
-          defaultValue={1}
-          min={0}
-          max={100}
-          style={{ width: '100%' }}
-          placeholder="Cantidad"
-          variant="filled"
-          size="lg"
-          value={dishQuantity}
-          onChange={setDishQuantity}
-          label={
-            <Text size="sm">
-              ¿Cuantos platos de {dishes.filter((dish) => dish.id === dishId).map((dish) => dish.name)} quieres?
-            </Text>
-          }
-        />
-        <Flex justify="space-between" align="center" mt={20}>
-          <Button variant="light" color="red" onClick={closeDish}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={() => {
-              if (dishQuantity <= 0) {
-                removeFromCart(dishId);
-              } else {
-                addToCart(dishId, dishQuantity);
-              }
-              closeDish();
-            }}
-          >
-            Añadir al carrito
-          </Button>
-        </Flex>
-      </Modal>
-
-      {/*Main page*/}
-
       <Layout navbar="user" header>
-        <Container size="xl" p={0}>
+        <Container size="xl" p={0} mb={80}>
           <Title order={1} color="dark.4">
-            Menú del día
-          </Title>
-          <Text color="dark.4" mt={10} sx={{ textWrap: 'balance' }}>
-            Aquí puedes ver todos los platos que tenemos disponibles. Pulsa en realizar pedido cuando hayas terminado de
-            agregar platos al carrito.
-          </Text>
-        </Container>
-
-        <Container size="xl" p={0} mt={40} mb={80}>
-          <Title order={2} color="dark.4">
-            Platos
+            Categorias
           </Title>
           <Divider mt={10} mb={10} />
           <Grid mt={10}>
-            {dishes.map((dish) => (
-              <Grid.Col key={dish.id} span={12} xs={6} lg={4} style={{ maxWidth: '470px' }}>
-                <Card shadow="sm" style={{ height: '100%' }} p={10}>
-                  <Card.Section>
-                    <Image src={EXAMPLE_IMAGE_URL} height={200} alt={dish.name} />
-                  </Card.Section>
-                  <Title order={3} color="dark.4" weight={600} mt={10} size={rem(18)}>
-                    {dish.name}
-                  </Title>
-                  <Divider mt={10} mb={10} />
-                  <Flex justify="space-between" align="center">
-                    <Text color="gray.8">$ {dish.price}</Text>
-                    <Flex justify="center" gap={10} align="center">
-                      {shoppingCart.filter((cartDish) => cartDish.id === dish.id).length > 0 && (
-                        <ActionIcon
-                          color="red"
-                          variant="light"
-                          onClick={() => {
-                            removeFromCart(dish.id);
-                          }}
-                        >
-                          <IconX />
-                        </ActionIcon>
-                      )}
-                      <Button
-                        color="orange"
-                        variant="light"
-                        onClick={() => {
-                          setDishId(dish.id);
-                          setDishQuantity(() => {
-                            const quantity = shoppingCart
-                              .filter((qdish) => qdish.id === dish.id)
-                              .map((qdish) => qdish.quantity);
-                            return quantity.length > 0 ? quantity[0] : 1;
-                          });
-                          openDish();
-                        }}
-                      >
-                        Agregar al carrito
-                      </Button>
-                    </Flex>
-                  </Flex>
-                </Card>
+            {categories.map((category) => (
+              <Grid.Col key={category.id} span={12} xs={6} lg={4} style={{ maxWidth: '470px' }}>
+                <Box
+                  shadow="sm"
+                  component={Link}
+                  to={`/dishes/${table}?category=${category.id}`}
+                  sx={{
+                    textDecoration: 'none',
+                  }}
+                >
+                  <BackgroundImage
+                    src={EXAMPLE_IMAGE_URL}
+                    sx={{
+                      height: '200px',
+                      position: 'relative',
+                      '&:hover': {
+                        cursor: 'pointer',
+                      },
+                    }}
+                    p={10}
+                    radius="xs"
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        zIndex: '1',
+                      }}
+                    ></div>
+
+                    <Title
+                      order={2}
+                      sx={{
+                        color: 'white',
+                        zIndex: '2',
+                        position: 'relative',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      {category.name}
+                    </Title>
+                  </BackgroundImage>
+                </Box>
               </Grid.Col>
             ))}
           </Grid>
@@ -191,7 +125,7 @@ function Home() {
                 onClick={removeAllFromCart}
                 fullWidth
               >
-                Vaciar carrito
+                Vaciar pedido
               </Button>
 
               <Button
