@@ -48,7 +48,7 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
               transform: `translate3d(0, ${isMobile ? (pinned ? 0 : rem(-60)) : 0}, 0)`,
               transition: 'transform 300ms ease',
             }}
-            zIndex={100}
+            zIndex={500}
           >
             <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
               {navbar && (

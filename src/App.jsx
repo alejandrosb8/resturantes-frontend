@@ -14,6 +14,7 @@ import { PrivateRouteAdmin, PrivateRouteUser } from './utils/PrivateRoute';
 import NotQr from './pages/NotQr';
 import UserOrder from './pages/Order';
 import { DishesPage } from './pages/DishesPage.jsx';
+import './App.css';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);

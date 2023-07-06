@@ -26,8 +26,10 @@ export function ShoppingProvider({ children }) {
       newCart = [...shoppingCart, { id: itemId, quantity }];
     }
 
-    setShoppingCart(newCart);
-    localStorage.setItem('shoppingCart', JSON.stringify(newCart));
+    const newCartToAdd = newCart.filter((item) => item.quantity > 0);
+
+    setShoppingCart(newCartToAdd);
+    localStorage.setItem('shoppingCart', JSON.stringify(newCartToAdd));
   }
 
   function removeFromCart(itemId) {

@@ -7,6 +7,7 @@ import LoadingView from '../components/LoadingView';
 import { useShopping } from '../contexts/ShoppingContext';
 import { IconShoppingCart, IconTrash } from '@tabler/icons-react';
 import useUserTable from '../hooks/useTable';
+import { AnimatedLink } from '../components/AnimatedLink.jsx';
 import {
   Box,
   Title,
@@ -23,6 +24,24 @@ import {
 
 const EXAMPLE_IMAGE_URL =
   'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80';
+
+const animationDishPage = [
+  [
+    { transform: 'translateY(100%)' },
+    { transform: 'translateY(66%)' },
+    { transform: 'translateY(33%)' },
+    { transform: 'translateY(0px)' },
+    { transform: 'translateY(10px)' },
+    { transform: 'translateY(0px)' },
+    { transform: 'translateY(5px)' },
+    { transform: 'translateY(0)' },
+  ],
+  {
+    duration: 500,
+    easing: 'ease-in',
+    pseudoElement: '::view-transition-new(root)',
+  },
+];
 
 function Home() {
   const { authTokens, setAuthTokens, setUser } = useAuth();
@@ -48,16 +67,14 @@ function Home() {
       });
   }, [authTokens, setAuthTokens, setUser, navigate, table]);
 
-  if (loading) {
-    return <LoadingView />;
-  }
-
   return (
     <>
+      {loading && <LoadingView />}
+
       <Layout navbar="user" header>
         <Container size="xl" p={0} mb={80}>
           <Title order={1} color="dark.4">
-            Categorias
+            Menú
           </Title>
           <Divider mt={10} mb={10} />
           <Grid mt={10}>
@@ -65,8 +82,9 @@ function Home() {
               <Grid.Col key={category.id} span={12} xs={6} lg={4} style={{ maxWidth: '470px' }}>
                 <Box
                   shadow="sm"
-                  component={Link}
-                  to={`/dishes/${table}?category=${category.id}`}
+                  component={AnimatedLink}
+                  to={`/dishes/${table}?category=${category.id}&name=${category.name}`}
+                  animation={animationDishPage}
                   sx={{
                     textDecoration: 'none',
                   }}
