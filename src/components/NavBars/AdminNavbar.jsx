@@ -17,10 +17,23 @@ const linksData = [
     idNumber: 1,
   },
   {
+    label:'Categoría',
+    to:'/admin/categories',
+    id:'admin-categories',
+    idNumber:2,
+  },
+
+  {
+    label: 'Platos',
+    to: '/admin/dishes',
+    id: 'admin-dishes',
+    idNumber: 3,
+  },
+  {
     label: 'Configuración',
     to: '/admin/settings',
     id: 'admin-settings',
-    idNumber: 2,
+    idNumber: 4,
   },
 ];
 
