@@ -30,6 +30,9 @@ function AdminTables() {
 
   const [createDescription, setCreateDescription] = useInputState('');
 
+  const [errorCreateTable, setErrorCreateTable] = useState('');
+  const [errorDescription, setErrorDescription] = useState('');
+
   const getTables = useCallback(() => {
     setLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
@@ -38,8 +41,13 @@ function AdminTables() {
         setTables(response.data.data);
         setLoading(false);
       })
-      .catch(() => {
-        navigate('/admin/login');
+      .catch((error) => {
+        if (error.response.data.message === 'TABLES_NOT_FOUND') {
+          setTables([]);
+          setLoading(false);
+        } else {
+          navigate('/admin/login');
+        }
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);
 
@@ -62,8 +70,12 @@ function AdminTables() {
         setCreateDescription('');
         getTables();
       })
-      .catch(() => {
-        navigate('/admin/login');
+      .catch((error) => {
+        if (error.response.data.message === 'INVALID_DATA') {
+          setErrorCreateTable('No se pudo crear la mesa');
+        } else {
+          navigate('/admin/login');
+        }
       });
   };
 
@@ -73,7 +85,9 @@ function AdminTables() {
 
   return (
     <>
+      {/* Editar mesa */}
       <Modal
+        styles={{ zIndex: 20000 }}
         opened={openedDescription}
         onClose={() => {
           setTableId(null);
@@ -89,6 +103,12 @@ function AdminTables() {
           required
         />
 
+        {errorDescription && (
+          <Text mt={10} color="red">
+            {errorDescription}
+          </Text>
+        )}
+
         <Button
           onClick={() => {
             axiosPrivate(authTokens, setAuthTokens, setUser)
@@ -98,8 +118,12 @@ function AdminTables() {
                 getTables();
                 closeDescription();
               })
-              .catch(() => {
-                navigate('/admin/login');
+              .catch((error) => {
+                if (error.response.data.message === 'INVALID_DATA') {
+                  setErrorDescription('No se pudo actualizar la mesa');
+                } else {
+                  navigate('/admin/login');
+                }
               });
           }}
           color="orange"
@@ -109,6 +133,8 @@ function AdminTables() {
           Confirmar
         </Button>
       </Modal>
+
+      {/* ver QR */}
       <Modal
         opened={openedQr}
         onClose={() => {
@@ -142,6 +168,11 @@ function AdminTables() {
                   <th>Acciones</th>
                 </tr>
               </thead>
+              {tables.length === 0 && (
+                <Text mt={20} mb={10} size="xl">
+                  No hay mesas
+                </Text>
+              )}
               <tbody>
                 {tables.map((table) => (
                   <tr key={table.id}>
@@ -201,6 +232,11 @@ function AdminTables() {
                 Confirmar
               </Button>
             </Flex>
+            {errorCreateTable && (
+              <Text mt={20} color="red">
+                {errorCreateTable}
+              </Text>
+            )}
           </>
         )}
       </Layout>

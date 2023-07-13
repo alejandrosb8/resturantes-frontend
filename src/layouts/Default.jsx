@@ -5,7 +5,7 @@ import AdminNavbar from '../components/NavBars/AdminNavbar';
 import UserNavbar from '../components/NavBars/UserNavbar';
 import { useHeadroom, useMediaQuery } from '@mantine/hooks';
 
-export default function Layout({ children, header, footer, navbar, navbarActive }) {
+export default function Layout({ children, footer, navbar, navbarActive }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
 
@@ -39,7 +39,33 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
         )
       }
       header={
-        header && (
+        navbar === 'admin' ? (
+          <Header
+            height={{ base: 50 }}
+            p="md"
+            sx={{
+              backgroundColor: theme.colors.orange[6],
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+              {navbar && (
+                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                  <Burger
+                    opened={opened}
+                    onClick={() => setOpened((o) => !o)}
+                    size="sm"
+                    color={theme.colors.orange[0]}
+                    mr="xl"
+                  />
+                </MediaQuery>
+              )}
+
+              <Text size="xl" color="white" weight="bold">
+                Resturantes
+              </Text>
+            </div>
+          </Header>
+        ) : (
           <Header
             height={{ base: 50 }}
             p="md"
