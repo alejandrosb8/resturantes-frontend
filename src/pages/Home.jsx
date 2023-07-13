@@ -20,6 +20,7 @@ import {
   Affix,
   Transition,
   BackgroundImage,
+  Text,
 } from '@mantine/core';
 
 const EXAMPLE_IMAGE_URL =
@@ -62,8 +63,12 @@ function Home() {
         setCategories(response.data.data);
         setLoading(false);
       })
-      .catch(() => {
-        navigate(`/login/${table}`);
+      .catch((error) => {
+        if (error.response.status === 404) {
+          setLoading(false);
+        } else {
+          navigate(`/login/${table}`);
+        }
       });
   }, [authTokens, setAuthTokens, setUser, navigate, table]);
 
@@ -78,6 +83,11 @@ function Home() {
           </Title>
           <Divider mt={10} mb={10} />
           <Grid mt={10}>
+            {categories.length === 0 && (
+              <Text align="center" size="xl">
+                No hay platos disponibles
+              </Text>
+            )}
             {categories.map((category) => (
               <Grid.Col key={category.id} span={12} xs={6} lg={4} style={{ maxWidth: '470px' }}>
                 <Box
