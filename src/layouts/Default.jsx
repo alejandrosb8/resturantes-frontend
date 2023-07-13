@@ -5,7 +5,7 @@ import AdminNavbar from '../components/NavBars/AdminNavbar';
 import UserNavbar from '../components/NavBars/UserNavbar';
 import { useHeadroom, useMediaQuery } from '@mantine/hooks';
 
-export default function Layout({ children, footer, navbar, navbarActive }) {
+export default function Layout({ children, header, footer, navbar, navbarActive }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
 
@@ -39,7 +39,8 @@ export default function Layout({ children, footer, navbar, navbarActive }) {
         )
       }
       header={
-        navbar === 'admin' ? (
+        header &&
+        (navbar === 'admin' ? (
           <Header
             height={{ base: 50 }}
             p="md"
@@ -94,7 +95,7 @@ export default function Layout({ children, footer, navbar, navbarActive }) {
               </Text>
             </div>
           </Header>
-        )
+        ))
       }
     >
       {children}
