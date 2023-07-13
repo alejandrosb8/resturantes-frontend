@@ -44,12 +44,21 @@ export function ShoppingProvider({ children }) {
     localStorage.removeItem('shoppingCart');
   }
 
+  function editCart(newCart) {
+    const newCartToAdd = newCart.filter((item) => item.quantity > 0);
+    console.log(newCartToAdd);
+
+    setShoppingCart(newCartToAdd);
+    localStorage.setItem('shoppingCart', JSON.stringify(newCartToAdd));
+  }
+
   const value = {
     shoppingCart,
     setShoppingCart,
     addToCart,
     removeFromCart,
     removeAllFromCart,
+    editCart,
   };
 
   return <ShoppingContext.Provider value={value}>{children}</ShoppingContext.Provider>;
