@@ -1,20 +1,15 @@
 import Layout from '../../layouts/Default';
-import { Title, Text, Table, Button, Skeleton, ActionIcon, Flex, Modal, TextInput, Center } from '@mantine/core';
+import { Title, Text, Table, Button, Skeleton, ActionIcon, Flex, Modal, TextInput, Center, Image } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { IconPencil, IconTrash, IconQrcode } from '@tabler/icons-react';
+import { IconPencil, IconTrash, IconPhoto } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
-import { QRCode } from 'react-qrcode-logo';
 
-const ENVIRONMENT = import.meta.env.VITE_ENV;
 
-const DOMAIN =
-  ENVIRONMENT === 'development' ? 'http://localhost:5173' : 'https://green-stone-04b86be10.3.azurestaticapps.net';
-
-function AdminTables() {
-  const [tables, setTables] = useState([]);
+function AdminDishes() {
+  const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
@@ -24,73 +19,81 @@ function AdminTables() {
   const [openedDescription, { open: openDescription, close: closeDescription }] = useDisclosure(false);
 
   // qr modal
-  const [openedQr, { open: openQr, close: closeQr }] = useDisclosure(false);
+  const [openedImg, { open: openImg, close: closeImg }] = useDisclosure(false);
 
-  const [tableId, setTableId] = useState(null);
+  const [imgUrl, setImgUrl] = useState(null);
 
   const [createDescription, setCreateDescription] = useInputState('');
 
-  const [errorCreateTable, setErrorCreateTable] = useState('');
-  const [errorDescription, setErrorDescription] = useState('');
 
-  const getTables = useCallback(() => {
+  const getDishes = useCallback(() => {
     setLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .get('/tables')
+      .get('/dishes')
       .then((response) => {
-        setTables(response.data.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        if (error.response.data.message === 'TABLES_NOT_FOUND') {
-          setTables([]);
+        const data = response.data.data;
+        const promises = data.map((item) => {
+          // Check if item has a categoryId
+          if (item?.categoryId) {
+            return axiosPrivate(authTokens, setAuthTokens, setUser)
+              .get(`/categories/${item.categoryId}`)
+              .then((resp) => {
+                // Asignar la categoría al item
+                item.category = resp.data.data.name;
+                return item;
+              })
+              .catch(() => {
+                navigate('/admin/login');
+              });
+          } else {
+            // Return the item without category
+            return Promise.resolve(item);
+          }
+        });
+        Promise.all(promises).then((results) => {
+          setDishes(results);
           setLoading(false);
-        } else {
-          navigate('/admin/login');
-        }
+        });
+      })
+      .catch(() => {
+        navigate('/admin/login');
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);
 
-  const deleteTable = (id) => {
+  const deleteDishes = (id) => {
     setLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .delete(`/tables/${id}`)
+      .delete(`/dishes/${id}`)
       .then(() => {
-        getTables();
+        getDishes();
       })
       .catch(() => {
         navigate('/admin/login');
       });
   };
 
-  const createTable = (description) => {
+  const createDishes = (description) => {
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .post('/tables', { description: description })
+      .post('/dishes', { description: description })
       .then(() => {
         setCreateDescription('');
-        getTables();
+        getDishes();
       })
-      .catch((error) => {
-        if (error.response.data.message === 'INVALID_DATA') {
-          setErrorCreateTable('No se pudo crear la mesa');
-        } else {
-          navigate('/admin/login');
-        }
+      .catch(() => {
+        navigate('/admin/login');
       });
   };
 
   useEffect(() => {
-    getTables();
-  }, [getTables]);
+    getDishes();
+  }, [getDishes]);
 
   return (
     <>
-      {/* Editar mesa */}
       <Modal
-        styles={{ zIndex: 20000 }}
         opened={openedDescription}
         onClose={() => {
-          setTableId(null);
+          setImgUrl(null);
           closeDescription();
         }}
         title="Cambiar descripción"
@@ -103,27 +106,17 @@ function AdminTables() {
           required
         />
 
-        {errorDescription && (
-          <Text mt={10} color="red">
-            {errorDescription}
-          </Text>
-        )}
-
         <Button
           onClick={() => {
             axiosPrivate(authTokens, setAuthTokens, setUser)
-              .patch(`/tables/${tableId}`, { description })
+              .patch(`/tables/${imgUrl}`, { description })
               .then(() => {
-                setTableId(null);
-                getTables();
+                setImgUrl(null);
+                getDishes();
                 closeDescription();
               })
-              .catch((error) => {
-                if (error.response.data.message === 'INVALID_DATA') {
-                  setErrorDescription('No se pudo actualizar la mesa');
-                } else {
-                  navigate('/admin/login');
-                }
+              .catch(() => {
+                navigate('/admin/login');
               });
           }}
           color="orange"
@@ -133,22 +126,20 @@ function AdminTables() {
           Confirmar
         </Button>
       </Modal>
-
-      {/* ver QR */}
       <Modal
-        opened={openedQr}
+        opened={openedImg}
         onClose={() => {
-          setTableId(null);
-          closeQr();
+          setImgUrl(null);
+          closeImg();
         }}
-        title="Código QR"
+        title="Imagen "
       >
-        <Center>{tableId && <QRCode value={`${DOMAIN}/login/${tableId}`} size={256} />}</Center>
+        <Center>{imgUrl && <Image src={imgUrl} alt='Imagen Comida'/>}</Center>
       </Modal>
-      <Layout navbar="admin" navbarActive="admin-tables" header>
-        <Title order={1}>Mesas</Title>
+      <Layout navbar="admin" navbarActive="admin-dishes" header>
+        <Title order={1}>Platos</Title>
         <Text mt={20} mb={10}>
-          Lista de mesas
+          Lista de platos
         </Text>
         {loading ? (
           <>
@@ -165,26 +156,25 @@ function AdminTables() {
                 <tr>
                   <th>ID</th>
                   <th>Descripción</th>
+                  <th>Precio</th>
+                  <th>Categoría</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
-              {tables.length === 0 && (
-                <Text mt={20} mb={10} size="xl">
-                  No hay mesas
-                </Text>
-              )}
               <tbody>
-                {tables.map((table) => (
-                  <tr key={table.id}>
-                    <td>{table.id}</td>
-                    <td>{table.description}</td>
+                {dishes.map((dish) => (
+                  <tr key={dish.id}>
+                    <td>{dish.id}</td>
+                    <td>{dish.name}</td>
+                    <td>{dish.price}</td>
+                    <td>{dish.category}</td>
                     <td>
                       <Flex align="center" gap="xs">
                         <ActionIcon
                           variant="transparent"
                           color="orange"
                           onClick={() => {
-                            setTableId(table.id);
+                            setImgUrl(dish.imageUrl);
                             openDescription();
                           }}
                         >
@@ -194,7 +184,7 @@ function AdminTables() {
                           variant="transparent"
                           color="orange"
                           onClick={() => {
-                            deleteTable(table.id);
+                            deleteDishes(dish.id);
                           }}
                         >
                           <IconTrash />
@@ -203,11 +193,11 @@ function AdminTables() {
                           variant="transparent"
                           color="orange"
                           onClick={() => {
-                            setTableId(table.id);
-                            openQr();
+                            setImgUrl(dish.imageUrl);
+                            openImg();
                           }}
                         >
-                          <IconQrcode />
+                          <IconPhoto />
                         </ActionIcon>
                       </Flex>
                     </td>
@@ -225,18 +215,13 @@ function AdminTables() {
               />
               <Button
                 onClick={() => {
-                  createTable(createDescription);
+                  createDishes(createDescription);
                 }}
                 color="orange"
               >
                 Confirmar
               </Button>
             </Flex>
-            {errorCreateTable && (
-              <Text mt={20} color="red">
-                {errorCreateTable}
-              </Text>
-            )}
           </>
         )}
       </Layout>
@@ -244,4 +229,4 @@ function AdminTables() {
   );
 }
 
-export default AdminTables;
+export default AdminDishes;

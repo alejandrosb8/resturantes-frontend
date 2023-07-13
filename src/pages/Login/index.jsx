@@ -5,6 +5,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { useForm } from '@mantine/form';
 import RecoverPassword from './RecoverPassword';
+import useTable from '../../hooks/useTable';
 
 function Login() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,6 +14,8 @@ function Login() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRecoverPassword, setShowRecoverPassword] = useState(false);
+
+  const { table } = useTable();
 
   const { verifyAccount, login } = useAuth();
   const navigate = useNavigate();
@@ -60,7 +63,7 @@ function Login() {
     const response = responseRaw.response;
 
     if (responseRaw.status === 200) {
-      navigate('/');
+      navigate(`/${table}`);
     } else if (response.data.message === 'EMAIL_NOT_FOUND') {
       setErrorMsg('El correo electrónico no está registrado');
     } else if (response.data.message === 'WRONG_PASSWORD') {
@@ -263,7 +266,7 @@ function Login() {
                 label={<Text color="#666">¿No tienes una cuenta?</Text>}
               />
 
-              <Button component={Link} to="/register" variant="outline" fullWidth>
+              <Button component={Link} to={`/register/${table}`} variant="outline" fullWidth>
                 Regístrate
               </Button>
             </Stack>

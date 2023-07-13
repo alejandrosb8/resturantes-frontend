@@ -11,10 +11,16 @@ import AdminHome from './pages/Admin/Home';
 import AdminTables from './pages/Admin/Tables';
 import AdminSettings from './pages/Admin/Settings';
 import { PrivateRouteAdmin, PrivateRouteUser } from './utils/PrivateRoute';
+import NotQr from './pages/NotQr';
+import UserOrder from './pages/Order';
+import { DishesPage } from './pages/DishesPage.jsx';
+import './App.css';
+import AdminDishes from './pages/Admin/Dishes';
+import AdminCategories from './pages/Admin/Categories';
 
 export default function App() {
-  const [user, setUser] = useState(localStorage.getItem('user') || null);
-  const [authTokens, setAuthTokens] = useState(localStorage.getItem('tokens') || null);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+  const [authTokens, setAuthTokens] = useState(JSON.parse(localStorage.getItem('tokens')) || null);
 
   return (
     <MantineProvider
@@ -25,21 +31,56 @@ export default function App() {
         fontFamily: 'Open Sans, sans serif',
         spacing: { xs: '1rem', sm: '1.2rem', md: '1.8rem', lg: '2.2rem', xl: '2.8rem' },
         primaryColor: 'orange',
+        headings: { fontFamily: 'Architects Daughter, sans serif' },
       }}
     >
       <AuthContext.Provider value={{ user, setUser, authTokens, setAuthTokens }}>
         <ModalsProvider>
           <Routes>
+            <Route path="/" element={<NotQr />} />
             <Route
-              path="/"
+              path="/:tableId"
               element={
                 <PrivateRouteUser>
                   <Home />
                 </PrivateRouteUser>
               }
             />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/not-qr" element={<NotQr />} />
+            <Route path="/login" element={<NotQr />} />
+            <Route path="/register" element={<NotQr />} />
+            <Route
+              path="/login/:tableId"
+              element={
+                <PrivateRouteUser loginOrRegister>
+                  <Login />
+                </PrivateRouteUser>
+              }
+            />
+            <Route
+              path="/register/:tableId"
+              element={
+                <PrivateRouteUser loginOrRegister>
+                  <Register />
+                </PrivateRouteUser>
+              }
+            />
+            <Route
+              path="/dishes/:tableId"
+              element={
+                <PrivateRouteUser>
+                  <DishesPage />
+                </PrivateRouteUser>
+              }
+            />
+            <Route
+              path="/order/:tableId"
+              element={
+                <PrivateRouteUser>
+                  <UserOrder />
+                </PrivateRouteUser>
+              }
+            />
             <Route
               path="/admin"
               element={
@@ -48,6 +89,7 @@ export default function App() {
                 </PrivateRouteAdmin>
               }
             />
+
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
               path="/admin/tables"
@@ -62,6 +104,22 @@ export default function App() {
               element={
                 <PrivateRouteAdmin>
                   <AdminSettings />
+                </PrivateRouteAdmin>
+              }
+            />
+            <Route
+              path="/admin/dishes"
+              element={
+                <PrivateRouteAdmin>
+                  <AdminDishes />
+                </PrivateRouteAdmin>
+              }
+            />
+            <Route
+              path="/admin/categories"
+              element={
+                <PrivateRouteAdmin>
+                  <AdminCategories />
                 </PrivateRouteAdmin>
               }
             />
