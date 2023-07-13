@@ -83,7 +83,7 @@ function Home() {
           </Title>
           <Divider mt={10} mb={10} />
           <Grid mt={10}>
-            {categories.length === 0 && (
+            {categories.length === 0 && !loading && (
               <Text align="center" size="xl">
                 No hay platos disponibles
               </Text>

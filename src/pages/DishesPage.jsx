@@ -25,6 +25,7 @@ import { useInputState } from '@mantine/hooks';
 import Layout from '../layouts/Default.jsx';
 import { IconShoppingCart, IconTrash, IconArrowLeft } from '@tabler/icons-react';
 import { AnimatedLink } from '../components/AnimatedLink.jsx';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const EXAMPLE_IMAGE_URL =
   'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80';
@@ -110,40 +111,43 @@ export const DishesPage = () => {
   return (
     <>
       <Layout navbar="user" header>
-        <Container size="xl" p={0} mb={80}>
-          {!dishId && (
-            <Flex justify="flex-start" align="center" gap={10}>
-              <ActionIcon
-                component={AnimatedLink}
-                animation={animationHomePage}
-                to={`/${table}`}
-                variant="subtle"
-                color="orange"
-                inlineStyles={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <IconArrowLeft color="#FD7E14" />
-              </ActionIcon>
-              <Title order={1} color="dark.4">
-                {categoryNameParam ? categoryNameParam : category?.name}
-              </Title>
-            </Flex>
-          )}
-          {loading ? (
-            <LoadingView />
-          ) : (
-            <>
-              {dishId ? (
-                <>
-                  {/*Dish detail*/}
+        <AnimatePresence>
+          <Container size="xl" p={0} mb={80}>
+            {!dishId && (
+              <Flex justify="flex-start" align="center" gap={10}>
+                <ActionIcon
+                  component={AnimatedLink}
+                  animation={animationHomePage}
+                  to={`/${table}`}
+                  variant="subtle"
+                  color="orange"
+                  inlineStyles={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <IconArrowLeft color="#FD7E14" />
+                </ActionIcon>
+                <Title order={1} color="dark.4">
+                  {categoryNameParam ? categoryNameParam : category?.name}
+                </Title>
+              </Flex>
+            )}
+            {loading ? (
+              <LoadingView />
+            ) : (
+              <>
+                {dishId ? (
+                  <>
+                    {/*Dish detail*/}
 
-                  <Transition transition="slide-up" mounted={dishId}>
-                    {(transitionStyles) => (
+                    <motion.div
+                      initial={{ opacity: 0, y: 100 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -100 }}
+                    >
                       <Container
-                        style={transitionStyles}
                         size="xs"
                         p={0}
                         sx={{
@@ -157,7 +161,6 @@ export const DishesPage = () => {
                             style={{
                               viewTransitionName: `${dishId}`,
                               maxWidth: '400px',
-                              ...transitionStyles,
                             }}
                           />
                           <Container
@@ -166,6 +169,10 @@ export const DishesPage = () => {
                             sx={{
                               margin: 'auto',
                               marginTop: '10px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                             }}
                           >
                             <Title
@@ -197,7 +204,6 @@ export const DishesPage = () => {
                               stepHoldInterval={100}
                               sx={{
                                 width: '100%',
-                                maxWidth: '300px',
                               }}
                             />
                             <Text size={rem(16)} align="center" color="dark.4">
@@ -238,114 +244,131 @@ export const DishesPage = () => {
                           </Container>
                         </Flex>
                       </Container>
+                    </motion.div>
+                  </>
+                ) : (
+                  <>
+                    {/*Dishes list*/}
+
+                    <Divider mt={10} mb={10} />
+
+                    {(!dishes || dishes.length < 1) && (
+                      <Title order={2} color="dark.4">
+                        No hay platos en esta categoría
+                      </Title>
                     )}
-                  </Transition>
-                </>
-              ) : (
-                <>
-                  {/*Dishes list*/}
 
-                  <Divider mt={10} mb={10} />
-
-                  {(!dishes || dishes.length < 1) && (
-                    <Title order={2} color="dark.4">
-                      No hay platos en esta categoría
-                    </Title>
-                  )}
-
-                  <Grid mt={10} sx={{ width: '100%', margin: '0' }}>
-                    {dishes.map((dish) => (
-                      <Grid.Col key={dish.id} span={12} xs={6} lg={4} style={{ maxWidth: '520px' }}>
-                        <Card
-                          shadow="sm"
-                          style={{ height: '100%', width: '100%', maxWidth: '520px', position: 'relative' }}
-                          p={10}
-                        >
-                          {shoppingCart.filter((cartDish) => cartDish.id === dish.id)[0]?.quantity && (
-                            <Flex
-                              justify="center"
-                              align="center"
-                              direction="column"
-                              p={14}
-                              style={{
-                                position: 'absolute',
-                                top: '0',
-                                left: '0',
-                                width: '100%',
-                                height: '100%',
-                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                zIndex: '100',
-                              }}
-                            >
-                              <Text color="gray.7" size="xl" weight={600} align="center">
-                                {dish.name}
-                              </Text>
-                              <Text color="gray.7" size="lg" weight={600} align="center" mt={5}>
-                                Cantidad: {shoppingCart.filter((cartDish) => cartDish.id === dish.id)[0].quantity}
-                              </Text>
-                              <Flex justify="center" align="center" direction="column" gap={5} mt={10}>
-                                <Button
-                                  fullWidth
-                                  color="orange"
-                                  mt={10}
-                                  onClick={() => {
-                                    handleOpenDetailsClick(dish.id);
+                    <Grid mt={10} sx={{ width: '100%', margin: '0' }}>
+                      {dishes.map((dish) => (
+                        <Grid.Col key={dish.id} span={12} xs={6} lg={4} style={{ maxWidth: '520px' }}>
+                          <Card
+                            shadow="sm"
+                            style={{ height: '100%', width: '100%', maxWidth: '520px', position: 'relative' }}
+                            p={10}
+                          >
+                            {shoppingCart.filter((cartDish) => cartDish.id === dish.id)[0]?.quantity && (
+                              <Flex
+                                justify="center"
+                                align="center"
+                                direction="column"
+                                p={14}
+                                style={{
+                                  position: 'absolute',
+                                  top: '0',
+                                  left: '0',
+                                  width: '100%',
+                                  height: '100%',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                  zIndex: '100',
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: '0',
+                                    right: '0',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    backgroundColor: '#fff',
+                                    zIndex: '100',
+                                    borderRadius: '10px',
+                                    width: 'auto',
                                   }}
                                 >
-                                  Agregar más
-                                </Button>
-                                <Button
-                                  fullWidth
-                                  color="red"
-                                  variant="light"
-                                  mt={10}
-                                  onClick={() => {
-                                    removeFromCart(dish.id);
-                                  }}
-                                >
-                                  Quitar
-                                </Button>
+                                  <Text color="orange" size="md" align="center">
+                                    Pedido
+                                  </Text>
+                                </div>
+                                <Text color="gray.7" size="xl" weight={600} align="center">
+                                  {dish.name}
+                                </Text>
+                                <Text color="gray.7" size="md" weight={500} align="center" mt={5}>
+                                  Cantidad: {shoppingCart.filter((cartDish) => cartDish.id === dish.id)[0].quantity}
+                                </Text>
+                                <Flex justify="center" align="center" direction="column" gap={5} mt={10}>
+                                  <Button
+                                    fullWidth
+                                    color="orange"
+                                    mt={10}
+                                    onClick={() => {
+                                      handleOpenDetailsClick(dish.id);
+                                    }}
+                                  >
+                                    Agregar más
+                                  </Button>
+                                  <Button
+                                    fullWidth
+                                    color="red"
+                                    variant="light"
+                                    mt={10}
+                                    onClick={() => {
+                                      removeFromCart(dish.id);
+                                    }}
+                                  >
+                                    Quitar
+                                  </Button>
+                                </Flex>
                               </Flex>
+                            )}
+                            <Card.Section>
+                              <Image src={EXAMPLE_IMAGE_URL} height={200} alt={dish.name} />
+                            </Card.Section>
+                            <Flex justify={'space-between'} align="center" mt={10}>
+                              <Title
+                                order={3}
+                                color="dark.4"
+                                weight={600}
+                                size={rem(18)}
+                                sx={{
+                                  minHeight: '30px',
+                                }}
+                              >
+                                {dish?.name}
+                              </Title>
                             </Flex>
-                          )}
-                          <Card.Section>
-                            <Image src={EXAMPLE_IMAGE_URL} height={200} alt={dish.name} />
-                          </Card.Section>
-                          <Flex justify={'space-between'} align="center" mt={10}>
-                            <Title
-                              order={3}
-                              color="dark.4"
-                              weight={600}
-                              size={rem(18)}
-                              sx={{
-                                minHeight: '30px',
-                              }}
-                            >
-                              {dish?.name}
-                            </Title>
-                          </Flex>
-                          <Divider mt={10} mb={10} />
-                          <Flex justify="space-between" align="center">
-                            <Text color="gray.8">$ {dish.price}</Text>
-                            <Button
-                              color="orange"
-                              variant="light"
-                              onClick={() => {
-                                handleOpenDetailsClick(dish.id);
-                              }}
-                            >
-                              Agregar al pedido
-                            </Button>
-                          </Flex>
-                        </Card>
-                      </Grid.Col>
-                    ))}
-                  </Grid>
-                </>
-              )}
-            </>
-          )}
-        </Container>
+                            <Divider mt={10} mb={10} />
+                            <Flex justify="space-between" align="center">
+                              <Text color="gray.8">$ {dish.price}</Text>
+                              <Button
+                                color="orange"
+                                variant="light"
+                                onClick={() => {
+                                  handleOpenDetailsClick(dish.id);
+                                }}
+                              >
+                                Agregar al pedido
+                              </Button>
+                            </Flex>
+                          </Card>
+                        </Grid.Col>
+                      ))}
+                    </Grid>
+                  </>
+                )}
+              </>
+            )}
+          </Container>
+        </AnimatePresence>
       </Layout>
       <Affix position={{ bottom: rem(20), right: rem(20) }}>
         <Transition transition="slide-up" mounted={shoppingCart.length > 0}>
