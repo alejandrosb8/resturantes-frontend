@@ -9,7 +9,7 @@ export function useShopping() {
 export function ShoppingProvider({ children }) {
   const [shoppingCart, setShoppingCart] = useState(JSON.parse(localStorage.getItem('shoppingCart')) || []);
 
-  function addToCart(itemId, quantity) {
+  function addToCart(itemId, quantity, details) {
     let newCart = [];
     if (shoppingCart.find((item) => item.id === itemId)) {
       newCart = shoppingCart.map((item) => {
@@ -17,13 +17,14 @@ export function ShoppingProvider({ children }) {
           return {
             ...item,
             quantity: quantity,
+            details: details,
           };
         } else {
           return item;
         }
       });
     } else {
-      newCart = [...shoppingCart, { id: itemId, quantity }];
+      newCart = [...shoppingCart, { id: itemId, quantity, details }];
     }
 
     const newCartToAdd = newCart.filter((item) => item.quantity > 0);

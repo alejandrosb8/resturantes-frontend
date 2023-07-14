@@ -6,7 +6,19 @@ import { useShopping } from '../contexts/ShoppingContext';
 import { axiosPrivate } from '../utils/axios';
 import useAuth from '../hooks/useAuth';
 import useUserTable from '../hooks/useTable';
-import { Title, Text, Button, Divider, Flex, Container, Table, ActionIcon, Modal } from '@mantine/core';
+import {
+  Title,
+  Text,
+  Button,
+  Divider,
+  Flex,
+  Container,
+  Table,
+  ActionIcon,
+  Modal,
+  Popover,
+  UnstyledButton,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 
@@ -84,13 +96,20 @@ function OrderPage() {
             color="orange"
             ml={10}
             onClick={() => {
+              const dataToSend = {
+                tableId: table,
+                dishes: orderDishes.map((dish) => ({
+                  id: dish.id,
+                  quantity: dish.quantity,
+                  details: shoppingCart.filter((sdish) => sdish.id === dish.id).map((sdish) => sdish.details)[0],
+                })),
+              };
+
+              console.log(dataToSend);
+
               axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
                 .post('/orders', {
-                  tableId: table,
-                  dishes: orderDishes.map((dish) => ({
-                    id: dish.id,
-                    quantity: dish.quantity,
-                  })),
+                  ...dataToSend,
                 })
                 .then(() => {
                   notifications.show({
@@ -101,8 +120,7 @@ function OrderPage() {
                   removeAllFromCart();
                   navigate(`/${table}`);
                 })
-                .catch((error) => {
-                  console.log(error);
+                .catch(() => {
                   close();
                   notifications.show({
                     title: 'Error',
@@ -140,6 +158,7 @@ function OrderPage() {
                 <thead>
                   <tr>
                     <th>Articulo</th>
+                    <th>Detalles</th>
                     <th>Cantidad</th>
                     <th>Precio</th>
                   </tr>
@@ -148,6 +167,23 @@ function OrderPage() {
                   {orderDishes.map((dish) => (
                     <tr key={dish.id}>
                       <td>{dish.name}</td>
+                      <td>
+                        <Popover width={200} position="bottom" withArrow shadow="md">
+                          <Popover.Target>
+                            <UnstyledButton>
+                              <Text size="sm" color="blue">
+                                Ver detalles
+                              </Text>
+                            </UnstyledButton>
+                          </Popover.Target>
+                          <Popover.Dropdown>
+                            <Text size="sm">
+                              {shoppingCart.filter((sdish) => sdish.id === dish.id).map((sdish) => sdish.details)[0] ||
+                                'Sin detalles'}
+                            </Text>
+                          </Popover.Dropdown>
+                        </Popover>
+                      </td>
                       <td>
                         <Flex align="center" gap={10}>
                           <ActionIcon

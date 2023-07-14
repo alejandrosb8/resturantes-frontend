@@ -20,6 +20,7 @@ import {
   Title,
   Transition,
   Image,
+  Textarea,
 } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
 import Layout from '../layouts/Default.jsx';
@@ -45,6 +46,10 @@ export const DishesPage = () => {
     const quantity = shoppingCart.filter((dish) => dish.id === dishId).map((dish) => dish.quantity);
     return quantity.length > 0 ? quantity[0] : 1;
   });
+  const [dishNote, setDishNote] = useInputState(() => {
+    const note = shoppingCart.filter((dish) => dish.id === dishId).map((dish) => dish.note);
+    return note.length > 0 ? note[0] : '';
+  });
 
   const { table } = useUserTable();
 
@@ -61,21 +66,14 @@ export const DishesPage = () => {
   ];
 
   const handleOpenDetailsClick = (dish) => {
-    /*if (document.startViewTransition) {
-      document.startViewTransition(() => {
-        flushSync(() => {
-          setDishId(dish);
-          setDishQuantity(() => {
-            const quantity = shoppingCart.filter((qdish) => qdish.id === dish).map((qdish) => qdish.quantity);
-            return quantity.length > 0 ? quantity[0] : 1;
-          });
-        });
-      });
-    } else {*/
     setDishId(dish);
     setDishQuantity(() => {
       const quantity = shoppingCart.filter((qdish) => qdish.id === dish).map((qdish) => qdish.quantity);
       return quantity.length > 0 ? quantity[0] : 1;
+    });
+    setDishNote(() => {
+      const note = shoppingCart.filter((qdish) => qdish.id === dish).map((qdish) => qdish.details);
+      return note.length > 0 ? note[0] : '';
     });
   };
 
@@ -146,6 +144,12 @@ export const DishesPage = () => {
                       initial={{ opacity: 0, y: 100 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -100 }}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
                     >
                       <Container
                         size="xs"
@@ -216,13 +220,27 @@ export const DishesPage = () => {
                               ).toFixed(2)}
                             </Text>
 
-                            <Flex justify="center" align="center" direction="column" gap={10} mt={20}>
+                            <Textarea
+                              label="Nota"
+                              placeholder="Agrega una nota para el cocinero sobre tu pedido"
+                              autosize
+                              minRows={2}
+                              maxRows={4}
+                              mt={20}
+                              sx={{
+                                width: '100%',
+                              }}
+                              value={dishNote}
+                              onChange={(e) => setDishNote(e.target.value)}
+                            />
+
+                            <Flex justify="center" align="center" direction="row" wrap="wrap" gap={10} mt={30}>
                               <Button
                                 color="orange"
                                 size="lg"
                                 fullWidth
                                 onClick={() => {
-                                  addToCart(dishId, dishQuantity);
+                                  addToCart(dishId, dishQuantity, dishNote.trim());
                                   setDishId(null);
                                 }}
                               >
@@ -236,6 +254,7 @@ export const DishesPage = () => {
                                 onClick={() => {
                                   setDishId(null);
                                   setDishQuantity(0);
+                                  setDishNote('');
                                 }}
                               >
                                 Borrar del pedido
