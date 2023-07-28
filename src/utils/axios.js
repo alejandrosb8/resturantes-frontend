@@ -43,7 +43,7 @@ export function axiosPrivate(authTokens, setAuthTokens, setUser, role = 'admin')
 
       if (error.response.status === 403 || error.response.status === 401 || error.response.status === 498) {
         return axios
-          .get(role === 'customer' ? REFRESH_TOKEN_ADMIN_URL : REFRESH_TOKEN_URL, {
+          .get(role === 'customer' ? REFRESH_TOKEN_URL : REFRESH_TOKEN_ADMIN_URL, {
             headers: {
               Authorization: `Bearer ${authTokens.refreshToken}`,
             },

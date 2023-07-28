@@ -60,7 +60,8 @@ function OrderPage() {
       .catch(() => {
         navigate(`/${table}`);
       });
-  }, [navigate, authTokens, setAuthTokens, setUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, authTokens, setAuthTokens, setUser, table]);
 
   useEffect(() => {
     setOrderDishes(shoppingCart);
@@ -158,7 +159,7 @@ function OrderPage() {
                 <thead>
                   <tr>
                     <th>Articulo</th>
-                    <th>Detalles</th>
+                    <th>Notas</th>
                     <th>Cantidad</th>
                     <th>Precio</th>
                   </tr>
@@ -235,7 +236,7 @@ function OrderPage() {
                           </ActionIcon>
                         </Flex>
                       </td>
-                      <td>$ {dish.price}</td>
+                      <td>$ {Number(dish.price).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -246,7 +247,7 @@ function OrderPage() {
                 </Text>
                 <Divider sx={{ width: '100%' }} variant="dashed" size="sm" />
                 <Text size="lg" weight={500} sx={{ flexShrink: 0 }}>
-                  $ {orderDishes.reduce((acc, dish) => acc + dish.price * dish.quantity, 0)}
+                  $ {Number(orderDishes.reduce((acc, dish) => acc + dish.price * dish.quantity, 0)).toFixed(2)}
                 </Text>
               </Flex>
 

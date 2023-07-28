@@ -47,7 +47,6 @@ export function ShoppingProvider({ children }) {
 
   function editCart(newCart) {
     const newCartToAdd = newCart.filter((item) => item.quantity > 0);
-    console.log(newCartToAdd);
 
     setShoppingCart(newCartToAdd);
     localStorage.setItem('shoppingCart', JSON.stringify(newCartToAdd));

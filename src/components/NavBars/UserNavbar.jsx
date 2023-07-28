@@ -11,6 +11,12 @@ const linksData = [
     id: 'home',
     idNumber: 0,
   },
+  {
+    label: 'Ordenes',
+    to: '/orders',
+    id: 'orders',
+    idNumber: 1,
+  },
 ];
 
 function UserNavbar({ opened, currentActive }) {
@@ -26,6 +32,7 @@ function UserNavbar({ opened, currentActive }) {
     return null;
   }
   linksData[0].to = `/${table}`;
+  linksData[1].to = `/orders/${table}`;
 
   return (
     <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} zIndex={50}>

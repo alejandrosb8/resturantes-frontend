@@ -19,6 +19,8 @@ import AdminCategories from './pages/Admin/Categories';
 import { Notifications } from '@mantine/notifications';
 import { DevSupport } from '@react-buddy/ide-toolbox';
 import { ComponentPreviews, useInitial } from './dev/index.js';
+import Orders from './pages/Orders';
+import Payment from './pages/Payment';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -82,6 +84,22 @@ export default function App() {
                 element={
                   <PrivateRouteUser>
                     <UserOrder />
+                  </PrivateRouteUser>
+                }
+              />
+              <Route
+                path="/orders/:tableId"
+                element={
+                  <PrivateRouteUser>
+                    <Orders />
+                  </PrivateRouteUser>
+                }
+              />
+              <Route
+                path="/payment/:tableId"
+                element={
+                  <PrivateRouteUser>
+                    <Payment />
                   </PrivateRouteUser>
                 }
               />

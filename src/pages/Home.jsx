@@ -5,7 +5,7 @@ import { axiosPrivate } from '../utils/axios';
 import Layout from '../layouts/Default';
 import LoadingView from '../components/LoadingView';
 import { useShopping } from '../contexts/ShoppingContext';
-import { IconShoppingCart, IconTrash } from '@tabler/icons-react';
+import { IconShoppingCart, IconTrash, IconCreditCard } from '@tabler/icons-react';
 import useUserTable from '../hooks/useTable';
 import { AnimatedLink } from '../components/AnimatedLink.jsx';
 import {
@@ -144,7 +144,7 @@ function Home() {
       <Affix position={{ bottom: rem(20), right: rem(20) }}>
         <Transition transition="slide-up" mounted={shoppingCart.length > 0}>
           {(transitionStyles) => (
-            <Flex justify="space-evenly" align="center" gap={10} direction="column">
+            <Flex justify="space-evenly" align="center" gap={10} direction="column" mb={10}>
               <Button
                 color="red"
                 leftIcon={<IconTrash />}
@@ -167,6 +167,20 @@ function Home() {
                 Realizar pedido
               </Button>
             </Flex>
+          )}
+        </Transition>
+        <Transition transition="slide-up" mounted={true} mt={10}>
+          {(transitionStyles) => (
+            <Button
+              component={Link}
+              to={`/payment/${table}`}
+              color="blue"
+              leftIcon={<IconCreditCard />}
+              style={transitionStyles}
+              fullWidth
+            >
+              Pagar
+            </Button>
           )}
         </Transition>
       </Affix>

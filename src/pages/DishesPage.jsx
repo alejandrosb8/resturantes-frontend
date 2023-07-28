@@ -24,7 +24,7 @@ import {
 } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
 import Layout from '../layouts/Default.jsx';
-import { IconShoppingCart, IconTrash, IconArrowLeft } from '@tabler/icons-react';
+import { IconShoppingCart, IconTrash, IconArrowLeft, IconCreditCard } from '@tabler/icons-react';
 import { AnimatedLink } from '../components/AnimatedLink.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -193,17 +193,18 @@ export const DishesPage = () => {
                               {dishes.filter((dish) => dish.id === dishId).map((dish) => dish.name)}
                             </Title>
                             <Text size={rem(18)} align="center" color="dark.4">
-                              $ {dishes.filter((dish) => dish.id === dishId).map((dish) => dish.price)}
+                              ${' '}
+                              {Number(dishes.filter((dish) => dish.id === dishId).map((dish) => dish.price)).toFixed(2)}
                             </Text>
                             <NumberInput
                               value={dishQuantity}
                               onChange={setDishQuantity}
-                              min={0}
+                              min={1}
                               max={1000}
                               label="Cantidad"
                               mt={20}
                               mb={20}
-                              size="lg"
+                              size="md"
                               stepHoldDelay={500}
                               stepHoldInterval={100}
                               sx={{
@@ -227,6 +228,7 @@ export const DishesPage = () => {
                               minRows={2}
                               maxRows={4}
                               mt={20}
+                              size="md"
                               sx={{
                                 width: '100%',
                               }}
@@ -392,7 +394,7 @@ export const DishesPage = () => {
       <Affix position={{ bottom: rem(20), right: rem(20) }}>
         <Transition transition="slide-up" mounted={shoppingCart.length > 0}>
           {(transitionStyles) => (
-            <Flex justify="space-evenly" align="center" gap={10} direction="column">
+            <Flex justify="space-evenly" align="center" gap={10} direction="column" mb={10}>
               <Button
                 color="red"
                 leftIcon={<IconTrash />}
@@ -415,6 +417,20 @@ export const DishesPage = () => {
                 Realizar pedido
               </Button>
             </Flex>
+          )}
+        </Transition>
+        <Transition transition="slide-up" mounted={true} mt={10}>
+          {(transitionStyles) => (
+            <Button
+              component={Link}
+              to={`/payment/${table}`}
+              color="blue"
+              leftIcon={<IconCreditCard />}
+              style={transitionStyles}
+              fullWidth
+            >
+              Pagar
+            </Button>
           )}
         </Transition>
       </Affix>
