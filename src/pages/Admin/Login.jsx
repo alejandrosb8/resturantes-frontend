@@ -32,6 +32,8 @@ function Login() {
     const responseRaw = await adminLogin(username, password);
     const response = responseRaw.response;
 
+    console.log(responseRaw);
+
     if (responseRaw.status === 200) {
       navigate('/admin');
     } else if (response.data.message === 'USERNAME_NOT_FOUND') {
