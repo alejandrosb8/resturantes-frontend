@@ -1,149 +1,471 @@
 import Layout from '../../layouts/Default';
-import { Title, Text, Table, Button, Skeleton, ActionIcon, Flex, Modal, TextInput, Center, Image } from '@mantine/core';
+import {
+  Title,
+  Text,
+  Table,
+  Button,
+  Skeleton,
+  ActionIcon,
+  Flex,
+  Modal,
+  TextInput,
+  FileInput,
+  Image,
+  Divider,
+  NumberInput,
+  Select,
+} from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { IconPencil, IconTrash, IconPhoto } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
-
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 
 function AdminDishes() {
   const [dishes, setDishes] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false);
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
 
-  // description modal
-  const [description, setDescription] = useInputState('');
-  const [openedDescription, { open: openDescription, close: closeDescription }] = useDisclosure(false);
+  const [categoryFilter, setCategoryFilter] = useState('');
 
-  // qr modal
+  // edit modal
+  const [openedEdit, { open: openEdit, close: closeEdit }] = useDisclosure(false);
+
+  // image modal
   const [openedImg, { open: openImg, close: closeImg }] = useDisclosure(false);
 
-  const [imgUrl, setImgUrl] = useState(null);
+  // create modal
+  const [openedCreate, { open: openCreate, close: closeCreate }] = useDisclosure(false);
 
-  const [createDescription, setCreateDescription] = useInputState('');
+  // delete modal
+  const [openedDelete, { open: openDelete, close: closeDelete }] = useDisclosure(false);
 
+  const [dishId, setDishId] = useState(null);
+  const [dishData, setDishData] = useInputState(null);
 
-  const getDishes = useCallback(() => {
+  const dishCreateForm = useForm({
+    initialValues: {
+      name: '',
+      price: '',
+      categoryId: '',
+      image: '',
+    },
+
+    validate: {
+      name: (value) => (value.toString().trim().length > 0 ? null : 'Debe ingresar un nombre'),
+      price: (value) => (/\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?/.test(value) ? null : 'Debe ingresar un precio'),
+      categoryId: (value) => (value.toString().trim().length > 0 ? null : 'Debe seleccionar una categoría'),
+      image: (value) => (value.toString().trim().length > 0 ? null : 'Debe ingresar una imagen'),
+    },
+  });
+
+  const dishEditForm = useForm({
+    initialValues: {
+      name: '',
+      price: '',
+      categoryId: '',
+      image: '',
+    },
+  });
+
+  const getCategories = useCallback(() => {
     setLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .get('/dishes')
+      .get('/categories')
       .then((response) => {
-        const data = response.data.data;
-        const promises = data.map((item) => {
-          // Check if item has a categoryId
-          if (item?.categoryId) {
-            return axiosPrivate(authTokens, setAuthTokens, setUser)
-              .get(`/categories/${item.categoryId}`)
-              .then((resp) => {
-                // Asignar la categoría al item
-                item.category = resp.data.data.name;
-                return item;
-              })
-              .catch(() => {
-                navigate('/admin/login');
-              });
-          } else {
-            // Return the item without category
-            return Promise.resolve(item);
-          }
-        });
-        Promise.all(promises).then((results) => {
-          setDishes(results);
-          setLoading(false);
-        });
+        setCategories(response.data.data);
+        setLoading(false);
       })
-      .catch(() => {
-        navigate('/admin/login');
+      .catch((err) => {
+        if (err.response.status === 404) {
+          setLoading(false);
+        } else {
+          navigate('/admin/login');
+        }
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);
 
-  const deleteDishes = (id) => {
+  const getDishes = useCallback(
+    (haveCategory) => {
+      setLoading(true);
+
+      let haveCategoryQuery;
+
+      if (haveCategory === 'withCategory') {
+        haveCategoryQuery = 'true';
+      } else if (haveCategory === 'withoutCategory') {
+        haveCategoryQuery = 'false';
+      } else {
+        haveCategoryQuery = '';
+      }
+
+      axiosPrivate(authTokens, setAuthTokens, setUser)
+        .get(`/dishes?haveCategory=${haveCategoryQuery}`)
+        .then((response) => {
+          setDishes(response.data.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          if (err.response.status === 404) {
+            setLoading(false);
+          } else {
+            navigate('/admin/login');
+          }
+        });
+    },
+    [authTokens, setAuthTokens, setUser, navigate],
+  );
+
+  const getDishesByCategory = useCallback(
+    (categoryId) => {
+      setLoading(true);
+      axiosPrivate(authTokens, setAuthTokens, setUser)
+        .get(`/categories/${categoryId}/dishes`)
+        .then((response) => {
+          setDishes(response.data.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          if (err.response.status === 404) {
+            setDishes([]);
+            setLoading(false);
+          } else {
+            navigate('/admin/login');
+          }
+        });
+    },
+    [authTokens, setAuthTokens, setUser, navigate],
+  );
+
+  const deleteDish = (id) => {
     setLoading(true);
+    setModalLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .delete(`/dishes/${id}`)
       .then(() => {
-        getDishes();
+        setModalLoading(false);
+        filterDishes(categoryFilter);
+        notifications.show({
+          title: 'Plato eliminado',
+          message: 'El plato se eliminó correctamente',
+          color: 'teal',
+        });
       })
       .catch(() => {
-        navigate('/admin/login');
+        setModalLoading(false);
+        closeDelete();
+        notifications.show({
+          title: 'Error',
+          message: 'Ocurrió un error al eliminar el plato',
+          color: 'red',
+        });
       });
   };
 
-  const createDishes = (description) => {
+  const createDish = (values) => {
+    setModalLoading(true);
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('price', values.price);
+    formData.append('image', values.image);
+    formData.append('categoryId', values.categoryId);
+
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .post('/dishes', { description: description })
+      .post('/dishes', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       .then(() => {
-        setCreateDescription('');
-        getDishes();
+        setDishData(null);
+        filterDishes(categoryFilter);
+        closeCreate();
+        setModalLoading(false);
+        dishCreateForm.reset();
+        notifications.show({
+          title: 'Plato creado',
+          message: 'El plato se creó correctamente',
+          color: 'teal',
+        });
       })
       .catch(() => {
-        navigate('/admin/login');
+        setDishData(null);
+        closeCreate();
+        setModalLoading(false);
+        notifications.show({
+          title: 'Error',
+          message: 'Ocurrió un error al crear el plato',
+          color: 'red',
+        });
       });
+  };
+  const editDish = (values) => {
+    setModalLoading(true);
+    const formData = new FormData();
+
+    if (values.name) {
+      formData.append('name', values.name);
+    }
+
+    if (values.price) {
+      formData.append('price', values.price);
+    }
+
+    if (values.categoryId) {
+      formData.append('categoryId', values.categoryId);
+    }
+
+    if (values.image) {
+      formData.append('image', values.image);
+    }
+
+    if (!values.name && !values.image && !values.price && !values.categoryId) {
+      setDishData(null);
+      closeEdit();
+      setModalLoading(false);
+      dishEditForm.reset();
+      return;
+    }
+
+    axiosPrivate(authTokens, setAuthTokens, setUser)
+      .patch(`/dishes/${dishId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then(() => {
+        setDishData(null);
+        filterDishes(categoryFilter);
+        closeEdit();
+        setModalLoading(false);
+        dishEditForm.reset();
+        notifications.show({
+          title: 'Plato editado',
+          message: 'El plato se editó correctamente',
+          color: 'teal',
+        });
+      })
+      .catch(() => {
+        setDishData(null);
+        closeEdit();
+        setModalLoading(false);
+        notifications.show({
+          title: 'Error',
+          message: 'Ocurrió un error al editar el plato',
+          color: 'red',
+        });
+      });
+  };
+
+  const filterDishes = (categoryId) => {
+    if (categoryId === '') {
+      getDishes();
+    } else if (categoryId === 'withCategory') {
+      getDishes('withCategory');
+    } else if (categoryId === 'withoutCategory') {
+      getDishes('withoutCategory');
+    } else {
+      getDishesByCategory(categoryId);
+    }
   };
 
   useEffect(() => {
-    getDishes();
-  }, [getDishes]);
+    filterDishes(categoryFilter);
+    getCategories();
+  }, []);
 
   return (
     <>
-      <Modal
-        opened={openedDescription}
-        onClose={() => {
-          setImgUrl(null);
-          closeDescription();
-        }}
-        title="Cambiar descripción"
-      >
-        <TextInput
-          value={description}
-          onChange={setDescription}
-          placeholder="Nueva descripción"
-          label="Nueva descripción"
-          required
-        />
+      {/* Modals */}
 
-        <Button
-          onClick={() => {
-            axiosPrivate(authTokens, setAuthTokens, setUser)
-              .patch(`/tables/${imgUrl}`, { description })
-              .then(() => {
-                setImgUrl(null);
-                getDishes();
-                closeDescription();
-              })
-              .catch(() => {
-                navigate('/admin/login');
-              });
-          }}
-          color="orange"
-          fullWidth
-          mt={20}
-        >
-          Confirmar
-        </Button>
+      {/* Create Modal */}
+
+      <Modal
+        opened={openedCreate}
+        onClose={() => {
+          setDishData(null);
+          closeCreate();
+        }}
+        title="Crear plato"
+      >
+        <form onSubmit={dishCreateForm.onSubmit((values) => createDish(values))}>
+          <TextInput placeholder="Nombre" label="Nombre" required {...dishCreateForm.getInputProps('name')} />
+          <NumberInput
+            mt={15}
+            placeholder="Precio"
+            label="Precio"
+            min={0.01}
+            precision={2}
+            required
+            {...dishCreateForm.getInputProps('price')}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+            formatter={(value) =>
+              !Number.isNaN(parseFloat(value)) ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : '$ '
+            }
+          />
+          <Select
+            mt={15}
+            label="Categoría"
+            placeholder="Categoría"
+            required
+            data={[
+              { value: '', label: 'Sin categoría' },
+              ...categories.map((category) => ({ value: category.id, label: category.name })),
+            ]}
+            {...dishCreateForm.getInputProps('categoryId')}
+          />
+          <FileInput
+            mt={15}
+            placeholder="Imagen"
+            label="Imagen"
+            required
+            accept="image/*"
+            {...dishCreateForm.getInputProps('image')}
+          />
+          <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
+            Confirmar
+          </Button>
+        </form>
       </Modal>
+
+      {/* Edit Modal */}
+
+      <Modal
+        opened={openedEdit}
+        onClose={() => {
+          setDishId(null);
+          closeEdit();
+        }}
+        title="Editar plato"
+      >
+        <form onSubmit={dishEditForm.onSubmit((values) => editDish(values))}>
+          <TextInput
+            placeholder="Nombre"
+            label="Nuevo nombre"
+            description="Si no ingresa un nombre, se mantendrá el actual"
+            {...dishEditForm.getInputProps('name')}
+          />
+          <NumberInput
+            mt={15}
+            placeholder="Precio"
+            label="Nuevo precio"
+            description="Si no ingresa un precio, se mantendrá el actual"
+            precision={2}
+            min={0.01}
+            {...dishEditForm.getInputProps('price')}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+            formatter={(value) =>
+              !Number.isNaN(parseFloat(value)) ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : '$ '
+            }
+          />
+          <Select
+            mt={15}
+            label="Nueva categoría"
+            placeholder="Nueva categoría"
+            description="Si no selecciona una categoría, se mantendrá la actual"
+            data={[
+              { value: 'null', label: 'Sin categoría' },
+              ...categories.map((category) => ({ value: category.id, label: category.name })),
+            ]}
+            {...dishEditForm.getInputProps('categoryId')}
+          />
+          <FileInput
+            mt={15}
+            label="Nueva imagen"
+            placeholder="Selecciona imagen"
+            description="Si no selecciona una imagen, se mantendrá la actual"
+            accept="image/*"
+            {...dishEditForm.getInputProps('image')}
+          />
+
+          <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
+            Confirmar
+          </Button>
+        </form>
+      </Modal>
+
+      {/* Delete Modal */}
+
+      <Modal
+        opened={openedDelete}
+        onClose={() => {
+          setDishId(null);
+          closeDelete();
+        }}
+        title="Eliminar categoría"
+      >
+        <Text>¿Está seguro que desea eliminar la categoría?</Text>
+        <Flex mt={20} justify="end" gap="xs">
+          <Button
+            onClick={() => {
+              setDishId(null);
+              closeDelete();
+            }}
+            color="orange"
+            variant="outline"
+            loading={modalLoading}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => {
+              deleteDish(dishId);
+              setDishId(null);
+              closeDelete();
+            }}
+            color="red"
+            loading={modalLoading}
+          >
+            Eliminar
+          </Button>
+        </Flex>
+      </Modal>
+
+      {/* Image Modal */}
+
       <Modal
         opened={openedImg}
         onClose={() => {
-          setImgUrl(null);
+          setDishId(null);
           closeImg();
         }}
-        title="Imagen "
+        title="Imagen"
       >
-        <Center>{imgUrl && <Image src={imgUrl} alt='Imagen Comida'/>}</Center>
+        <Image src={dishData?.image} alt="Imagen Plato" />
       </Modal>
+
+      {/* Main Page */}
+
       <Layout navbar="admin" navbarActive="admin-dishes" header>
         <Title order={1}>Platos</Title>
         <Text mt={20} mb={10}>
-          Lista de platos
+          Lista de Platos
         </Text>
+        <Select
+          label="Filtrar por categoría"
+          placeholder="Filtrar por categoría"
+          value={categoryFilter}
+          data={[
+            { value: '', label: 'Todos' },
+            { value: 'withCategory', label: 'Con categoría' },
+            ...categories.map((category) => ({ value: category.id, label: category.name })),
+            { value: 'withoutCategory', label: 'Sin categoría' },
+          ]}
+          onChange={(value) => {
+            setCategoryFilter(value);
+            filterDishes(value);
+          }}
+        />
+
         {loading ? (
           <>
-            <Skeleton height={50} radius="sm" />
+            <Skeleton height={50} mt={15} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
@@ -151,77 +473,80 @@ function AdminDishes() {
           </>
         ) : (
           <>
-            <Table striped>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Descripción</th>
-                  <th>Precio</th>
-                  <th>Categoría</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dishes.map((dish) => (
-                  <tr key={dish.id}>
-                    <td>{dish.id}</td>
-                    <td>{dish.name}</td>
-                    <td>{dish.price}</td>
-                    <td>{dish.category}</td>
-                    <td>
-                      <Flex align="center" gap="xs">
-                        <ActionIcon
-                          variant="transparent"
-                          color="orange"
-                          onClick={() => {
-                            setImgUrl(dish.imageUrl);
-                            openDescription();
-                          }}
-                        >
-                          <IconPencil />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="transparent"
-                          color="orange"
-                          onClick={() => {
-                            deleteDishes(dish.id);
-                          }}
-                        >
-                          <IconTrash />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="transparent"
-                          color="orange"
-                          onClick={() => {
-                            setImgUrl(dish.imageUrl);
-                            openImg();
-                          }}
-                        >
-                          <IconPhoto />
-                        </ActionIcon>
-                      </Flex>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <Flex align="flex-end" mt={20} gap="xs">
-              <TextInput
-                value={createDescription}
-                onChange={setCreateDescription}
-                placeholder="Crear nueva mesa"
-                label="Crear nueva mesa"
-                required
-              />
+            <Flex align="center" justify="start" mb={15} mt={20}>
               <Button
                 onClick={() => {
-                  createDishes(createDescription);
+                  openCreate();
                 }}
                 color="orange"
+                leftIcon={'+'}
+                variant="outline"
               >
-                Confirmar
+                Crear plato
               </Button>
             </Flex>
+            <Divider />
+            {dishes.length <= 0 ? (
+              <Text mt={20}>No hay platos</Text>
+            ) : (
+              <Table striped>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Categoría</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dishes.map((dish) => (
+                    <tr key={dish.id}>
+                      <td>{dish.id}</td>
+                      <td>{dish.name}</td>
+                      <td>$ {dish.price}</td>
+                      <td>{dish.categoryName ? dish.categoryName : 'Sin categoría'}</td>
+                      <td>
+                        <Flex align="center" gap="xs">
+                          <ActionIcon
+                            variant="transparent"
+                            color="orange"
+                            onClick={() => {
+                              setDishId(dish.id);
+                              setDishData({ name: dish.name, price: dish.price });
+                              openEdit();
+                            }}
+                          >
+                            <IconPencil />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="transparent"
+                            color="orange"
+                            onClick={() => {
+                              setDishId(dish.id);
+                              openDelete();
+                            }}
+                          >
+                            <IconTrash />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="transparent"
+                            color="orange"
+                            onClick={() => {
+                              setDishId(dish.id);
+                              setDishData((prev) => ({ ...prev, image: dish.imageUrl }));
+                              openImg();
+                            }}
+                          >
+                            <IconPhoto />
+                          </ActionIcon>
+                        </Flex>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
           </>
         )}
       </Layout>

@@ -41,7 +41,7 @@ function AdminCategories() {
   // delete modal
   const [openedDelete, { open: openDelete, close: closeDelete }] = useDisclosure(false);
 
-  const [categoriesId, setCategoriesId] = useState(null);
+  const [categoryId, setCategoryId] = useState(null);
   const [categoryData, setCategoryData] = useInputState(null);
 
   const categoryCreateForm = useForm({
@@ -161,7 +161,7 @@ function AdminCategories() {
     }
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .patch(`/categories/${categoriesId}`, formData, {
+      .patch(`/categories/${categoryId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -203,7 +203,7 @@ function AdminCategories() {
       <Modal
         opened={openedCreate}
         onClose={() => {
-          setCategoriesId(null);
+          setCategoryId(null);
           closeCreate();
         }}
         title="Crear categoría"
@@ -215,6 +215,7 @@ function AdminCategories() {
             placeholder="Imagen"
             label="Imagen"
             required
+            accept="image/*"
             {...categoryCreateForm.getInputProps('image')}
           />
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
@@ -228,10 +229,10 @@ function AdminCategories() {
       <Modal
         opened={openedEdit}
         onClose={() => {
-          setCategoriesId(null);
+          setCategoryId(null);
           closeEdit();
         }}
-        title="Cambiar descripción"
+        title="Editar categoría"
       >
         <form onSubmit={categoryEditForm.onSubmit((values) => editCategories(values))}>
           <TextInput
@@ -245,6 +246,7 @@ function AdminCategories() {
             label="Nueva imagen"
             placeholder="Selecciona imagen"
             description="Si no selecciona una imagen, se mantendrá la actual"
+            accept="image/*"
             {...categoryEditForm.getInputProps('image')}
           />
 
@@ -259,7 +261,7 @@ function AdminCategories() {
       <Modal
         opened={openedDelete}
         onClose={() => {
-          setCategoriesId(null);
+          setCategoryId(null);
           closeDelete();
         }}
         title="Eliminar categoría"
@@ -268,7 +270,7 @@ function AdminCategories() {
         <Flex mt={20} justify="end" gap="xs">
           <Button
             onClick={() => {
-              setCategoriesId(null);
+              setCategoryId(null);
               closeDelete();
             }}
             color="orange"
@@ -279,8 +281,8 @@ function AdminCategories() {
           </Button>
           <Button
             onClick={() => {
-              deleteCategories(categoriesId);
-              setCategoriesId(null);
+              deleteCategories(categoryId);
+              setCategoryId(null);
               closeDelete();
             }}
             color="red"
@@ -296,7 +298,7 @@ function AdminCategories() {
       <Modal
         opened={openedImg}
         onClose={() => {
-          setCategoriesId(null);
+          setCategoryId(null);
           closeImg();
         }}
         title="Imagen"
@@ -358,7 +360,7 @@ function AdminCategories() {
                             variant="transparent"
                             color="orange"
                             onClick={() => {
-                              setCategoriesId(category.id);
+                              setCategoryId(category.id);
                               setCategoryData({ name: category.name });
                               openEdit();
                             }}
@@ -369,7 +371,7 @@ function AdminCategories() {
                             variant="transparent"
                             color="orange"
                             onClick={() => {
-                              setCategoriesId(category.id);
+                              setCategoryId(category.id);
                               openDelete();
                             }}
                           >
@@ -379,7 +381,7 @@ function AdminCategories() {
                             variant="transparent"
                             color="orange"
                             onClick={() => {
-                              setCategoriesId(category.id);
+                              setCategoryId(category.id);
                               setCategoryData((prev) => ({ ...prev, image: category.imageUrl }));
                               openImg();
                             }}

@@ -23,9 +23,6 @@ import {
   Text,
 } from '@mantine/core';
 
-const EXAMPLE_IMAGE_URL =
-  'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80';
-
 const animationDishPage = [
   [
     { transform: 'translateY(100%)' },
@@ -101,7 +98,7 @@ function Home() {
                   }}
                 >
                   <BackgroundImage
-                    src={EXAMPLE_IMAGE_URL}
+                    src={category.imageUrl}
                     sx={{
                       height: '200px',
                       position: 'relative',
