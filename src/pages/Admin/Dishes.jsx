@@ -504,7 +504,7 @@ function AdminDishes() {
                     <tr key={dish.id}>
                       <td>{dish.id}</td>
                       <td>{dish.name}</td>
-                      <td>$ {dish.price}</td>
+                      <td>$ {Number(dish.price).toFixed(2)}</td>
                       <td>{dish.categoryName ? dish.categoryName : 'Sin categoría'}</td>
                       <td>
                         <Flex align="center" gap="xs">
