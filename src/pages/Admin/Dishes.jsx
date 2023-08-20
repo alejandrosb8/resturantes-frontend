@@ -398,7 +398,7 @@ function AdminDishes() {
           setDishId(null);
           closeDelete();
         }}
-        title="Eliminar categoría"
+        title="Eliminar plato"
       >
         <Text>¿Está seguro que desea eliminar la categoría?</Text>
         <Flex mt={20} justify="end" gap="xs">
@@ -445,7 +445,7 @@ function AdminDishes() {
       <Layout navbar="admin" navbarActive="admin-dishes" header>
         <Title order={1}>Platos</Title>
         <Text mt={20} mb={10}>
-          Lista de Platos
+          Lista de platos
         </Text>
         <Select
           label="Filtrar por categoría"

@@ -1,12 +1,26 @@
 import Layout from '../../layouts/Default';
-import { Title, Text, Table, Button, Skeleton, ActionIcon, Flex, Modal, TextInput, Center } from '@mantine/core';
+import {
+  Title,
+  Text,
+  Table,
+  Button,
+  Skeleton,
+  ActionIcon,
+  Flex,
+  Modal,
+  TextInput,
+  Center,
+  Divider,
+} from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { IconPencil, IconTrash, IconQrcode } from '@tabler/icons-react';
-import { useDisclosure, useInputState } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { QRCode } from 'react-qrcode-logo';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 
 const ENVIRONMENT = import.meta.env.VITE_ENV;
 
@@ -16,34 +30,55 @@ const DOMAIN =
 function AdminTables() {
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false);
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
 
-  // description modal
-  const [description, setDescription] = useInputState('');
-  const [openedDescription, { open: openDescription, close: closeDescription }] = useDisclosure(false);
+  // edit modal
+  const [openedEdit, { open: openEdit, close: closeEdit }] = useDisclosure(false);
 
   // qr modal
   const [openedQr, { open: openQr, close: closeQr }] = useDisclosure(false);
 
+  // create modal
+  const [openedCreate, { open: openCreate, close: closeCreate }] = useDisclosure(false);
+
+  // delete modal
+  const [openedDelete, { open: openDelete, close: closeDelete }] = useDisclosure(false);
+
   const [tableId, setTableId] = useState(null);
 
-  const [createDescription, setCreateDescription] = useInputState('');
+  const tableCreateForm = useForm({
+    initialValues: {
+      description: '',
+    },
 
-  const [errorCreateTable, setErrorCreateTable] = useState('');
-  const [errorDescription, setErrorDescription] = useState('');
+    validate: {
+      description: (value) => {
+        if (!value) {
+          return 'La descripción es requerida';
+        }
+      },
+    },
+  });
+
+  const tableEditForm = useForm({
+    initialValues: {
+      description: '',
+    },
+  });
 
   const getTables = useCallback(() => {
     setLoading(true);
+
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .get('/tables')
+      .get(`/tables`)
       .then((response) => {
         setTables(response.data.data);
         setLoading(false);
       })
-      .catch((error) => {
-        if (error.response.data.message === 'TABLES_NOT_FOUND') {
-          setTables([]);
+      .catch((err) => {
+        if (err.response.status === 404) {
           setLoading(false);
         } else {
           navigate('/admin/login');
@@ -53,106 +88,199 @@ function AdminTables() {
 
   const deleteTable = (id) => {
     setLoading(true);
+    setModalLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .delete(`/tables/${id}`)
       .then(() => {
+        setModalLoading(false);
         getTables();
+        notifications.show({
+          title: 'Mesa eliminada',
+          message: 'La mesa se eliminó correctamente',
+          color: 'teal',
+        });
       })
       .catch(() => {
-        navigate('/admin/login');
+        setModalLoading(false);
+        closeDelete();
+        notifications.show({
+          title: 'Error',
+          message: 'Ocurrió un error al eliminar la mesa',
+          color: 'red',
+        });
       });
   };
 
-  const createTable = (description) => {
+  const createTable = (values) => {
+    setModalLoading(true);
+
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .post('/tables', { description: description })
+      .post('/tables', { description: values.description })
       .then(() => {
-        setCreateDescription('');
         getTables();
+        closeCreate();
+        setModalLoading(false);
+        tableCreateForm.reset();
+        notifications.show({
+          title: 'Mesa creada',
+          message: 'La mesa se creó correctamente',
+          color: 'teal',
+        });
       })
-      .catch((error) => {
-        if (error.response.data.message === 'INVALID_DATA') {
-          setErrorCreateTable('No se pudo crear la mesa');
-        } else {
-          navigate('/admin/login');
-        }
+      .catch(() => {
+        closeCreate();
+        setModalLoading(false);
+        notifications.show({
+          title: 'Error',
+          message: 'Ocurrió un error al crear la mesa',
+          color: 'red',
+        });
+      });
+  };
+  const editTable = (values) => {
+    setModalLoading(true);
+
+    if (!values.description) {
+      closeEdit();
+      setModalLoading(false);
+      tableEditForm.reset();
+      return;
+    }
+
+    axiosPrivate(authTokens, setAuthTokens, setUser)
+      .patch(`/tables/${tableId}`, { description: values.description })
+      .then(() => {
+        getTables();
+        closeEdit();
+        setModalLoading(false);
+        tableEditForm.reset();
+        notifications.show({
+          title: 'Mesa editada',
+          message: 'La mesa se editó correctamente',
+          color: 'teal',
+        });
+      })
+      .catch(() => {
+        closeEdit();
+        setModalLoading(false);
+        notifications.show({
+          title: 'Error',
+          message: 'Ocurrió un error al editar la mesa',
+          color: 'red',
+        });
       });
   };
 
   useEffect(() => {
     getTables();
-  }, [getTables]);
+  }, []);
 
   return (
     <>
-      {/* Editar mesa */}
+      {/* Modals */}
+
+      {/* Create Modal */}
+
       <Modal
-        styles={{ zIndex: 20000 }}
-        opened={openedDescription}
+        opened={openedCreate}
         onClose={() => {
-          setTableId(null);
-          closeDescription();
+          closeCreate();
         }}
-        title="Cambiar descripción"
+        title="Crear mesa"
       >
-        <TextInput
-          value={description}
-          onChange={setDescription}
-          placeholder="Nueva descripción"
-          label="Nueva descripción"
-          required
-        />
-
-        {errorDescription && (
-          <Text mt={10} color="red">
-            {errorDescription}
-          </Text>
-        )}
-
-        <Button
-          onClick={() => {
-            axiosPrivate(authTokens, setAuthTokens, setUser)
-              .patch(`/tables/${tableId}`, { description })
-              .then(() => {
-                setTableId(null);
-                getTables();
-                closeDescription();
-              })
-              .catch((error) => {
-                if (error.response.data.message === 'INVALID_DATA') {
-                  setErrorDescription('No se pudo actualizar la mesa');
-                } else {
-                  navigate('/admin/login');
-                }
-              });
-          }}
-          color="orange"
-          fullWidth
-          mt={20}
-        >
-          Confirmar
-        </Button>
+        <form onSubmit={tableCreateForm.onSubmit((values) => createTable(values))}>
+          <TextInput placeholder="Nombre" label="Nombre" required {...tableCreateForm.getInputProps('description')} />
+          <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
+            Confirmar
+          </Button>
+        </form>
       </Modal>
 
-      {/* ver QR */}
+      {/* Edit Modal */}
+
+      <Modal
+        opened={openedEdit}
+        onClose={() => {
+          setTableId(null);
+          closeEdit();
+        }}
+        title="Editar mesa"
+      >
+        <form onSubmit={tableEditForm.onSubmit((values) => editTable(values))}>
+          <TextInput
+            placeholder="Nombre"
+            label="Nuevo nombre"
+            description="Si no ingresa un nombre, se mantendrá el actual"
+            {...tableEditForm.getInputProps('description')}
+          />
+
+          <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
+            Confirmar
+          </Button>
+        </form>
+      </Modal>
+
+      {/* Delete Modal */}
+
+      <Modal
+        opened={openedDelete}
+        onClose={() => {
+          setTableId(null);
+          closeDelete();
+        }}
+        title="Eliminar mesa"
+      >
+        <Text>¿Está seguro que desea eliminar la categoría?</Text>
+        <Flex mt={20} justify="end" gap="xs">
+          <Button
+            onClick={() => {
+              setTableId(null);
+              closeDelete();
+            }}
+            color="orange"
+            variant="outline"
+            loading={modalLoading}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => {
+              deleteTable(tableId);
+              setTableId(null);
+              closeDelete();
+            }}
+            color="red"
+            loading={modalLoading}
+          >
+            Eliminar
+          </Button>
+        </Flex>
+      </Modal>
+
+      {/* Qr Modal */}
+
       <Modal
         opened={openedQr}
         onClose={() => {
           setTableId(null);
           closeQr();
         }}
-        title="Código QR"
+        title="Imagen"
       >
         <Center>{tableId && <QRCode value={`${DOMAIN}/login/${tableId}`} size={256} />}</Center>
       </Modal>
+
+      {/* Main Page */}
+
       <Layout navbar="admin" navbarActive="admin-tables" header>
         <Title order={1}>Mesas</Title>
         <Text mt={20} mb={10}>
           Lista de mesas
         </Text>
+
         {loading ? (
           <>
-            <Skeleton height={50} radius="sm" />
+            <Skeleton height={50} mt={15} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
@@ -160,82 +288,73 @@ function AdminTables() {
           </>
         ) : (
           <>
-            <Table striped>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Descripción</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              {tables.length === 0 && (
-                <Text mt={20} mb={10} size="xl">
-                  No hay mesas
-                </Text>
-              )}
-              <tbody>
-                {tables.map((table) => (
-                  <tr key={table.id}>
-                    <td>{table.id}</td>
-                    <td>{table.description}</td>
-                    <td>
-                      <Flex align="center" gap="xs">
-                        <ActionIcon
-                          variant="transparent"
-                          color="orange"
-                          onClick={() => {
-                            setTableId(table.id);
-                            openDescription();
-                          }}
-                        >
-                          <IconPencil />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="transparent"
-                          color="orange"
-                          onClick={() => {
-                            deleteTable(table.id);
-                          }}
-                        >
-                          <IconTrash />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="transparent"
-                          color="orange"
-                          onClick={() => {
-                            setTableId(table.id);
-                            openQr();
-                          }}
-                        >
-                          <IconQrcode />
-                        </ActionIcon>
-                      </Flex>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <Flex align="flex-end" mt={20} gap="xs">
-              <TextInput
-                value={createDescription}
-                onChange={setCreateDescription}
-                placeholder="Crear nueva mesa"
-                label="Crear nueva mesa"
-                required
-              />
+            <Flex align="center" justify="start" mb={15} mt={20}>
               <Button
                 onClick={() => {
-                  createTable(createDescription);
+                  openCreate();
                 }}
                 color="orange"
+                leftIcon={'+'}
+                variant="outline"
               >
-                Confirmar
+                Crear mesa
               </Button>
             </Flex>
-            {errorCreateTable && (
-              <Text mt={20} color="red">
-                {errorCreateTable}
-              </Text>
+            <Divider />
+            {tables.length <= 0 ? (
+              <Text mt={20}>No hay mesas</Text>
+            ) : (
+              <Table striped>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tables.map((table) => (
+                    <tr key={table.id}>
+                      <td>{table.id}</td>
+                      <td>{table.description}</td>
+                      <td>
+                        <Flex align="center" gap="xs">
+                          <ActionIcon
+                            variant="transparent"
+                            color="orange"
+                            onClick={() => {
+                              setTableId(table.id);
+                              openEdit();
+                            }}
+                          >
+                            <IconPencil />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="transparent"
+                            color="orange"
+                            onClick={() => {
+                              setTableId(table.id);
+                              openDelete();
+                            }}
+                          >
+                            <IconTrash />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="transparent"
+                            color="orange"
+                            onClick={() => {
+                              setTableId(table.id);
+                              openQr();
+                            }}
+                          >
+                            <IconQrcode />
+                          </ActionIcon>
+                        </Flex>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             )}
           </>
         )}
