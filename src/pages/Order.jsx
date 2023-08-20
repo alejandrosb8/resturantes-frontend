@@ -106,8 +106,6 @@ function OrderPage() {
                 })),
               };
 
-              console.log(dataToSend);
-
               axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
                 .post('/orders', {
                   ...dataToSend,

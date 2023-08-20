@@ -1,13 +1,13 @@
 import useAuth from '../hooks/useAuth.js';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useShopping } from '../contexts/ShoppingContext.jsx';
 import useUserTable from '../hooks/useTable.js';
 import { axiosPrivate } from '../utils/axios.js';
 import LoadingView from '../components/LoadingView.jsx';
+import SideFixesButtons from '../components/SideFixesButtons.jsx';
 import {
   ActionIcon,
-  Affix,
   Button,
   Card,
   Container,
@@ -18,13 +18,12 @@ import {
   rem,
   Text,
   Title,
-  Transition,
   Image,
   Textarea,
 } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
 import Layout from '../layouts/Default.jsx';
-import { IconShoppingCart, IconTrash, IconArrowLeft, IconCreditCard } from '@tabler/icons-react';
+import { IconArrowLeft } from '@tabler/icons-react';
 import { AnimatedLink } from '../components/AnimatedLink.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -40,7 +39,7 @@ export const DishesPage = () => {
   const [category, setCategory] = useState(null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { shoppingCart, addToCart, removeFromCart, removeAllFromCart } = useShopping();
+  const { shoppingCart, addToCart, removeFromCart } = useShopping();
   const [dishId, setDishId] = useState(null);
   const [dishQuantity, setDishQuantity] = useInputState(() => {
     const quantity = shoppingCart.filter((dish) => dish.id === dishId).map((dish) => dish.quantity);
@@ -391,49 +390,7 @@ export const DishesPage = () => {
           </Container>
         </AnimatePresence>
       </Layout>
-      <Affix position={{ bottom: rem(20), right: rem(20) }}>
-        <Transition transition="slide-up" mounted={shoppingCart.length > 0}>
-          {(transitionStyles) => (
-            <Flex justify="space-evenly" align="center" gap={10} direction="column" mb={10}>
-              <Button
-                color="red"
-                leftIcon={<IconTrash />}
-                style={transitionStyles}
-                variant="light"
-                onClick={removeAllFromCart}
-                fullWidth
-              >
-                Vaciar pedido
-              </Button>
-
-              <Button
-                component={Link}
-                to={`/order/${table}`}
-                color="green.8"
-                leftIcon={<IconShoppingCart />}
-                style={transitionStyles}
-                fullWidth
-              >
-                Realizar pedido
-              </Button>
-            </Flex>
-          )}
-        </Transition>
-        <Transition transition="slide-up" mounted={true} mt={10}>
-          {(transitionStyles) => (
-            <Button
-              component={Link}
-              to={`/payment/${table}`}
-              color="blue"
-              leftIcon={<IconCreditCard />}
-              style={transitionStyles}
-              fullWidth
-            >
-              Pagar
-            </Button>
-          )}
-        </Transition>
-      </Affix>
+      <SideFixesButtons />
     </>
   );
 };

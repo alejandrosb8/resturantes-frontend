@@ -21,6 +21,7 @@ import { DevSupport } from '@react-buddy/ide-toolbox';
 import { ComponentPreviews, useInitial } from './dev/index.js';
 import Orders from './pages/Orders';
 import Payment from './pages/Payment';
+import AdminBanks from './pages/Admin/Banks';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -142,6 +143,14 @@ export default function App() {
                 element={
                   <PrivateRouteAdmin>
                     <AdminCategories />
+                  </PrivateRouteAdmin>
+                }
+              />
+              <Route
+                path="/admin/banks"
+                element={
+                  <PrivateRouteAdmin>
+                    <AdminBanks />
                   </PrivateRouteAdmin>
                 }
               />

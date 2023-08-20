@@ -1,27 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { axiosPrivate } from '../utils/axios';
 import Layout from '../layouts/Default';
 import LoadingView from '../components/LoadingView';
-import { useShopping } from '../contexts/ShoppingContext';
-import { IconShoppingCart, IconTrash, IconCreditCard } from '@tabler/icons-react';
 import useUserTable from '../hooks/useTable';
 import { AnimatedLink } from '../components/AnimatedLink.jsx';
-import {
-  Box,
-  Title,
-  Button,
-  Grid,
-  Divider,
-  Flex,
-  rem,
-  Container,
-  Affix,
-  Transition,
-  BackgroundImage,
-  Text,
-} from '@mantine/core';
+import SideFixesButtons from '../components/SideFixesButtons';
+import { Box, Title, Grid, Divider, Container, BackgroundImage, Text } from '@mantine/core';
 
 const animationDishPage = [
   [
@@ -48,8 +34,6 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
 
-  const { shoppingCart, removeAllFromCart } = useShopping();
-
   const { table } = useUserTable();
 
   useEffect(() => {
@@ -59,7 +43,6 @@ function Home() {
       .then((response) => {
         setCategories(response.data.data);
         setLoading(false);
-        console.log(response.data.data);
       })
       .catch((error) => {
         if (error.response.status === 404) {
@@ -139,49 +122,7 @@ function Home() {
           </Grid>
         </Container>
       </Layout>
-      <Affix position={{ bottom: rem(20), right: rem(20) }}>
-        <Transition transition="slide-up" mounted={shoppingCart.length > 0}>
-          {(transitionStyles) => (
-            <Flex justify="space-evenly" align="center" gap={10} direction="column" mb={10}>
-              <Button
-                color="red"
-                leftIcon={<IconTrash />}
-                style={transitionStyles}
-                variant="light"
-                onClick={removeAllFromCart}
-                fullWidth
-              >
-                Vaciar pedido
-              </Button>
-
-              <Button
-                component={Link}
-                to={`/order/${table}`}
-                color="green.8"
-                leftIcon={<IconShoppingCart />}
-                style={transitionStyles}
-                fullWidth
-              >
-                Realizar pedido
-              </Button>
-            </Flex>
-          )}
-        </Transition>
-        <Transition transition="slide-up" mounted={true} mt={10}>
-          {(transitionStyles) => (
-            <Button
-              component={Link}
-              to={`/payment/${table}`}
-              color="blue"
-              leftIcon={<IconCreditCard />}
-              style={transitionStyles}
-              fullWidth
-            >
-              Pagar
-            </Button>
-          )}
-        </Transition>
-      </Affix>
+      <SideFixesButtons />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { Table, Title } from '@mantine/core';
+import { Table, Title, Badge } from '@mantine/core';
 import useUserTable from '../hooks/useTable';
 import { axiosPrivate } from '../utils/axios';
 import { useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import Layout from '../layouts/Default';
 import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import LoadingView from '../components/LoadingView';
+import SideFixesButtons from '../components/SideFixesButtons';
 
 function Orders() {
   const { table } = useUserTable();
@@ -48,25 +49,30 @@ function Orders() {
   }
 
   return (
-    <Layout navbarActive="orders" navbar="user" header>
-      <Title>Ordenes</Title>
-      <Table mt={20}>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders?.map((order) => (
-            <tr key={order.id}>
-              <td>{formatDate(order.createdAt)}</td>
-              <td>$ {Number(order.total).toFixed(2)}</td>
+    <>
+      <Layout navbarActive="orders" navbar="user" header>
+        <Title>Ordenes</Title>
+        <Table mt={20}>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Estado</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
-    </Layout>
+          </thead>
+          <tbody>
+            {orders?.map((order) => (
+              <tr key={order.id}>
+                <td>{formatDate(order.createdAt)}</td>
+                <td>$ {Number(order.total).toFixed(2)}</td>
+                <td>{order.debt <= 0 ? <Badge color="green">Pagado</Badge> : <Badge color="red">Pendiente</Badge>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Layout>
+      <SideFixesButtons />
+    </>
   );
 }
 

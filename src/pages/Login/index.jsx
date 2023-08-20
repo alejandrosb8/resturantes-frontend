@@ -62,6 +62,8 @@ function Login() {
     const responseRaw = await login(email, password);
     const response = responseRaw.response;
 
+    console.log(responseRaw);
+
     if (responseRaw.status === 200) {
       navigate(`/${table}`);
     } else if (response.data.message === 'EMAIL_NOT_FOUND') {

@@ -17,10 +17,10 @@ const linksData = [
     idNumber: 1,
   },
   {
-    label:'Categoría',
-    to:'/admin/categories',
-    id:'admin-categories',
-    idNumber:2,
+    label: 'Categoría',
+    to: '/admin/categories',
+    id: 'admin-categories',
+    idNumber: 2,
   },
 
   {
@@ -30,10 +30,16 @@ const linksData = [
     idNumber: 3,
   },
   {
+    label: 'Bancos',
+    to: '/admin/banks',
+    id: 'admin-banks',
+    idNumber: 4,
+  },
+  {
     label: 'Configuración',
     to: '/admin/settings',
     id: 'admin-settings',
-    idNumber: 4,
+    idNumber: 5,
   },
 ];
 
