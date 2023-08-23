@@ -3,45 +3,48 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 
-const linksData = [
+const linksDataRaw = [
   {
     label: 'Inicio',
     to: '/admin',
     id: 'admin-home',
-    idNumber: 0,
+  },
+  {
+    label: 'Verificar pagos',
+    to: '/admin/verify-payments',
+    id: 'admin-verify-payments',
   },
   {
     label: 'Mesas',
     to: '/admin/tables',
     id: 'admin-tables',
-    idNumber: 1,
   },
   {
     label: 'Categoría',
     to: '/admin/categories',
     id: 'admin-categories',
-    idNumber: 2,
   },
-
   {
     label: 'Platos',
     to: '/admin/dishes',
     id: 'admin-dishes',
-    idNumber: 3,
   },
   {
     label: 'Bancos',
     to: '/admin/banks',
     id: 'admin-banks',
-    idNumber: 4,
   },
   {
     label: 'Configuración',
     to: '/admin/settings',
     id: 'admin-settings',
-    idNumber: 5,
   },
 ];
+
+const linksData = linksDataRaw.map((link, index) => ({
+  ...link,
+  idNumber: index,
+}));
 
 function AdminNavbar({ opened, currentActive }) {
   const [active, setActive] = useState(

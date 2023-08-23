@@ -22,6 +22,7 @@ import { ComponentPreviews, useInitial } from './dev/index.js';
 import Orders from './pages/Orders';
 import Payment from './pages/Payment';
 import AdminBanks from './pages/Admin/Banks';
+import AdminVerifyPayments from './pages/Admin/VerifyPayments';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -151,6 +152,14 @@ export default function App() {
                 element={
                   <PrivateRouteAdmin>
                     <AdminBanks />
+                  </PrivateRouteAdmin>
+                }
+              />
+              <Route
+                path="/admin/verify-payments"
+                element={
+                  <PrivateRouteAdmin>
+                    <AdminVerifyPayments />
                   </PrivateRouteAdmin>
                 }
               />

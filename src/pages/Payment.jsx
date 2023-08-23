@@ -37,7 +37,7 @@ function Payment() {
 
   const [data, setData] = useState({});
   const [paymentType, setPaymentType] = useState('cash');
-  const [currentOrder, setCurrentOrder] = useState({});
+  const [currentOrder, setCurrentOrder] = useState(null);
   const [banks, setBanks] = useState([]);
 
   const navigate = useNavigate();
@@ -80,7 +80,6 @@ function Payment() {
 
   const form = useForm({
     initialValues: {
-      orderId: '',
       amount: '',
       dni: '',
       bankId: '',
@@ -89,7 +88,6 @@ function Payment() {
     },
 
     validate: {
-      orderId: (value) => (value.trim().length > 0 ? null : 'Ingresa la orden'),
       dni: (value) => (value.trim().match(/^[0-9]+$/) ? null : 'Ingresa un número de DNI válido'),
       amount: (value) => (/\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?/.test(value) ? null : 'Ingresa un monto válido'),
       reference: (value) =>
@@ -114,7 +112,7 @@ function Payment() {
 
     const values = data;
 
-    formData.append('orderId', values.orderId);
+    formData.append('orderId', currentOrder?.id);
     formData.append('type', paymentType);
     formData.append('dni', values.dni);
     formData.append('amount', values.amount);
@@ -124,7 +122,9 @@ function Payment() {
       formData.append('voucher', values.voucherImg);
     }
 
-    console.log(values);
+    formData.append('bankId', values.bankId);
+
+    console.log(formData.values);
 
     axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
       .post(`/payments`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -212,81 +212,89 @@ function Payment() {
                 label="Orden"
                 placeholder="Selecciona la orden a pagar"
                 required
-                {...form.getInputProps('orderId')}
-                value={currentOrder.id}
+                value={currentOrder?.id}
                 onChange={(value) => {
                   setCurrentOrder(orders.find((order) => order.id === value));
                 }}
               />
 
-              {currentOrder?.id && (
-                <Text size="sm" mt={0} mb={20}>
-                  Total a pagar: $ {Number.parseFloat(currentOrder.total).toFixed(2)}
-                </Text>
-              )}
-
-              <Select
-                data={[
-                  { value: 'cash', label: 'Efectivo' },
-                  { value: 'transfer', label: 'Transferencia' },
-                  { value: 'card', label: 'Tarjeta' },
-                ]}
-                label="Tipo de pago"
-                placeholder="Selecciona el tipo de pago"
-                required
-                value={paymentType}
-                onChange={setPaymentType}
-              />
-              <NumberInput
-                label="Monto"
-                placeholder="Ingresa el monto a pagar"
-                required
-                min={0.01}
-                precision={2}
-                {...form.getInputProps('amount')}
-                parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
-                formatter={(value) =>
-                  !Number.isNaN(parseFloat(value)) ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : '$ '
-                }
-              />
-              <TextInput label="DNI" placeholder="Ingresa el número de DNI" required {...form.getInputProps('dni')} />
-              {paymentType === 'transfer' && (
+              {currentOrder && (
                 <>
+                  <Text size="sm" mt={0} mb={20}>
+                    Total a pagar: $ {Number.parseFloat(currentOrder?.total).toFixed(2)}
+                  </Text>
+
                   <Select
-                    data={banks.map((bank) => ({
-                      value: bank.id,
-                      label: bank.name,
-                    }))}
-                    label="Banco"
-                    placeholder="Selecciona el banco"
+                    data={[
+                      { value: 'cash', label: 'Efectivo' },
+                      { value: 'transfer', label: 'Transferencia' },
+                      { value: 'card', label: 'Tarjeta' },
+                    ]}
+                    label="Tipo de pago"
+                    placeholder="Selecciona el tipo de pago"
                     required
-                    {...form.getInputProps('bankId')}
+                    value={paymentType}
+                    onChange={setPaymentType}
                   />
-
+                  <NumberInput
+                    label="Monto"
+                    placeholder="Ingresa el monto a pagar"
+                    required
+                    min={0.01}
+                    precision={2}
+                    {...form.getInputProps('amount')}
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                    formatter={(value) =>
+                      !Number.isNaN(parseFloat(value))
+                        ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
+                        : '$ '
+                    }
+                  />
                   <TextInput
-                    label="Referencia"
-                    placeholder="Ingresa el número referencia"
+                    label="DNI"
+                    placeholder="Ingresa el número de DNI"
                     required
-                    {...form.getInputProps('reference')}
+                    {...form.getInputProps('dni')}
                   />
+                  {paymentType === 'transfer' && (
+                    <>
+                      <Select
+                        data={banks.map((bank) => ({
+                          value: bank.id,
+                          label: bank.name,
+                        }))}
+                        label="Banco"
+                        placeholder="Selecciona el banco"
+                        required
+                        {...form.getInputProps('bankId')}
+                      />
 
-                  <FileInput
-                    placeholder="Ingresa la imagen de la transacción"
-                    label="Imagen de la transacción"
-                    required
-                    accept="image/*"
-                    {...form.getInputProps('voucherImg')}
-                  />
+                      <TextInput
+                        label="Referencia"
+                        placeholder="Ingresa el número referencia"
+                        required
+                        {...form.getInputProps('reference')}
+                      />
+
+                      <FileInput
+                        placeholder="Ingresa la imagen de la transacción"
+                        label="Imagen de la transacción"
+                        required
+                        accept="image/*"
+                        {...form.getInputProps('voucherImg')}
+                      />
+                    </>
+                  )}
+                  <Flex justify="flex-end" gap={10}>
+                    <Button color="red" variant="outline" component={Link} to={`/${table}`}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" color="orange">
+                      Pagar
+                    </Button>
+                  </Flex>
                 </>
               )}
-              <Flex justify="flex-end" gap={10}>
-                <Button color="red" variant="outline" component={Link} to={`/${table}`}>
-                  Cancelar
-                </Button>
-                <Button type="submit" color="orange">
-                  Pagar
-                </Button>
-              </Flex>
             </Flex>
           </form>
         </Container>
