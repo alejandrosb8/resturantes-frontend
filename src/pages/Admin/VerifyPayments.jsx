@@ -64,8 +64,10 @@ function AdminVerifyPayments() {
   const [currentAction, setCurrentAction] = useState(null);
 
   const getPayments = useCallback(
-    (query) => {
-      setLoading(true);
+    (query, withoutLoading) => {
+      if (!withoutLoading) {
+        setLoading(true);
+      }
 
       const requestUrl = query ? `/payments?status=${query}` : '/payments';
 
@@ -177,6 +179,15 @@ function AdminVerifyPayments() {
 
   useEffect(() => {
     getPayments('pending');
+
+    //create interval to get new payments every 5 seconds
+    const interval = setInterval(() => {
+      getPayments('pending', true);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   return (
