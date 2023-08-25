@@ -30,6 +30,16 @@ const linksDataRaw = [
     id: 'admin-dishes',
   },
   {
+    label: 'Pedidos',
+    to: '/admin/orders',
+    id: 'admin-orders',
+  },
+  {
+    label: 'Pagos',
+    to: '/admin/payments',
+    id: 'admin-payments',
+  },
+  {
     label: 'Bancos',
     to: '/admin/banks',
     id: 'admin-banks',
