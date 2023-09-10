@@ -51,7 +51,6 @@ function Payment() {
     axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
       .get(`/customers/${user.sub}/orders?inDebt=true`)
       .then((response) => {
-        console.log(response.data.status);
         setOrders(response.data.status);
         setLoading(false);
       })
@@ -68,7 +67,6 @@ function Payment() {
       .get(`/banks`)
       .then((response) => {
         setBanks(response.data.data);
-        console.log(response.data.data);
       })
       .catch((error) => {
         console.log(error);
@@ -92,13 +90,20 @@ function Payment() {
       dni: (value) => (value.trim().match(/^[0-9]+$/) ? null : 'Ingresa un número de DNI válido'),
       amount: (value) => (/\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?/.test(value) ? null : 'Ingresa un monto válido'),
       reference: (value) =>
-        value.trim().match(/^[0-9]+$/) && paymentType === 'transfer' ? null : 'Ingresa un número de referencia válido',
-      voucherImg: (value) =>
-        value.toString().trim().length > 0 && paymentType === 'transfer'
-          ? null
-          : 'Debe ingresar la imagen de la transacción',
+        paymentType === 'transfer'
+          ? value.trim().match(/^[0-9]+$/)
+            ? null
+            : 'Ingresa un número de referencia válido'
+          : null,
 
-      bankId: (value) => (value.trim().length > 0 && paymentType === 'transfer' ? null : 'Ingresa el banco'),
+      voucherImg: (value) =>
+        paymentType === 'transfer'
+          ? value.toString().trim().length > 0
+            ? null
+            : 'Debe ingresar la imagen de la transacción'
+          : null,
+
+      bankId: (value) => (paymentType === 'transfer' ? (value.trim().length > 0 ? null : 'Ingresa el banco') : null),
     },
   });
 
@@ -121,9 +126,8 @@ function Payment() {
     if (paymentType === 'transfer') {
       formData.append('reference', values.reference);
       formData.append('voucher', values.voucherImg);
+      formData.append('bankId', values.bankId);
     }
-
-    formData.append('bankId', values.bankId);
 
     console.log(formData.values);
 
@@ -209,7 +213,7 @@ function Payment() {
               <Select
                 data={orders.map((order) => ({
                   value: order.id,
-                  label: order.id,
+                  label: order.dishes_orders.map((dish) => dish.dish.name).join(', '),
                 }))}
                 label="Orden"
                 placeholder="Selecciona la orden a pagar"
