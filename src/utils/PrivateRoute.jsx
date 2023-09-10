@@ -28,6 +28,8 @@ export const PrivateRouteUser = ({ children, loginOrRegister }) => {
     } catch (error) {
       setTable(null);
     }
+
+    console.log(user);
   }, [tableId]);
 
   useEffect(() => {
@@ -46,7 +48,11 @@ export const PrivateRouteUser = ({ children, loginOrRegister }) => {
     return <LoadingView />;
   }
 
-  if (!user && !loginOrRegister && user?.role !== 'customer') {
+  if (!user && !loginOrRegister) {
+    return <Navigate to={`/login/${table}`} />;
+  }
+
+  if (user?.role !== 'customer' && !loginOrRegister) {
     return <Navigate to={`/login/${table}`} />;
   }
 

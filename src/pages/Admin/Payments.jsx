@@ -406,7 +406,7 @@ function AdminPayments() {
                   {payments.map((payment) => (
                     <tr key={payment.id}>
                       <td>{payment.id}</td>
-                      <td>Alejandro Sánchez</td>
+                      <td>{payment.customer[0].fullName}</td>
                       <td>{formatDate(payment.createdAt)}</td>
                       <td>
                         <Badge color={formatStatus(payment.status).color}>{formatStatus(payment.status).text}</Badge>

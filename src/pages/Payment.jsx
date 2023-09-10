@@ -51,6 +51,7 @@ function Payment() {
     axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
       .get(`/customers/${user.sub}/orders?inDebt=true`)
       .then((response) => {
+        console.log(response.data.status);
         setOrders(response.data.status);
         setLoading(false);
       })
@@ -204,6 +205,7 @@ function Payment() {
           </Flex>
           <form onSubmit={form.onSubmit((values) => handleForm(values))} style={{ marginTop: '20px' }}>
             <Flex direction="column" gap={15}>
+              {/* Select with a preview of the first three dishes, if there are more then ... is show */}
               <Select
                 data={orders.map((order) => ({
                   value: order.id,
