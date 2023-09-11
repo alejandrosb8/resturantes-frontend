@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../layouts/Default';
-import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, PasswordInput } from '@mantine/core';
+import {
+  Button,
+  TextInput,
+  Container,
+  Divider,
+  Anchor,
+  Title,
+  Stack,
+  Text,
+  PasswordInput,
+  UnstyledButton,
+} from '@mantine/core';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { useForm } from '@mantine/form';
@@ -259,7 +270,15 @@ function Login() {
               <Button type="submit" fullWidth loading={loading}>
                 Iniciar sesión
               </Button>
-              <Anchor href="/" align="center" size="sm">
+              <Anchor
+                align="center"
+                size="sm"
+                component={UnstyledButton}
+                onClick={() => {
+                  setSearchParams({ recoverPassword: true });
+                  setShowRecoverPassword(true);
+                }}
+              >
                 ¿Olvidaste tu contraseña?
               </Anchor>
               <Divider
