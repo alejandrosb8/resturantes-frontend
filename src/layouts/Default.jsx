@@ -46,6 +46,7 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
             p="md"
             sx={{
               backgroundColor: theme.colors.orange[6],
+              border: 'none',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -74,6 +75,7 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
               backgroundColor: theme.colors.orange[6],
               transform: `translate3d(0, ${isMobile ? (pinned ? 0 : rem(-60)) : 0}, 0)`,
               transition: 'transform 300ms ease',
+              border: 'none',
             }}
             zIndex={500}
           >
