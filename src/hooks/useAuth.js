@@ -1,4 +1,4 @@
-import axios from '../utils/axios';
+import axios, { axiosPrivate } from '../utils/axios';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import jwt_decode from 'jwt-decode';
@@ -17,7 +17,7 @@ const CHANGE_PASSWORD_URL = `${USER_AUTH}/change-password`;
 // admin auth
 
 const ADMIN_LOGIN_URL = `${ADMIN_AUTH}/login`;
-const ADMIN_UPDATE_URL = `${ADMIN_AUTH}/change-username-password `;
+const ADMIN_UPDATE_URL = `${ADMIN_AUTH}/change-username-password`;
 
 function useAuth() {
   const { authTokens, setAuthTokens, setUser, user } = useContext(AuthContext);
@@ -111,13 +111,10 @@ function useAuth() {
   }
 
   async function adminUpdate(username, password) {
-    return axios
+    return axiosPrivate(authTokens, setAuthTokens, setUser)
       .patch(ADMIN_UPDATE_URL, { username, password })
       .then((response) => {
         return response;
-      })
-      .catch((error) => {
-        return error;
       });
   }
 
