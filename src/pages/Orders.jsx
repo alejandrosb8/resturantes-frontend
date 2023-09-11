@@ -94,7 +94,7 @@ function Orders() {
       </Modal>
 
       <Layout navbarActive="orders" navbar="user" header>
-        <Title>Ordenes</Title>
+        <Title>Historial de ordenes</Title>
         <Table mt={20}>
           <thead>
             <tr>

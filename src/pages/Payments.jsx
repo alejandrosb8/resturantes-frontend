@@ -1,114 +1,71 @@
-import Layout from '../../layouts/Default';
 import {
-  Title,
-  Text,
   Table,
-  Skeleton,
-  Flex,
-  Modal,
-  Divider,
-  Box,
+  Title,
   Badge,
+  Box,
+  Text,
+  Modal,
   Popover,
   UnstyledButton,
   ScrollArea,
-  Select,
-  Image,
+  Flex,
   Center,
+  Image,
+  Divider,
   Accordion,
 } from '@mantine/core';
-import { axiosPrivate } from '../../utils/axios';
+import useUserTable from '../hooks/useTable';
+import { axiosPrivate } from '../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
-import useAuth from '../../hooks/useAuth';
+import Layout from '../layouts/Default';
+import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import LoadingView from '../components/LoadingView';
+import SideFixesButtons from '../components/SideFixesButtons';
 import { useDisclosure } from '@mantine/hooks';
 
-function formatStatus(status) {
-  if (status === 'pending') {
-    return {
-      color: 'yellow',
-      text: 'Pendiente',
-    };
-  }
-  if (status === 'approved') {
-    return {
-      color: 'green',
-      text: 'Aprobado',
-    };
-  }
-  if (status === 'rejected') {
-    return {
-      color: 'red',
-      text: 'Rechazado',
-    };
-  }
-}
+function Payments() {
+  const { table } = useUserTable();
 
-function formatDate(date) {
-  const newDate = new Date(date);
-  const day = newDate.getDate();
-  const month = newDate.getMonth() + 1;
-  const year = newDate.getFullYear();
-  return `${day}-${month}-${year}`;
-}
-
-function filterDishes(payments, status) {
-  return payments.filter((payment) => {
-    if (status === '') {
-      return true;
-    } else {
-      return payment.status === status;
-    }
-  });
-}
-
-function formatPaymentType(type) {
-  switch (type) {
-    case 'cash':
-      return 'Efectivo';
-    case 'card':
-      return 'Tarjeta';
-    case 'transfer':
-      return 'Transferencia';
-    default:
-      return 'Desconocido';
-  }
-}
-
-function AdminPayments() {
   const [payments, setPayments] = useState([]);
-  const [paymentsFiltered, setPaymentsFiltered] = useState('');
   const [loading, setLoading] = useState(true);
-  const { authTokens, setAuthTokens, setUser } = useAuth();
-  const navigate = useNavigate();
-
-  // details modal
-  const [openedDetails, { open: openDetails, close: closeDetails }] = useDisclosure(false);
 
   const [paymentData, setPaymentData] = useState(null);
-  const [bank, setBank] = useState(null);
+  const [opened, { open, close }] = useDisclosure(false);
+
   const [currentOrder, setCurrentOrder] = useState(null);
 
-  const getPayments = useCallback(
-    (status) => {
-      setLoading(true);
+  const [bank, setBank] = useState(null);
 
-      axiosPrivate(authTokens, setAuthTokens, setUser)
-        .get(`/payments`)
-        .then((response) => {
-          setPayments(filterDishes(response.data.data, status || paymentsFiltered));
+  const { authTokens, setAuthTokens, setUser, user } = useAuth();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!table) {
+      return;
+    }
+
+    setLoading(true);
+    axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
+      .get(`/customers/${user.sub}/payments`)
+      .then((response) => {
+        setPayments(response.data.status);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error.response.status === 404) {
           setLoading(false);
-        })
-        .catch((err) => {
-          if (err.response.status === 404) {
-            setLoading(false);
-          } else {
-            navigate('/admin/login');
-          }
-        });
-    },
-    [authTokens, setAuthTokens, setUser, navigate],
-  );
+        } else if (error.response.status === 401) {
+          navigate(`/login/${table}`);
+        }
+      });
+
+    return () => {
+      setPayments([]);
+    };
+  }, [table]);
 
   const getBank = useCallback(
     (id) => {
@@ -154,25 +111,14 @@ function AdminPayments() {
     [authTokens, setAuthTokens, setUser, navigate],
   );
 
-  useEffect(() => {
-    getPayments();
-  }, []);
+  if (loading) {
+    return <LoadingView />;
+  }
 
   return (
     <>
-      {/* Modals */}
-
       {/* Details Modal */}
-
-      <Modal
-        opened={openedDetails}
-        onClose={() => {
-          closeDetails();
-        }}
-        title="Detalles de la orden"
-        size="xl"
-        zIndex={500}
-      >
+      <Modal opened={opened} onClose={close} size="xl" title="Platos de la orden" centered zIndex={500}>
         <ScrollArea>
           <Flex direction="column" gap={15}>
             <Flex
@@ -183,15 +129,6 @@ function AdminPayments() {
             >
               <Text weight={600}>Fecha:</Text>
               <Text>{formatDate(paymentData?.createdAt)}</Text>
-            </Flex>
-            <Flex
-              justify="space-between"
-              sx={{
-                borderBottom: '1px solid #DDD',
-              }}
-            >
-              <Text weight={600}>Usuario:</Text>
-              <Text>{paymentData?.customer[0].fullName}</Text>
             </Flex>
             <Flex
               justify="space-between"
@@ -279,15 +216,6 @@ function AdminPayments() {
                         borderBottom: '1px solid #DDD',
                       }}
                     >
-                      <Text weight={600}>ID:</Text>
-                      <Text>{currentOrder?.id}</Text>
-                    </Flex>
-                    <Flex
-                      justify="space-between"
-                      sx={{
-                        borderBottom: '1px solid #DDD',
-                      }}
-                    >
                       <Text weight={600}>Fecha:</Text>
                       <Text>{formatDate(currentOrder?.createdAt)}</Text>
                     </Flex>
@@ -355,89 +283,93 @@ function AdminPayments() {
         </ScrollArea>
       </Modal>
 
-      {/* Main Page */}
+      <Layout navbarActive="payments" navbar="user" header>
+        <Title>Historial de pagos</Title>
+        <Table mt={20}>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Monto</th>
+              <th>Estado</th>
+              <th>Detalles</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments?.map((payment) => (
+              <tr key={payment.id}>
+                <td>{formatDate(payment.createdAt)}</td>
+                <td>$ {Number(payment.amount).toFixed(2)}</td>
+                <td>
+                  <Badge color={formatStatus(payment.status).color} variant="light">
+                    {formatStatus(payment.status).text}
+                  </Badge>
+                </td>
+                <td>
+                  <Box
+                    sx={{
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setPaymentData(payment);
+                      open();
 
-      <Layout navbar="admin" navbarActive="admin-payments" header>
-        <Title payment={1}>Pagos</Title>
-        <Text mt={20} mb={10}>
-          Lista de pagos
-        </Text>
-
-        <Select
-          label="Filtrar por estado"
-          placeholder="Filtrar por estado"
-          value={paymentsFiltered}
-          data={[
-            { value: '', label: 'Todos' },
-            { value: 'pending', label: 'Pendiente' },
-            { value: 'approved', label: 'Aprobado' },
-            { value: 'rejected', label: 'Rechazado' },
-          ]}
-          onChange={(value) => {
-            setPaymentsFiltered(value);
-            getPayments(value);
-          }}
-        />
-
-        {loading ? (
-          <>
-            <Skeleton height={50} mt={15} radius="sm" />
-            <Skeleton height={50} mt={6} radius="sm" />
-            <Skeleton height={50} mt={6} radius="sm" />
-            <Skeleton height={50} mt={6} radius="sm" />
-            <Skeleton height={30} mt={6} radius="sm" />
-          </>
-        ) : (
-          <>
-            <Divider />
-            {payments.length <= 0 ? (
-              <Text mt={20}>No hay pagos</Text>
-            ) : (
-              <Table striped>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Detalles</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment) => (
-                    <tr key={payment.id}>
-                      <td>{payment.id}</td>
-                      <td>{payment.customer[0].fullName}</td>
-                      <td>{formatDate(payment.createdAt)}</td>
-                      <td>
-                        <Badge color={formatStatus(payment.status).color}>{formatStatus(payment.status).text}</Badge>
-                      </td>
-                      <td>
-                        <Box
-                          sx={{
-                            cursor: 'pointer',
-                          }}
-                          onClick={() => {
-                            setPaymentData(payment);
-                            openDetails();
-
-                            getBank(payment.bankId);
-                            getOrder(payment.orderId);
-                          }}
-                        >
-                          <Text color="blue">Ver detalles</Text>
-                        </Box>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            )}
-          </>
-        )}
+                      getBank(payment.bankId);
+                      getOrder(payment.orderId);
+                    }}
+                  >
+                    <Text color="blue">Ver detalles</Text>
+                  </Box>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       </Layout>
+      <SideFixesButtons />
     </>
   );
 }
 
-export default AdminPayments;
+function formatDate(date) {
+  const newDate = new Date(date);
+  const day = newDate.getDate();
+  const month = newDate.getMonth() + 1;
+  const year = newDate.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+function formatStatus(status) {
+  if (status === 'pending') {
+    return {
+      color: 'yellow',
+      text: 'Pendiente',
+    };
+  }
+  if (status === 'approved') {
+    return {
+      color: 'green',
+      text: 'Aprobado',
+    };
+  }
+  if (status === 'rejected') {
+    return {
+      color: 'red',
+      text: 'Rechazado',
+    };
+  }
+}
+
+function formatPaymentType(type) {
+  switch (type) {
+    case 'cash':
+      return 'Efectivo';
+    case 'card':
+      return 'Tarjeta';
+    case 'transfer':
+      return 'Transferencia';
+    default:
+      return 'Desconocido';
+  }
+}
+
+export default Payments;

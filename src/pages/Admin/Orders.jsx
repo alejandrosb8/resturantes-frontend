@@ -112,6 +112,7 @@ function AdminOrders() {
         }}
         title="Detalles de la orden"
         size="xl"
+        zIndex={500}
       >
         <ScrollArea>
           <Flex direction="column" gap={15}>

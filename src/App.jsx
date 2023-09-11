@@ -25,6 +25,7 @@ import AdminBanks from './pages/Admin/Banks';
 import AdminVerifyPayments from './pages/Admin/VerifyPayments';
 import AdminOrders from './pages/Admin/Orders';
 import AdminPayments from './pages/Admin/Payments';
+import Payments from './pages/Payments';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -104,6 +105,14 @@ export default function App() {
                 element={
                   <PrivateRouteUser>
                     <Payment />
+                  </PrivateRouteUser>
+                }
+              />
+              <Route
+                path="/payments/:tableId"
+                element={
+                  <PrivateRouteUser>
+                    <Payments />
                   </PrivateRouteUser>
                 }
               />
