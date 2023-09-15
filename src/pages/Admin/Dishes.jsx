@@ -115,7 +115,8 @@ function AdminDishes() {
           setLoading(false);
         })
         .catch((err) => {
-          if (err.response.status === 404) {
+          console.log(err);
+          if (err?.response?.status === 404) {
             setDishes([]);
             setLoading(false);
           } else {

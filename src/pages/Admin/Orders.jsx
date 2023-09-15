@@ -6,19 +6,20 @@ import {
   Skeleton,
   Flex,
   Modal,
-  Divider,
   Box,
   Badge,
   Popover,
   UnstyledButton,
   ScrollArea,
   Select,
+  TextInput,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useDisclosure } from '@mantine/hooks';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 
 function formatStatus(debt) {
   if (debt > 0) {
@@ -66,6 +67,12 @@ function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [ordersFiltered, setOrdersFiltered] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const [orderBy, setOrderBy] = useState('');
+  const [orderDirection, setOrderDirection] = useState('asc');
+  const [finalOrders, setFinalOrders] = useState([]);
+  const [search, setSearch] = useState('');
+
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -95,9 +102,29 @@ function AdminOrders() {
     [authTokens, setAuthTokens, setUser, navigate],
   );
 
+  const getOrdersFilteredBySearch = useCallback(
+    (search) => {
+      setFinalOrders(
+        orders.filter(
+          (order) =>
+            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.customer?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
+            formatDate(order?.createdAt)?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '',
+        ),
+      );
+    },
+    [orders],
+  );
+
   useEffect(() => {
     getOrders();
   }, []);
+
+  useEffect(() => {
+    getOrdersFilteredBySearch(search);
+  }, [orders, search, getOrdersFilteredBySearch]);
 
   return (
     <>
@@ -222,6 +249,18 @@ function AdminOrders() {
           onChange={(value) => {
             setOrdersFiltered(value);
             getOrders(value);
+            getOrdersFilteredBySearch(search);
+          }}
+        />
+
+        <TextInput
+          label="Buscar"
+          placeholder="Buscar"
+          mt={10}
+          mb={10}
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
           }}
         />
 
@@ -235,25 +274,171 @@ function AdminOrders() {
           </>
         ) : (
           <>
-            <Divider />
-            {orders.length <= 0 ? (
+            {finalOrders.length <= 0 ? (
               <Text mt={20}>No hay pedidos</Text>
             ) : (
               <Table striped>
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Fecha</th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('id');
+                          setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+
+                          setFinalOrders(
+                            finalOrders.sort((a, b) => {
+                              if (orderDirection === 'asc' && orderBy === 'id') {
+                                return b.id.localeCompare(a.id);
+                              } else {
+                                return a.id.localeCompare(b.id);
+                              }
+                            }),
+                          );
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          ID
+                        </Text>
+                        {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('name');
+                          setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          setFinalOrders(
+                            finalOrders.sort((a, b) => {
+                              if (orderDirection === 'asc' && orderBy === 'name') {
+                                return b.customer.fullName.localeCompare(a.customer.fullName);
+                              } else {
+                                return a.customer.fullName.localeCompare(b.customer.fullName);
+                              }
+                            }),
+                          );
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          Usuario
+                        </Text>
+                        {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('dni');
+                          setOrderDirection(orderBy === 'dni' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          setFinalOrders(
+                            finalOrders.sort((a, b) => {
+                              if (orderDirection === 'asc' && orderBy === 'dni') {
+                                return b.customer.dni.localeCompare(a.customer.dni);
+                              } else {
+                                return a.customer.dni.localeCompare(b.customer.dni);
+                              }
+                            }),
+                          );
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          DNI
+                        </Text>
+                        {orderBy === 'dni' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('createdAt');
+                          setOrderDirection(orderBy === 'createdAt' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          setFinalOrders(
+                            finalOrders.sort((a, b) => {
+                              if (orderDirection === 'asc' && orderBy === 'createdAt') {
+                                return new Date(a.createdAt) - new Date(b.createdAt);
+                              } else {
+                                return new Date(b.createdAt) - new Date(a.createdAt);
+                              }
+                            }),
+                          );
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          Fecha
+                        </Text>
+                        {orderBy === 'createdAt' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
                     <th>Estado</th>
                     <th>Detalles</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order) => (
+                  {finalOrders.map((order) => (
                     <tr key={order.id}>
                       <td>{order.id}</td>
                       <td>{order.customer.fullName}</td>
+                      <td>{order.customer.dni}</td>
                       <td>{formatDate(order.createdAt)}</td>
                       <td>
                         <Badge color={formatStatus(order.debt).color}>{formatStatus(order.debt).text}</Badge>
