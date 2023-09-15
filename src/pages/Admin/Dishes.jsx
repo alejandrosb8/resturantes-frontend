@@ -14,6 +14,7 @@ import {
   Divider,
   NumberInput,
   Select,
+  Textarea,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -52,6 +53,7 @@ function AdminDishes() {
   const dishCreateForm = useForm({
     initialValues: {
       name: '',
+      description: '',
       price: '',
       categoryId: '',
       image: '',
@@ -68,6 +70,7 @@ function AdminDishes() {
   const dishEditForm = useForm({
     initialValues: {
       name: '',
+      description: '',
       price: '',
       categoryId: '',
       image: '',
@@ -113,6 +116,7 @@ function AdminDishes() {
         })
         .catch((err) => {
           if (err.response.status === 404) {
+            setDishes([]);
             setLoading(false);
           } else {
             navigate('/admin/login');
@@ -128,6 +132,7 @@ function AdminDishes() {
       axiosPrivate(authTokens, setAuthTokens, setUser)
         .get(`/categories/${categoryId}/dishes`)
         .then((response) => {
+          console.log(response.data.data);
           setDishes(response.data.data);
           setLoading(false);
         })
@@ -172,9 +177,12 @@ function AdminDishes() {
     setModalLoading(true);
     const formData = new FormData();
     formData.append('name', values.name);
+    formData.append('description', values.description);
     formData.append('price', values.price);
     formData.append('image', values.image);
     formData.append('categoryId', values.categoryId);
+
+    console.log(values);
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .post('/dishes', formData, {
@@ -194,7 +202,8 @@ function AdminDishes() {
           color: 'teal',
         });
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         setDishData(null);
         closeCreate();
         setModalLoading(false);
@@ -213,6 +222,10 @@ function AdminDishes() {
       formData.append('name', values.name);
     }
 
+    if (values.description) {
+      formData.append('description', values.description);
+    }
+
     if (values.price) {
       formData.append('price', values.price);
     }
@@ -225,7 +238,7 @@ function AdminDishes() {
       formData.append('image', values.image);
     }
 
-    if (!values.name && !values.image && !values.price && !values.categoryId) {
+    if (!values.name && !values.description && !values.image && !values.price && !values.categoryId) {
       setDishData(null);
       closeEdit();
       setModalLoading(false);
@@ -291,11 +304,18 @@ function AdminDishes() {
         onClose={() => {
           setDishData(null);
           closeCreate();
+          dishCreateForm.reset();
         }}
         title="Crear plato"
       >
         <form onSubmit={dishCreateForm.onSubmit((values) => createDish(values))}>
           <TextInput placeholder="Nombre" label="Nombre" required {...dishCreateForm.getInputProps('name')} />
+          <Textarea
+            mt={15}
+            placeholder="Descripción"
+            label="Descripción"
+            {...dishCreateForm.getInputProps('description')}
+          />
           <NumberInput
             mt={15}
             placeholder="Precio"
@@ -341,6 +361,7 @@ function AdminDishes() {
         onClose={() => {
           setDishId(null);
           closeEdit();
+          dishEditForm.reset();
         }}
         title="Editar plato"
       >
@@ -350,6 +371,12 @@ function AdminDishes() {
             label="Nuevo nombre"
             description="Si no ingresa un nombre, se mantendrá el actual"
             {...dishEditForm.getInputProps('name')}
+          />
+          <Textarea
+            mt={15}
+            placeholder="Descripción"
+            label="Descripción"
+            {...dishCreateForm.getInputProps('description')}
           />
           <NumberInput
             mt={15}
@@ -400,7 +427,7 @@ function AdminDishes() {
         }}
         title="Eliminar plato"
       >
-        <Text>¿Está seguro que desea eliminar la categoría?</Text>
+        <Text>¿Está seguro que desea eliminar este plato?</Text>
         <Flex mt={20} justify="end" gap="xs">
           <Button
             onClick={() => {
@@ -494,6 +521,7 @@ function AdminDishes() {
                   <tr>
                     <th>ID</th>
                     <th>Nombre</th>
+                    <th>Descripción</th>
                     <th>Precio</th>
                     <th>Categoría</th>
                     <th>Acciones</th>
@@ -504,6 +532,7 @@ function AdminDishes() {
                     <tr key={dish.id}>
                       <td>{dish.id}</td>
                       <td>{dish.name}</td>
+                      <td>{dish.description ? dish.description : 'Sin descripción'}</td>
                       <td>$ {Number(dish.price).toFixed(2)}</td>
                       <td>{dish.categoryName ? dish.categoryName : 'Sin categoría'}</td>
                       <td>

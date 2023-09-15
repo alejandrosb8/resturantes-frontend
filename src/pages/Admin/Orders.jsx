@@ -123,7 +123,7 @@ function AdminOrders() {
               }}
             >
               <Text weight={600}>Usuario:</Text>
-              <Text>Alejandro Sánchez</Text>
+              <Text>{orderData?.customer?.fullName}</Text>
             </Flex>
             <Flex
               justify="space-between"
@@ -253,7 +253,7 @@ function AdminOrders() {
                   {orders.map((order) => (
                     <tr key={order.id}>
                       <td>{order.id}</td>
-                      <td>Alejandro Sánchez</td>
+                      <td>{order.customer.fullName}</td>
                       <td>{formatDate(order.createdAt)}</td>
                       <td>
                         <Badge color={formatStatus(order.debt).color}>{formatStatus(order.debt).text}</Badge>

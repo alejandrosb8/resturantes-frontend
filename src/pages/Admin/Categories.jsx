@@ -205,6 +205,7 @@ function AdminCategories() {
         onClose={() => {
           setCategoryId(null);
           closeCreate();
+          categoryCreateForm.reset();
         }}
         title="Crear categoría"
       >
@@ -231,6 +232,7 @@ function AdminCategories() {
         onClose={() => {
           setCategoryId(null);
           closeEdit();
+          categoryEditForm.reset();
         }}
         title="Editar categoría"
       >
@@ -344,7 +346,6 @@ function AdminCategories() {
                   <tr>
                     <th>ID</th>
                     <th>Nombre</th>
-                    <th>Descripción</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -353,7 +354,6 @@ function AdminCategories() {
                     <tr key={category.id}>
                       <td>{category.id}</td>
                       <td>{category.name}</td>
-                      <td>{category.description}</td>
                       <td>
                         <Flex align="center" gap="xs">
                           <ActionIcon

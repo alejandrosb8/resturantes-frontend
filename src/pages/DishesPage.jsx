@@ -27,9 +27,6 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import { AnimatedLink } from '../components/AnimatedLink.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const EXAMPLE_IMAGE_URL =
-  'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80';
-
 export const DishesPage = () => {
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
@@ -159,7 +156,7 @@ export const DishesPage = () => {
                       >
                         <Flex justify="center" align="center" direction="column">
                           <Image
-                            src={EXAMPLE_IMAGE_URL}
+                            src={dishes.filter((dish) => dish.id === dishId).map((dish) => dish.imageUrl)}
                             alt={dishes.filter((dish) => dish.id === dishId).map((dish) => dish.name)}
                             style={{
                               viewTransitionName: `${dishId}`,
@@ -194,6 +191,11 @@ export const DishesPage = () => {
                             <Text size={rem(18)} align="center" color="dark.4">
                               ${' '}
                               {Number(dishes.filter((dish) => dish.id === dishId).map((dish) => dish.price)).toFixed(2)}
+                            </Text>
+                            <Text size={rem(16)} align="center" color="dark.4">
+                              {dishes.filter((dish) => dish.id === dishId).map((dish) => dish.description).length > 0
+                                ? dishes.filter((dish) => dish.id === dishId).map((dish) => dish.description)
+                                : 'Sin descripción'}
                             </Text>
                             <NumberInput
                               value={dishQuantity}
@@ -299,7 +301,7 @@ export const DishesPage = () => {
                                   width: '100%',
                                   height: '100%',
                                   backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                  zIndex: '100',
+                                  zIndex: '49',
                                 }}
                               >
                                 <div
@@ -351,7 +353,7 @@ export const DishesPage = () => {
                               </Flex>
                             )}
                             <Card.Section>
-                              <Image src={EXAMPLE_IMAGE_URL} height={200} alt={dish.name} />
+                              <Image src={dish?.imageUrl} height={200} alt={dish.name} />
                             </Card.Section>
                             <Flex justify={'space-between'} align="center" mt={10}>
                               <Title

@@ -164,6 +164,7 @@ function AdminBanks() {
         opened={openedCreate}
         onClose={() => {
           closeCreate();
+          bankCreateForm.reset();
         }}
         title="Crear banco"
       >
@@ -182,6 +183,7 @@ function AdminBanks() {
         onClose={() => {
           setBankId(null);
           closeEdit();
+          bankEditForm.reset();
         }}
         title="Editar banco"
       >

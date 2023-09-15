@@ -68,9 +68,9 @@ function useAuth() {
     localStorage.removeItem('user');
   }
 
-  async function recoverPassword(email) {
+  async function recoverPassword(email, tableId) {
     return axios
-      .post(RECOVER_PASSWORD_URL, { email })
+      .post(RECOVER_PASSWORD_URL, { email, tableId })
       .then((response) => {
         return response;
       })

@@ -185,6 +185,7 @@ function AdminTables() {
         opened={openedCreate}
         onClose={() => {
           closeCreate();
+          tableCreateForm.reset();
         }}
         title="Crear mesa"
       >
@@ -203,6 +204,7 @@ function AdminTables() {
         onClose={() => {
           setTableId(null);
           closeEdit();
+          tableEditForm.reset();
         }}
         title="Editar mesa"
       >

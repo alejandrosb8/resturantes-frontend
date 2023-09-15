@@ -21,7 +21,7 @@ function Register() {
       fullName: (value) => (/^[A-Za-zÀ-ÿ\s']+$/.test(value) ? null : 'El nombre solo debe contener letras'),
       email: (value) =>
         /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value) ? null : 'El correo electrónico no es válido',
-      dni: (value) => (/^[0-9]{7,}$/.test(value) ? null : 'El DNI debe contener al menos 7 dígitos'),
+      dni: (value) => (/^[0-9]{7,8}$/.test(value) ? null : 'El DNI debe contener al menos 7 dígitos'),
       phone: (value) =>
         /^\+?\d{1,3}[-.\s]?\(?\d{1,3}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}$/.test(value)
           ? null

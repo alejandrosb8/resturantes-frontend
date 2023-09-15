@@ -76,10 +76,9 @@ function AdminVerifyPayments() {
         .then((response) => {
           setPayments(response.data.data);
           setLoading(false);
-          console.log(response.data.data);
         })
         .catch((err) => {
-          if (err.response.status === 404) {
+          if (err?.response?.status === 404) {
             setLoading(false);
           } else {
             navigate('/admin/login');
