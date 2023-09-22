@@ -110,7 +110,7 @@ function AdminPayments() {
           if (err.response.status === 404) {
             setLoading(false);
           } else {
-            navigate('/admin/login');
+            setPayments([]);
           }
         });
     },
@@ -152,7 +152,7 @@ function AdminPayments() {
           if (err.response.status === 404) {
             return;
           } else {
-            navigate('/admin/login');
+            setBank(null);
           }
         });
     },
@@ -174,7 +174,7 @@ function AdminPayments() {
           if (err.response.status === 404) {
             return;
           } else {
-            navigate('/admin/login');
+            setCurrentOrder(null);
           }
         });
     },
@@ -570,10 +570,10 @@ function AdminPayments() {
 
                           setFinalOrders(
                             finalOrders.sort((a, b) => {
-                              if (orderDirection === 'asc' && orderBy === 'createdAt') {
-                                return new Date(a.createdAt) - new Date(b.createdAt);
+                              if (orderDirection === 'asc' && orderBy === 'dni') {
+                                return b.customer[0].dni - a.customer[0].dni;
                               } else {
-                                return new Date(b.createdAt) - new Date(a.createdAt);
+                                return a.customer[0].dni - b.customer[0].dni;
                               }
                             }),
                           );

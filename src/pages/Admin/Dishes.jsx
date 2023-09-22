@@ -120,7 +120,7 @@ function AdminDishes() {
             setDishes([]);
             setLoading(false);
           } else {
-            navigate('/admin/login');
+            setDishes([]);
           }
         });
     },

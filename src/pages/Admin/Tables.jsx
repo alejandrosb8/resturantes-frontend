@@ -11,6 +11,7 @@ import {
   TextInput,
   Center,
   Divider,
+  UnstyledButton,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -21,6 +22,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { QRCode } from 'react-qrcode-logo';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 
 const ENVIRONMENT = import.meta.env.VITE_ENV;
 
@@ -47,6 +49,11 @@ function AdminTables() {
   const [openedDelete, { open: openDelete, close: closeDelete }] = useDisclosure(false);
 
   const [tableId, setTableId] = useState(null);
+
+  const [orderBy, setOrderBy] = useState('');
+  const [orderDirection, setOrderDirection] = useState('asc');
+  const [finalOrders, setFinalOrders] = useState([]);
+  const [search, setSearch] = useState('');
 
   const tableCreateForm = useForm({
     initialValues: {
@@ -81,7 +88,7 @@ function AdminTables() {
         if (err.response.status === 404) {
           setLoading(false);
         } else {
-          navigate('/admin/login');
+          setTables([]);
         }
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);
@@ -170,6 +177,38 @@ function AdminTables() {
         });
       });
   };
+
+  useEffect(() => {
+    setFinalOrders(
+      tables
+        .sort((a, b) => {
+          if (orderBy) {
+            if (orderBy === 'id') {
+              if (orderDirection === 'asc') {
+                return b.id.localeCompare(a.id);
+              } else {
+                return a.id.localeCompare(b.id);
+              }
+            }
+            if (orderBy === 'name') {
+              if (orderDirection === 'asc') {
+                return b.description.localeCompare(a.description);
+              } else {
+                return a.description.localeCompare(b.description);
+              }
+            }
+          } else {
+            return;
+          }
+        })
+        .filter(
+          (order) =>
+            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.description?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '',
+        ),
+    );
+  }, [tables, orderBy, orderDirection, search]);
 
   useEffect(() => {
     getTables();
@@ -280,6 +319,17 @@ function AdminTables() {
           Lista de mesas
         </Text>
 
+        <TextInput
+          label="Buscar"
+          placeholder="Buscar"
+          mt={10}
+          mb={10}
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+          }}
+        />
+
         {loading ? (
           <>
             <Skeleton height={50} mt={15} radius="sm" />
@@ -303,19 +353,73 @@ function AdminTables() {
               </Button>
             </Flex>
             <Divider />
-            {tables.length <= 0 ? (
+            {finalOrders.length <= 0 ? (
               <Text mt={20}>No hay mesas</Text>
             ) : (
               <Table striped>
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Descripción</th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('id');
+                          setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          ID
+                        </Text>
+                        {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('name');
+                          setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          Nombre
+                        </Text>
+                        {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tables.map((table) => (
+                  {finalOrders.map((table) => (
                     <tr key={table.id}>
                       <td>{table.id}</td>
                       <td>{table.description}</td>

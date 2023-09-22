@@ -95,7 +95,7 @@ function AdminOrders() {
           if (err.response.status === 404) {
             setLoading(false);
           } else {
-            navigate('/admin/login');
+            setOrders([]);
           }
         });
     },
@@ -378,9 +378,9 @@ function AdminOrders() {
                           setFinalOrders(
                             finalOrders.sort((a, b) => {
                               if (orderDirection === 'asc' && orderBy === 'dni') {
-                                return b.customer.dni.localeCompare(a.customer.dni);
+                                return b.customer[0].dni - a.customer[0].dni;
                               } else {
-                                return a.customer.dni.localeCompare(b.customer.dni);
+                                return a.customer[0].dni - b.customer[0].dni;
                               }
                             }),
                           );

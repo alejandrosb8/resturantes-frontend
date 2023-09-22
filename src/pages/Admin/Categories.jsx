@@ -75,7 +75,7 @@ function AdminCategories() {
         if (err.response.status === 404) {
           setLoading(false);
         } else {
-          navigate('/admin/login');
+          setCategories([]);
         }
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);

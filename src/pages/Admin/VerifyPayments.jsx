@@ -82,50 +82,69 @@ function AdminVerifyPayments() {
         .get(requestUrl)
         .then((response) => {
           setPayments(response.data.data);
-          getPaymentsFilteredBySearch(search, response.data.data);
+
           setLoading(false);
         })
         .catch((err) => {
           if (err?.response?.status === 404) {
             setLoading(false);
           } else {
-            navigate('/admin/login');
+            setPayments([]);
           }
         });
     },
     [authTokens, setAuthTokens, setUser, navigate],
   );
 
-  const getPaymentsFilteredBySearch = useCallback(
-    (search, paymentsData) => {
-      if (!paymentsData) {
-        setFinalOrders(
-          payments.filter(
-            (order) =>
-              order?.id?.toLowerCase().includes(search.toLowerCase()) ||
-              order?.customer[0]?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-              order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
-              order?.amount?.toString()?.toLowerCase().includes(search.toLowerCase()) ||
-              formatDate(order?.createdAt)?.toLowerCase().includes(search.toLowerCase()) ||
-              search === '',
-          ),
-        );
-      } else {
-        setFinalOrders(
-          paymentsData.filter(
-            (order) =>
-              order?.id?.toLowerCase().includes(search.toLowerCase()) ||
-              order?.customer[0]?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-              order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
-              order?.amount?.toString()?.toLowerCase().includes(search.toLowerCase()) ||
-              formatDate(order?.createdAt)?.toLowerCase().includes(search.toLowerCase()) ||
-              search === '',
-          ),
-        );
-      }
-    },
-    [payments],
-  );
+  const getPaymentsFilteredBySearch = useCallback(() => {
+    console.log('Getting payments filtered by search...');
+    setFinalOrders(
+      payments
+        .sort((a, b) => {
+          if (orderBy) {
+            if (orderBy === 'createdAt') {
+              if (orderDirection === 'asc') {
+                return new Date(a.createdAt) - new Date(b.createdAt);
+              } else {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+              }
+            }
+            if (orderBy === 'name') {
+              if (orderDirection === 'asc') {
+                return b.customer[0].fullName.localeCompare(a.customer[0].fullName);
+              } else {
+                return a.customer[0].fullName.localeCompare(b.customer[0].fullName);
+              }
+            }
+            if (orderBy === 'dni') {
+              if (orderDirection === 'asc') {
+                return b.customer[0].dni - a.customer[0].dni;
+              } else {
+                return a.customer[0].dni - b.customer[0].dni;
+              }
+            }
+            if (orderBy === 'amount') {
+              if (orderDirection === 'asc') {
+                return b.amount - a.amount;
+              } else {
+                return a.amount - b.amount;
+              }
+            }
+          } else {
+            return;
+          }
+        })
+        .filter(
+          (order) =>
+            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.customer[0]?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.amount?.toString()?.toLowerCase().includes(search.toLowerCase()) ||
+            formatDate(order?.createdAt)?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '',
+        ),
+    );
+  }, [payments, orderBy, orderDirection, search]);
 
   useEffect(() => {
     getPaymentsFilteredBySearch(search);
@@ -148,7 +167,7 @@ function AdminVerifyPayments() {
           if (err.response.status === 404) {
             setModalLoading(false);
           } else {
-            navigate('/admin/login');
+            setBank(null);
           }
         });
     },
@@ -173,7 +192,7 @@ function AdminVerifyPayments() {
           if (err.response.status === 404) {
             setModalLoading(false);
           } else {
-            navigate('/admin/login');
+            setCurrentOrder(null);
           }
         });
     },
@@ -224,42 +243,8 @@ function AdminVerifyPayments() {
 
     //create interval to get new payments every 5 seconds
     const interval = setInterval(() => {
+      console.log('Getting new payments...');
       getPayments('pending', true);
-
-      if (orderBy) {
-        setFinalOrders(
-          finalOrders.sort((a, b) => {
-            if (orderBy === 'createdAt') {
-              if (orderDirection === 'asc') {
-                return new Date(a.createdAt) - new Date(b.createdAt);
-              } else {
-                return new Date(b.createdAt) - new Date(a.createdAt);
-              }
-            }
-            if (orderBy === 'name') {
-              if (orderDirection === 'asc') {
-                return b.customer[0].fullName.localeCompare(a.customer[0].fullName);
-              } else {
-                return a.customer[0].fullName.localeCompare(b.customer[0].fullName);
-              }
-            }
-            if (orderBy === 'dni') {
-              if (orderDirection === 'asc') {
-                return b.customer[0].dni.localeCompare(a.customer[0].dni);
-              } else {
-                return a.customer[0].dni.localeCompare(b.customer[0].dni);
-              }
-            }
-            if (orderBy === 'amount') {
-              if (orderDirection === 'asc') {
-                return b.amount - a.amount;
-              } else {
-                return a.amount - b.amount;
-              }
-            }
-          }),
-        );
-      }
     }, 5000);
 
     return () => {

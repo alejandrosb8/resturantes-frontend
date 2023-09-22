@@ -1,5 +1,17 @@
 import Layout from '../../layouts/Default';
-import { Title, Text, Table, Button, Skeleton, ActionIcon, Flex, Modal, TextInput, Divider } from '@mantine/core';
+import {
+  Title,
+  Text,
+  Table,
+  Button,
+  Skeleton,
+  ActionIcon,
+  Flex,
+  Modal,
+  TextInput,
+  Divider,
+  UnstyledButton,
+} from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
@@ -8,6 +20,7 @@ import { IconPencil, IconTrash } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 
 function AdminBanks() {
   const [banks, setBanks] = useState([]);
@@ -26,6 +39,11 @@ function AdminBanks() {
   const [openedDelete, { open: openDelete, close: closeDelete }] = useDisclosure(false);
 
   const [bankId, setBankId] = useState(null);
+
+  const [orderBy, setOrderBy] = useState('');
+  const [orderDirection, setOrderDirection] = useState('asc');
+  const [finalOrders, setFinalOrders] = useState([]);
+  const [search, setSearch] = useState('');
 
   const bankCreateForm = useForm({
     initialValues: {
@@ -60,7 +78,7 @@ function AdminBanks() {
         if (err.response.status === 404) {
           setLoading(false);
         } else {
-          navigate('/admin/login');
+          setBanks([]);
         }
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);
@@ -149,6 +167,38 @@ function AdminBanks() {
         });
       });
   };
+
+  useEffect(() => {
+    setFinalOrders(
+      banks
+        .sort((a, b) => {
+          if (orderBy) {
+            if (orderBy === 'id') {
+              if (orderDirection === 'asc') {
+                return b.id.localeCompare(a.id);
+              } else {
+                return a.id.localeCompare(b.id);
+              }
+            }
+            if (orderBy === 'name') {
+              if (orderDirection === 'asc') {
+                return b.name.localeCompare(a.name);
+              } else {
+                return a.name.localeCompare(b.name);
+              }
+            }
+          } else {
+            return;
+          }
+        })
+        .filter(
+          (order) =>
+            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.name?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '',
+        ),
+    );
+  }, [banks, orderBy, orderDirection, search]);
 
   useEffect(() => {
     getBanks();
@@ -246,6 +296,17 @@ function AdminBanks() {
           Lista de bancos
         </Text>
 
+        <TextInput
+          label="Buscar"
+          placeholder="Buscar"
+          mt={10}
+          mb={10}
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+          }}
+        />
+
         {loading ? (
           <>
             <Skeleton height={50} mt={15} radius="sm" />
@@ -269,19 +330,74 @@ function AdminBanks() {
               </Button>
             </Flex>
             <Divider />
-            {banks.length <= 0 ? (
+            {finalOrders.length <= 0 ? (
               <Text mt={20}>No hay bancos</Text>
             ) : (
               <Table striped>
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('id');
+                          setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          ID
+                        </Text>
+                        {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
+                    <th>
+                      <UnstyledButton
+                        color="gray"
+                        ml={5}
+                        px={4}
+                        variant="outline"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'md',
+
+                          '&:hover': {
+                            color: 'orange',
+                            backgroundColor: '#f6f6f6',
+                          },
+                        }}
+                        onClick={() => {
+                          setOrderBy('name');
+                          setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+                        }}
+                      >
+                        <Text weight={600} size="md">
+                          Nombre
+                        </Text>
+                        {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                      </UnstyledButton>
+                    </th>
+
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {banks.map((bank) => (
+                  {finalOrders.map((bank) => (
                     <tr key={bank.id}>
                       <td>{bank.id}</td>
                       <td>{bank.name}</td>
