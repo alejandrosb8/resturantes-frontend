@@ -1,4 +1,4 @@
-import { Table, Title, Badge, Box, Text, Modal, Popover, UnstyledButton } from '@mantine/core';
+import { Table, Title, Badge, Box, Text, Modal, Popover, UnstyledButton, ScrollArea } from '@mantine/core';
 import useUserTable from '../hooks/useTable';
 import { axiosPrivate } from '../utils/axios';
 import { useEffect, useState } from 'react';
@@ -56,78 +56,84 @@ function Orders() {
     <>
       {/* Details Modal */}
       <Modal opened={opened} onClose={close} size="xl" title="Platos de la orden" centered>
-        <Table>
-          <thead>
-            <tr>
-              <th>Articulo</th>
-              <th>Precio</th>
-              <th>Cantidad</th>
-              <th>Notas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order?.dishes_orders.map((dish) => (
-              <tr key={dish.id}>
-                <td>{dish.dish.name}</td>
-                <td>$ {Number(dish.dish.price).toFixed(2)}</td>
-                <td>
-                  <Text>{dish.quantity}</Text>
-                </td>
-                <td>
-                  <Popover width={200} position="bottom" withArrow shadow="md">
-                    <Popover.Target>
-                      <UnstyledButton>
-                        <Text size="sm" color="blue">
-                          Ver detalles
-                        </Text>
-                      </UnstyledButton>
-                    </Popover.Target>
-                    <Popover.Dropdown>
-                      <Text size="sm">{dish.details ? dish.details : 'Sin notas'}</Text>
-                    </Popover.Dropdown>
-                  </Popover>
-                </td>
+        <ScrollArea>
+          <Table>
+            <thead>
+              <tr>
+                <th>Articulo</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Notas</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {order?.dishes_orders.map((dish) => (
+                <tr key={dish.id}>
+                  <td>{dish.dish.name}</td>
+                  <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                  <td>
+                    <Text>{dish.quantity}</Text>
+                  </td>
+                  <td>
+                    <Popover width={200} position="bottom" withArrow shadow="md">
+                      <Popover.Target>
+                        <UnstyledButton>
+                          <Text size="sm" color="blue">
+                            Ver detalles
+                          </Text>
+                        </UnstyledButton>
+                      </Popover.Target>
+                      <Popover.Dropdown>
+                        <Text size="sm">{dish.details ? dish.details : 'Sin notas'}</Text>
+                      </Popover.Dropdown>
+                    </Popover>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </ScrollArea>
       </Modal>
 
       <Layout navbarActive="orders" navbar="user" header>
         <Title>Historial de ordenes</Title>
-        <Table mt={20}>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Platos</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders?.map((order) => (
-              <tr key={order.id}>
-                <td>{formatDate(order.createdAt)}</td>
-                <td>$ {Number(order.total).toFixed(2)}</td>
-                <td>{order.debt <= 0 ? <Badge color="green">Pagado</Badge> : <Badge color="red">Pendiente</Badge>}</td>
-                <td>
-                  <Box
-                    sx={{
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      console.log(order);
-                      setOrder(order);
-                      open();
-                    }}
-                  >
-                    <Text color="blue">Ver platos</Text>
-                  </Box>
-                </td>
+        <ScrollArea>
+          <Table mt={20}>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Platos</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {orders?.map((order) => (
+                <tr key={order.id}>
+                  <td>{formatDate(order.createdAt)}</td>
+                  <td>$ {Number(order.total).toFixed(2)}</td>
+                  <td>
+                    {order.debt <= 0 ? <Badge color="green">Pagado</Badge> : <Badge color="red">Pendiente</Badge>}
+                  </td>
+                  <td>
+                    <Box
+                      sx={{
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        console.log(order);
+                        setOrder(order);
+                        open();
+                      }}
+                    >
+                      <Text color="blue">Ver platos</Text>
+                    </Box>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </ScrollArea>
       </Layout>
       <SideFixesButtons />
     </>

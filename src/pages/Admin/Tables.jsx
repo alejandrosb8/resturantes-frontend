@@ -11,6 +11,7 @@ import {
   TextInput,
   Center,
   Divider,
+  ScrollArea,
   UnstyledButton,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
@@ -356,111 +357,113 @@ function AdminTables() {
             {finalOrders.length <= 0 ? (
               <Text mt={20}>No hay mesas</Text>
             ) : (
-              <Table striped>
-                <thead>
-                  <tr>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
+              <ScrollArea>
+                <Table striped>
+                  <thead>
+                    <tr>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
 
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('id');
-                          setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          ID
-                        </Text>
-                        {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('id');
+                            setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            ID
+                          </Text>
+                          {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
 
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('name');
-                          setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          Nombre
-                        </Text>
-                        {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {finalOrders.map((table) => (
-                    <tr key={table.id}>
-                      <td>{table.id}</td>
-                      <td>{table.description}</td>
-                      <td>
-                        <Flex align="center" gap="xs">
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setTableId(table.id);
-                              openEdit();
-                            }}
-                          >
-                            <IconPencil />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setTableId(table.id);
-                              openDelete();
-                            }}
-                          >
-                            <IconTrash />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setTableId(table.id);
-                              openQr();
-                            }}
-                          >
-                            <IconQrcode />
-                          </ActionIcon>
-                        </Flex>
-                      </td>
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('name');
+                            setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Nombre
+                          </Text>
+                          {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {finalOrders.map((table) => (
+                      <tr key={table.id}>
+                        <td>{table.id}</td>
+                        <td>{table.description}</td>
+                        <td>
+                          <Flex align="center" gap="xs">
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setTableId(table.id);
+                                openEdit();
+                              }}
+                            >
+                              <IconPencil />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setTableId(table.id);
+                                openDelete();
+                              }}
+                            >
+                              <IconTrash />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setTableId(table.id);
+                                openQr();
+                              }}
+                            >
+                              <IconQrcode />
+                            </ActionIcon>
+                          </Flex>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </ScrollArea>
             )}
           </>
         )}

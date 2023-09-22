@@ -12,6 +12,7 @@ import {
   FileInput,
   Image,
   Divider,
+  ScrollArea,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -341,59 +342,61 @@ function AdminCategories() {
             {categories.length <= 0 ? (
               <Text mt={20}>No hay categorías</Text>
             ) : (
-              <Table striped>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((category) => (
-                    <tr key={category.id}>
-                      <td>{category.id}</td>
-                      <td>{category.name}</td>
-                      <td>
-                        <Flex align="center" gap="xs">
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setCategoryId(category.id);
-                              setCategoryData({ name: category.name });
-                              openEdit();
-                            }}
-                          >
-                            <IconPencil />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setCategoryId(category.id);
-                              openDelete();
-                            }}
-                          >
-                            <IconTrash />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setCategoryId(category.id);
-                              setCategoryData((prev) => ({ ...prev, image: category.imageUrl }));
-                              openImg();
-                            }}
-                          >
-                            <IconPhoto />
-                          </ActionIcon>
-                        </Flex>
-                      </td>
+              <ScrollArea>
+                <Table striped>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {categories.map((category) => (
+                      <tr key={category.id}>
+                        <td>{category.id}</td>
+                        <td>{category.name}</td>
+                        <td>
+                          <Flex align="center" gap="xs">
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setCategoryId(category.id);
+                                setCategoryData({ name: category.name });
+                                openEdit();
+                              }}
+                            >
+                              <IconPencil />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setCategoryId(category.id);
+                                openDelete();
+                              }}
+                            >
+                              <IconTrash />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setCategoryId(category.id);
+                                setCategoryData((prev) => ({ ...prev, image: category.imageUrl }));
+                                openImg();
+                              }}
+                            >
+                              <IconPhoto />
+                            </ActionIcon>
+                          </Flex>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </ScrollArea>
             )}
           </>
         )}

@@ -11,6 +11,7 @@ import {
   TextInput,
   Divider,
   UnstyledButton,
+  ScrollArea,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -333,102 +334,104 @@ function AdminBanks() {
             {finalOrders.length <= 0 ? (
               <Text mt={20}>No hay bancos</Text>
             ) : (
-              <Table striped>
-                <thead>
-                  <tr>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
+              <ScrollArea>
+                <Table striped>
+                  <thead>
+                    <tr>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
 
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('id');
-                          setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          ID
-                        </Text>
-                        {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('id');
+                            setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            ID
+                          </Text>
+                          {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
 
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('name');
-                          setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          Nombre
-                        </Text>
-                        {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('name');
+                            setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Nombre
+                          </Text>
+                          {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
 
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {finalOrders.map((bank) => (
-                    <tr key={bank.id}>
-                      <td>{bank.id}</td>
-                      <td>{bank.name}</td>
-                      <td>
-                        <Flex align="center" gap="xs">
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setBankId(bank.id);
-                              openEdit();
-                            }}
-                          >
-                            <IconPencil />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setBankId(bank.id);
-                              openDelete();
-                            }}
-                          >
-                            <IconTrash />
-                          </ActionIcon>
-                        </Flex>
-                      </td>
+                      <th>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {finalOrders.map((bank) => (
+                      <tr key={bank.id}>
+                        <td>{bank.id}</td>
+                        <td>{bank.name}</td>
+                        <td>
+                          <Flex align="center" gap="xs">
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setBankId(bank.id);
+                                openEdit();
+                              }}
+                            >
+                              <IconPencil />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setBankId(bank.id);
+                                openDelete();
+                              }}
+                            >
+                              <IconTrash />
+                            </ActionIcon>
+                          </Flex>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </ScrollArea>
             )}
           </>
         )}

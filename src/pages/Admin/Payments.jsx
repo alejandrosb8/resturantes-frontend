@@ -342,39 +342,41 @@ function AdminPayments() {
                       <Text weight={600}>Platos:</Text>
                     </Text>
                   </Flex>
-                  <Table striped>
-                    <thead>
-                      <tr>
-                        <th>Nombre</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Detalles</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentOrder?.dishes_orders?.map((dish) => (
-                        <tr key={dish.id}>
-                          <td>{dish.dish.name}</td>
-                          <td>{dish.quantity}</td>
-                          <td>$ {Number(dish.dish.price).toFixed(2)}</td>
-                          <td>
-                            <Popover width={200} position="bottom" withArrow shadow="md">
-                              <Popover.Target>
-                                <UnstyledButton>
-                                  <Text size="sm" color="blue">
-                                    Ver detalles
-                                  </Text>
-                                </UnstyledButton>
-                              </Popover.Target>
-                              <Popover.Dropdown>
-                                <Text size="sm">{dish.details ? dish.details : 'Sin detalles'}</Text>
-                              </Popover.Dropdown>
-                            </Popover>
-                          </td>
+                  <ScrollArea>
+                    <Table striped>
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Cantidad</th>
+                          <th>Precio</th>
+                          <th>Detalles</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                      </thead>
+                      <tbody>
+                        {currentOrder?.dishes_orders?.map((dish) => (
+                          <tr key={dish.id}>
+                            <td>{dish.dish.name}</td>
+                            <td>{dish.quantity}</td>
+                            <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                            <td>
+                              <Popover width={200} position="bottom" withArrow shadow="md">
+                                <Popover.Target>
+                                  <UnstyledButton>
+                                    <Text size="sm" color="blue">
+                                      Ver detalles
+                                    </Text>
+                                  </UnstyledButton>
+                                </Popover.Target>
+                                <Popover.Dropdown>
+                                  <Text size="sm">{dish.details ? dish.details : 'Sin detalles'}</Text>
+                                </Popover.Dropdown>
+                              </Popover>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </ScrollArea>
                 </Accordion.Panel>
               </Accordion.Item>
             </Accordion>
@@ -430,195 +432,201 @@ function AdminPayments() {
             {finalOrders.length <= 0 ? (
               <Text mt={20}>No hay pagos</Text>
             ) : (
-              <Table striped>
-                <thead>
-                  <tr>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
-
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('id');
-                          setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
-
-                          setFinalOrders(
-                            finalOrders.sort((a, b) => {
-                              if (orderDirection === 'asc' && orderBy === 'id') {
-                                return b.id.localeCompare(a.id);
-                              } else {
-                                return a.id.localeCompare(b.id);
-                              }
-                            }),
-                          );
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          ID
-                        </Text>
-                        {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
-
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('name');
-                          setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
-
-                          setFinalOrders(
-                            finalOrders.sort((a, b) => {
-                              if (orderDirection === 'asc' && orderBy === 'name') {
-                                return b.customer[0].fullName.localeCompare(a.customer[0].fullName);
-                              } else {
-                                return a.customer[0].fullName.localeCompare(b.customer[0].fullName);
-                              }
-                            }),
-                          );
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          Usuario
-                        </Text>
-                        {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
-
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('dni');
-                          setOrderDirection(orderBy === 'dni' && orderDirection === 'asc' ? 'desc' : 'asc');
-
-                          setFinalOrders(
-                            finalOrders.sort((a, b) => {
-                              if (orderDirection === 'asc' && orderBy === 'dni') {
-                                return b.customer[0].dni.localeCompare(a.customer[0].dni);
-                              } else {
-                                return a.customer[0].dni.localeCompare(b.customer[0].dni);
-                              }
-                            }),
-                          );
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          DNI
-                        </Text>
-                        {orderBy === 'dni' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
-                    <th>
-                      <UnstyledButton
-                        color="gray"
-                        ml={5}
-                        px={4}
-                        variant="outline"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 'md',
-
-                          '&:hover': {
-                            color: 'orange',
-                            backgroundColor: '#f6f6f6',
-                          },
-                        }}
-                        onClick={() => {
-                          setOrderBy('createdAt');
-                          setOrderDirection(orderBy === 'createdAt' && orderDirection === 'asc' ? 'desc' : 'asc');
-
-                          setFinalOrders(
-                            finalOrders.sort((a, b) => {
-                              if (orderDirection === 'asc' && orderBy === 'dni') {
-                                return b.customer[0].dni - a.customer[0].dni;
-                              } else {
-                                return a.customer[0].dni - b.customer[0].dni;
-                              }
-                            }),
-                          );
-                        }}
-                      >
-                        <Text weight={600} size="md">
-                          Fecha
-                        </Text>
-                        {orderBy === 'createdAt' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
-                      </UnstyledButton>
-                    </th>
-                    <th>Estado</th>
-                    <th>Detalles</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {finalOrders.map((payment) => (
-                    <tr key={payment.id}>
-                      <td>{payment.id}</td>
-                      <td>{payment.customer[0].fullName}</td>
-                      <td>{payment.customer[0].dni}</td>
-                      <td>{formatDate(payment.createdAt)}</td>
-                      <td>
-                        <Badge color={formatStatus(payment.status).color}>{formatStatus(payment.status).text}</Badge>
-                      </td>
-                      <td>
-                        <Box
+              <ScrollArea>
+                <Table striped>
+                  <thead>
+                    <tr>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
                           sx={{
-                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
                           }}
                           onClick={() => {
-                            setPaymentData(payment);
-                            openDetails();
+                            setOrderBy('id');
+                            setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
 
-                            getBank(payment.bankId);
-                            getOrder(payment.orderId);
+                            setFinalOrders(
+                              finalOrders.sort((a, b) => {
+                                if (orderDirection === 'asc' && orderBy === 'id') {
+                                  return b.id.localeCompare(a.id);
+                                } else {
+                                  return a.id.localeCompare(b.id);
+                                }
+                              }),
+                            );
                           }}
                         >
-                          <Text color="blue">Ver detalles</Text>
-                        </Box>
-                      </td>
+                          <Text weight={600} size="md">
+                            ID
+                          </Text>
+                          {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('name');
+                            setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+
+                            setFinalOrders(
+                              finalOrders.sort((a, b) => {
+                                if (orderDirection === 'asc' && orderBy === 'name') {
+                                  return b.customer[0].fullName.localeCompare(a.customer[0].fullName);
+                                } else {
+                                  return a.customer[0].fullName.localeCompare(b.customer[0].fullName);
+                                }
+                              }),
+                            );
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Usuario
+                          </Text>
+                          {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('dni');
+                            setOrderDirection(orderBy === 'dni' && orderDirection === 'asc' ? 'desc' : 'asc');
+
+                            setFinalOrders(
+                              finalOrders.sort((a, b) => {
+                                if (orderDirection === 'asc' && orderBy === 'dni') {
+                                  return b.customer[0].dni.localeCompare(a.customer[0].dni);
+                                } else {
+                                  return a.customer[0].dni.localeCompare(b.customer[0].dni);
+                                }
+                              }),
+                            );
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            DNI
+                          </Text>
+                          {orderBy === 'dni' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('createdAt');
+                            setOrderDirection(orderBy === 'createdAt' && orderDirection === 'asc' ? 'desc' : 'asc');
+
+                            setFinalOrders(
+                              finalOrders.sort((a, b) => {
+                                if (orderDirection === 'asc' && orderBy === 'dni') {
+                                  return b.customer[0].dni - a.customer[0].dni;
+                                } else {
+                                  return a.customer[0].dni - b.customer[0].dni;
+                                }
+                              }),
+                            );
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Fecha
+                          </Text>
+                          {orderBy === 'createdAt' && orderDirection === 'asc' ? (
+                            <IconChevronUp />
+                          ) : (
+                            <IconChevronDown />
+                          )}
+                        </UnstyledButton>
+                      </th>
+                      <th>Estado</th>
+                      <th>Detalles</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {finalOrders.map((payment) => (
+                      <tr key={payment.id}>
+                        <td>{payment.id}</td>
+                        <td>{payment.customer[0].fullName}</td>
+                        <td>{payment.customer[0].dni}</td>
+                        <td>{formatDate(payment.createdAt)}</td>
+                        <td>
+                          <Badge color={formatStatus(payment.status).color}>{formatStatus(payment.status).text}</Badge>
+                        </td>
+                        <td>
+                          <Box
+                            sx={{
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setPaymentData(payment);
+                              openDetails();
+
+                              getBank(payment.bankId);
+                              getOrder(payment.orderId);
+                            }}
+                          >
+                            <Text color="blue">Ver detalles</Text>
+                          </Box>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </ScrollArea>
             )}
           </>
         )}

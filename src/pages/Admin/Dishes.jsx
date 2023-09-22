@@ -15,6 +15,7 @@ import {
   NumberInput,
   Select,
   Textarea,
+  ScrollArea,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -517,65 +518,67 @@ function AdminDishes() {
             {dishes.length <= 0 ? (
               <Text mt={20}>No hay platos</Text>
             ) : (
-              <Table striped>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Categoría</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dishes.map((dish) => (
-                    <tr key={dish.id}>
-                      <td>{dish.id}</td>
-                      <td>{dish.name}</td>
-                      <td>{dish.description ? dish.description : 'Sin descripción'}</td>
-                      <td>$ {Number(dish.price).toFixed(2)}</td>
-                      <td>{dish.categoryName ? dish.categoryName : 'Sin categoría'}</td>
-                      <td>
-                        <Flex align="center" gap="xs">
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setDishId(dish.id);
-                              setDishData({ name: dish.name, price: dish.price });
-                              openEdit();
-                            }}
-                          >
-                            <IconPencil />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setDishId(dish.id);
-                              openDelete();
-                            }}
-                          >
-                            <IconTrash />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="transparent"
-                            color="orange"
-                            onClick={() => {
-                              setDishId(dish.id);
-                              setDishData((prev) => ({ ...prev, image: dish.imageUrl }));
-                              openImg();
-                            }}
-                          >
-                            <IconPhoto />
-                          </ActionIcon>
-                        </Flex>
-                      </td>
+              <ScrollArea>
+                <Table striped>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Descripción</th>
+                      <th>Precio</th>
+                      <th>Categoría</th>
+                      <th>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {dishes.map((dish) => (
+                      <tr key={dish.id}>
+                        <td>{dish.id}</td>
+                        <td>{dish.name}</td>
+                        <td>{dish.description ? dish.description : 'Sin descripción'}</td>
+                        <td>$ {Number(dish.price).toFixed(2)}</td>
+                        <td>{dish.categoryName ? dish.categoryName : 'Sin categoría'}</td>
+                        <td>
+                          <Flex align="center" gap="xs">
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setDishId(dish.id);
+                                setDishData({ name: dish.name, price: dish.price });
+                                openEdit();
+                              }}
+                            >
+                              <IconPencil />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setDishId(dish.id);
+                                openDelete();
+                              }}
+                            >
+                              <IconTrash />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="transparent"
+                              color="orange"
+                              onClick={() => {
+                                setDishId(dish.id);
+                                setDishData((prev) => ({ ...prev, image: dish.imageUrl }));
+                                openImg();
+                              }}
+                            >
+                              <IconPhoto />
+                            </ActionIcon>
+                          </Flex>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </ScrollArea>
             )}
           </>
         )}

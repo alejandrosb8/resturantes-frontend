@@ -243,39 +243,41 @@ function Payments() {
                       <Text weight={600}>Platos:</Text>
                     </Text>
                   </Flex>
-                  <Table striped>
-                    <thead>
-                      <tr>
-                        <th>Nombre</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Detalles</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentOrder?.dishes_orders?.map((dish) => (
-                        <tr key={dish.id}>
-                          <td>{dish.dish.name}</td>
-                          <td>{dish.quantity}</td>
-                          <td>$ {Number(dish.dish.price).toFixed(2)}</td>
-                          <td>
-                            <Popover width={200} position="bottom" withArrow shadow="md">
-                              <Popover.Target>
-                                <UnstyledButton>
-                                  <Text size="sm" color="blue">
-                                    Ver detalles
-                                  </Text>
-                                </UnstyledButton>
-                              </Popover.Target>
-                              <Popover.Dropdown>
-                                <Text size="sm">{dish.details ? dish.details : 'Sin detalles'}</Text>
-                              </Popover.Dropdown>
-                            </Popover>
-                          </td>
+                  <ScrollArea>
+                    <Table striped>
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Cantidad</th>
+                          <th>Precio</th>
+                          <th>Detalles</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                      </thead>
+                      <tbody>
+                        {currentOrder?.dishes_orders?.map((dish) => (
+                          <tr key={dish.id}>
+                            <td>{dish.dish.name}</td>
+                            <td>{dish.quantity}</td>
+                            <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                            <td>
+                              <Popover width={200} position="bottom" withArrow shadow="md">
+                                <Popover.Target>
+                                  <UnstyledButton>
+                                    <Text size="sm" color="blue">
+                                      Ver detalles
+                                    </Text>
+                                  </UnstyledButton>
+                                </Popover.Target>
+                                <Popover.Dropdown>
+                                  <Text size="sm">{dish.details ? dish.details : 'Sin detalles'}</Text>
+                                </Popover.Dropdown>
+                              </Popover>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </ScrollArea>
                 </Accordion.Panel>
               </Accordion.Item>
             </Accordion>
@@ -285,45 +287,47 @@ function Payments() {
 
       <Layout navbarActive="payments" navbar="user" header>
         <Title>Historial de pagos</Title>
-        <Table mt={20}>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Monto</th>
-              <th>Estado</th>
-              <th>Detalles</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments?.map((payment) => (
-              <tr key={payment.id}>
-                <td>{formatDate(payment.createdAt)}</td>
-                <td>$ {Number(payment.amount).toFixed(2)}</td>
-                <td>
-                  <Badge color={formatStatus(payment.status).color} variant="light">
-                    {formatStatus(payment.status).text}
-                  </Badge>
-                </td>
-                <td>
-                  <Box
-                    sx={{
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      setPaymentData(payment);
-                      open();
-
-                      getBank(payment.bankId);
-                      getOrder(payment.orderId);
-                    }}
-                  >
-                    <Text color="blue">Ver detalles</Text>
-                  </Box>
-                </td>
+        <ScrollArea>
+          <Table mt={20}>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th>Detalles</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {payments?.map((payment) => (
+                <tr key={payment.id}>
+                  <td>{formatDate(payment.createdAt)}</td>
+                  <td>$ {Number(payment.amount).toFixed(2)}</td>
+                  <td>
+                    <Badge color={formatStatus(payment.status).color} variant="light">
+                      {formatStatus(payment.status).text}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Box
+                      sx={{
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        setPaymentData(payment);
+                        open();
+
+                        getBank(payment.bankId);
+                        getOrder(payment.orderId);
+                      }}
+                    >
+                      <Text color="blue">Ver detalles</Text>
+                    </Box>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </ScrollArea>
       </Layout>
       <SideFixesButtons />
     </>
