@@ -8,7 +8,7 @@ import { ShoppingProvider } from '../contexts/ShoppingContext';
 
 const GET_TABLE_URL = '/tables';
 
-export const PrivateRouteUser = ({ children, loginOrRegister }) => {
+export const PrivateRouteUser = ({ children, loginOrRegister, support }) => {
   let { user } = useAuth();
 
   const [table, setTable] = useState('loading');
@@ -39,6 +39,10 @@ export const PrivateRouteUser = ({ children, loginOrRegister }) => {
       setTable(null);
     }
   }, [evaluateTable, tableId]);
+
+  if (support) {
+    return <TableContext.Provider value={{ table, setTable }}>{children}</TableContext.Provider>;
+  }
 
   if (!table) {
     return <Navigate to="/not-qr" />;

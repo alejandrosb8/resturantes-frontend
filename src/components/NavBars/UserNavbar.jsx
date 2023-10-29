@@ -20,6 +20,11 @@ const linksDataRaw = [
     to: '/payments',
     id: 'payments',
   },
+  {
+    label: 'Soporte',
+    to: '/support',
+    id: 'support',
+  },
 ];
 
 const linksData = linksDataRaw.map((link, index) => ({
@@ -42,6 +47,7 @@ function UserNavbar({ opened, currentActive }) {
   linksData[0].to = `/${table}`;
   linksData[1].to = `/orders/${table}`;
   linksData[2].to = `/payments/${table}`;
+  linksData[3].to = `/support/${table}`;
 
   return (
     <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} zIndex={50}>

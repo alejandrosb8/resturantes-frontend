@@ -178,6 +178,9 @@ function Register() {
                   <Button component={Link} to={`/login/${table}`} variant="outline" fullWidth>
                     Inicia sesión
                   </Button>
+                  <Button component={Link} to={`/support/${table}`} variant="subtle" fullWidth>
+                    Soporte
+                  </Button>
                 </Stack>
               </form>
             </>

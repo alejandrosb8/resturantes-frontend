@@ -26,6 +26,8 @@ import AdminVerifyPayments from './pages/Admin/VerifyPayments';
 import AdminOrders from './pages/Admin/Orders';
 import AdminPayments from './pages/Admin/Payments';
 import Payments from './pages/Payments';
+import { ModalsProvider } from '@mantine/modals';
+import Support from './pages/Support';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -44,156 +46,166 @@ export default function App() {
       }}
     >
       <Notifications position="top-center" zIndex={5000} />
-      <AuthContext.Provider value={{ user, setUser, authTokens, setAuthTokens }}>
-        <BrowserRouter>
-          <DevSupport ComponentPreviews={ComponentPreviews} useInitialHook={useInitial}>
-            <Routes>
-              <Route path="/" element={<NotQr />} />
-              <Route
-                path="/:tableId"
-                element={
-                  <PrivateRouteUser>
-                    <Home />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route path="/not-qr" element={<NotQr />} />
-              <Route path="/login" element={<NotQr />} />
-              <Route path="/register" element={<NotQr />} />
-              <Route
-                path="/login/:tableId"
-                element={
-                  <PrivateRouteUser loginOrRegister>
-                    <Login />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route
-                path="/register/:tableId"
-                element={
-                  <PrivateRouteUser loginOrRegister>
-                    <Register />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route
-                path="/dishes/:tableId"
-                element={
-                  <PrivateRouteUser>
-                    <DishesPage />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route
-                path="/order/:tableId"
-                element={
-                  <PrivateRouteUser>
-                    <UserOrder />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route
-                path="/orders/:tableId"
-                element={
-                  <PrivateRouteUser>
-                    <Orders />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route
-                path="/payment/:tableId"
-                element={
-                  <PrivateRouteUser>
-                    <Payment />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route
-                path="/payments/:tableId"
-                element={
-                  <PrivateRouteUser>
-                    <Payments />
-                  </PrivateRouteUser>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminHome />
-                  </PrivateRouteAdmin>
-                }
-              />
+      <ModalsProvider>
+        <AuthContext.Provider value={{ user, setUser, authTokens, setAuthTokens }}>
+          <BrowserRouter>
+            <DevSupport ComponentPreviews={ComponentPreviews} useInitialHook={useInitial}>
+              <Routes>
+                <Route path="/" element={<NotQr />} />
+                <Route
+                  path="/:tableId"
+                  element={
+                    <PrivateRouteUser>
+                      <Home />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route path="/not-qr" element={<NotQr />} />
+                <Route
+                  path="/support/:tableId"
+                  element={
+                    <PrivateRouteUser support>
+                      <Support />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route path="/login" element={<NotQr />} />
+                <Route path="/register" element={<NotQr />} />
+                <Route
+                  path="/login/:tableId"
+                  element={
+                    <PrivateRouteUser loginOrRegister>
+                      <Login />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route
+                  path="/register/:tableId"
+                  element={
+                    <PrivateRouteUser loginOrRegister>
+                      <Register />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route
+                  path="/dishes/:tableId"
+                  element={
+                    <PrivateRouteUser>
+                      <DishesPage />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route
+                  path="/order/:tableId"
+                  element={
+                    <PrivateRouteUser>
+                      <UserOrder />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route
+                  path="/orders/:tableId"
+                  element={
+                    <PrivateRouteUser>
+                      <Orders />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route
+                  path="/payment/:tableId"
+                  element={
+                    <PrivateRouteUser>
+                      <Payment />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route
+                  path="/payments/:tableId"
+                  element={
+                    <PrivateRouteUser>
+                      <Payments />
+                    </PrivateRouteUser>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminHome />
+                    </PrivateRouteAdmin>
+                  }
+                />
 
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route
-                path="/admin/tables"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminTables />
-                  </PrivateRouteAdmin>
-                }
-              />
-              <Route
-                path="/admin/settings"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminSettings />
-                  </PrivateRouteAdmin>
-                }
-              />
-              <Route
-                path="/admin/dishes"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminDishes />
-                  </PrivateRouteAdmin>
-                }
-              />
-              <Route
-                path="/admin/categories"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminCategories />
-                  </PrivateRouteAdmin>
-                }
-              />
-              <Route
-                path="/admin/banks"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminBanks />
-                  </PrivateRouteAdmin>
-                }
-              />
-              <Route
-                path="/admin/verify-payments"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminVerifyPayments />
-                  </PrivateRouteAdmin>
-                }
-              />
-              <Route
-                path="/admin/orders"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminOrders />
-                  </PrivateRouteAdmin>
-                }
-              />
-              <Route
-                path="/admin/payments"
-                element={
-                  <PrivateRouteAdmin>
-                    <AdminPayments />
-                  </PrivateRouteAdmin>
-                }
-              />
-            </Routes>
-          </DevSupport>
-        </BrowserRouter>
-      </AuthContext.Provider>
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin/tables"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminTables />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/settings"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminSettings />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/dishes"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminDishes />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/categories"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminCategories />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/banks"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminBanks />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/verify-payments"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminVerifyPayments />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/orders"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminOrders />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/payments"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminPayments />
+                    </PrivateRouteAdmin>
+                  }
+                />
+              </Routes>
+            </DevSupport>
+          </BrowserRouter>
+        </AuthContext.Provider>
+      </ModalsProvider>
     </MantineProvider>
   );
 }

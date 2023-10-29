@@ -290,6 +290,9 @@ function Login() {
               <Button component={Link} to={`/register/${table}`} variant="outline" fullWidth>
                 Regístrate
               </Button>
+              <Button component={Link} to={`/support/${table}`} variant="subtle" fullWidth>
+                Soporte
+              </Button>
             </Stack>
           </form>
         </Container>

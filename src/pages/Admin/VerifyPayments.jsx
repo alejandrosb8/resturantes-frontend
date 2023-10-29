@@ -399,12 +399,17 @@ function AdminVerifyPayments() {
                       <Text weight={600}>Deuda:</Text>
                       <Text>{currentOrder?.debt}</Text>
                     </Flex>
-                    <Text>
+                    <Text pt={20}>
                       <Text weight={600}>Platos:</Text>
                     </Text>
                   </Flex>
-                  <ScrollArea>
-                    <Table striped>
+                  <ScrollArea pt={30}>
+                    <Table
+                      striped
+                      style={{
+                        minWidth: '400px',
+                      }}
+                    >
                       <thead>
                         <tr>
                           <th>Nombre</th>

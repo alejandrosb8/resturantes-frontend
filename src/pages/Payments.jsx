@@ -119,7 +119,7 @@ function Payments() {
     <>
       {/* Details Modal */}
       <Modal opened={opened} onClose={close} size="xl" title="Platos de la orden" centered zIndex={500}>
-        <ScrollArea>
+        <ScrollArea pt={30}>
           <Flex direction="column" gap={15}>
             <Flex
               justify="space-between"

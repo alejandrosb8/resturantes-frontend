@@ -338,12 +338,17 @@ function AdminPayments() {
                       <Text>$ {Number(currentOrder?.debt).toFixed(2)}</Text>
                     </Flex>
 
-                    <Text>
+                    <Text pt={20}>
                       <Text weight={600}>Platos:</Text>
                     </Text>
                   </Flex>
-                  <ScrollArea>
-                    <Table striped>
+                  <ScrollArea pt={30}>
+                    <Table
+                      striped
+                      style={{
+                        minWidth: '400px',
+                      }}
+                    >
                       <thead>
                         <tr>
                           <th>Nombre</th>

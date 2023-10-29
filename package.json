@@ -11,9 +11,10 @@
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
-    "@mantine/core": "^6.0.8",
+    "@mantine/core": "^6.0.21",
     "@mantine/form": "^6.0.8",
     "@mantine/hooks": "^6.0.8",
+    "@mantine/modals": "^6.0.8",
     "@mantine/notifications": "^6.0.16",
     "@react-buddy/ide-toolbox": "^2.3.1",
     "@react-buddy/palette-mantine-core": "^6.0.0",

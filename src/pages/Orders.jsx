@@ -56,7 +56,7 @@ function Orders() {
     <>
       {/* Details Modal */}
       <Modal opened={opened} onClose={close} size="xl" title="Platos de la orden" centered>
-        <ScrollArea>
+        <ScrollArea pt={30}>
           <Table>
             <thead>
               <tr>

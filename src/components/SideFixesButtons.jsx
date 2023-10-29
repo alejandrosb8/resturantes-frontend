@@ -6,6 +6,7 @@ import { Affix, Button, Flex, rem, Transition } from '@mantine/core';
 import useUserTable from '../hooks/useTable';
 import { axiosPrivate } from '../utils/axios';
 import useAuth from '../hooks/useAuth';
+import { modals } from '@mantine/modals';
 
 function SideFixesButtons() {
   const { shoppingCart, removeAllFromCart } = useShopping();
@@ -37,7 +38,17 @@ function SideFixesButtons() {
               leftIcon={<IconTrash />}
               style={transitionStyles}
               variant="light"
-              onClick={removeAllFromCart}
+              onClick={() => {
+                modals.openConfirmModal({
+                  title: 'Vaciar pedido',
+                  children: '¿Estás seguro de que quieres vaciar el pedido?',
+                  labels: { cancel: 'Cancelar', confirm: 'Vaciar' },
+                  centered: true,
+                  onConfirm: () => {
+                    removeAllFromCart();
+                  },
+                });
+              }}
               fullWidth
             >
               Vaciar pedido
