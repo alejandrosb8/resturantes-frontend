@@ -117,6 +117,7 @@ function OrderPage() {
                     color: 'green',
                   });
                   removeAllFromCart();
+                  setOrderDishes([]);
                   navigate(`/${table}`);
                 })
                 .catch(() => {
