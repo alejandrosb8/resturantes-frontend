@@ -122,7 +122,7 @@ function AdminPayments() {
       setFinalOrders(
         payments.filter(
           (order) =>
-            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.code?.toString().includes(search) ||
             order?.customer[0]?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
             order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
             formatDate(order?.createdAt)?.toLowerCase().includes(search.toLowerCase()) ||
@@ -307,7 +307,7 @@ function AdminPayments() {
                       }}
                     >
                       <Text weight={600}>ID:</Text>
-                      <Text>{currentOrder?.id}</Text>
+                      <Text>{currentOrder?.code}</Text>
                     </Flex>
                     <Flex
                       justify="space-between"
@@ -465,9 +465,9 @@ function AdminPayments() {
                             setFinalOrders(
                               finalOrders.sort((a, b) => {
                                 if (orderDirection === 'asc' && orderBy === 'id') {
-                                  return b.id.localeCompare(a.id);
+                                  return b.code - a.code;
                                 } else {
-                                  return a.id.localeCompare(b.id);
+                                  return a.code - b.code;
                                 }
                               }),
                             );
@@ -604,7 +604,7 @@ function AdminPayments() {
                   <tbody>
                     {finalOrders.map((payment) => (
                       <tr key={payment.id}>
-                        <td>{payment.id}</td>
+                        <td>{payment.code}</td>
                         <td>{payment.customer[0].fullName}</td>
                         <td>{payment.customer[0].dni}</td>
                         <td>{formatDate(payment.createdAt)}</td>

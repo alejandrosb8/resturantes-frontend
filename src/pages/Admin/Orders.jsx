@@ -88,6 +88,7 @@ function AdminOrders() {
       axiosPrivate(authTokens, setAuthTokens, setUser)
         .get(`/orders`)
         .then((response) => {
+          console.log(response.data.data);
           setOrders(filterDishes(response.data.data, status || ordersFiltered));
           setLoading(false);
         })
@@ -107,7 +108,7 @@ function AdminOrders() {
       setFinalOrders(
         orders.filter(
           (order) =>
-            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.code?.toString()?.toLowerCase().includes(search.toLowerCase()) ||
             order?.customer?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
             order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
             formatDate(order?.createdAt)?.toLowerCase().includes(search.toLowerCase()) ||
@@ -312,9 +313,9 @@ function AdminOrders() {
                             setFinalOrders(
                               finalOrders.sort((a, b) => {
                                 if (orderDirection === 'asc' && orderBy === 'id') {
-                                  return b.id.localeCompare(a.id);
+                                  return b.code - a.code;
                                 } else {
-                                  return a.id.localeCompare(b.id);
+                                  return a.code - b.code;
                                 }
                               }),
                             );
@@ -448,7 +449,7 @@ function AdminOrders() {
                   <tbody>
                     {finalOrders.map((order) => (
                       <tr key={order.id}>
-                        <td>{order.id}</td>
+                        <td>{order.code}</td>
                         <td>{order.customer.fullName}</td>
                         <td>{order.customer.dni}</td>
                         <td>{formatDate(order.createdAt)}</td>

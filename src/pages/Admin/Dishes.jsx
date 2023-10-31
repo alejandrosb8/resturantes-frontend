@@ -16,6 +16,7 @@ import {
   Select,
   Textarea,
   ScrollArea,
+  UnstyledButton,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -25,6 +26,7 @@ import { IconPencil, IconTrash, IconPhoto } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 
 function AdminDishes() {
   const [dishes, setDishes] = useState([]);
@@ -50,6 +52,11 @@ function AdminDishes() {
 
   const [dishId, setDishId] = useState(null);
   const [dishData, setDishData] = useInputState(null);
+
+  const [orderBy, setOrderBy] = useState('');
+  const [orderDirection, setOrderDirection] = useState('asc');
+  const [finalOrders, setFinalOrders] = useState([]);
+  const [search, setSearch] = useState('');
 
   const dishCreateForm = useForm({
     initialValues: {
@@ -295,6 +302,66 @@ function AdminDishes() {
     getCategories();
   }, []);
 
+  useEffect(() => {
+    setFinalOrders(
+      dishes
+        .sort((a, b) => {
+          if (orderBy) {
+            if (orderBy === 'id') {
+              if (orderDirection === 'asc') {
+                return b.code - a.code;
+              } else {
+                return a.code - b.code;
+              }
+            }
+            if (orderBy === 'name') {
+              if (orderDirection === 'asc') {
+                return b.name.localeCompare(a.name);
+              } else {
+                return a.name.localeCompare(b.name);
+              }
+            }
+            if (orderBy === 'description') {
+              if (orderDirection === 'asc') {
+                return b.description.localeCompare(a.description);
+              } else {
+                return a.description.localeCompare(b.description);
+              }
+            }
+            if (orderBy === 'price') {
+              if (orderDirection === 'asc') {
+                return b.price - a.price;
+              } else {
+                return a.price - b.price;
+              }
+            }
+            if (orderBy === 'category') {
+              if (orderDirection === 'asc') {
+                return b.categoryName.localeCompare(a.categoryName);
+              } else {
+                return a.categoryName.localeCompare(b.categoryName);
+              }
+            }
+          } else {
+            return;
+          }
+        })
+        .filter(
+          (order) =>
+            order?.code?.toString().includes(search) ||
+            search === '' ||
+            order?.name?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '' ||
+            order?.description?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '' ||
+            order?.price?.toString().includes(search) ||
+            search === '' ||
+            order?.categoryName?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '',
+        ),
+    );
+  }, [dishes, orderBy, orderDirection, search]);
+
   return (
     <>
       {/* Modals */}
@@ -492,6 +559,17 @@ function AdminDishes() {
           }}
         />
 
+        <TextInput
+          label="Buscar"
+          placeholder="Buscar"
+          mt={10}
+          mb={10}
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+          }}
+        />
+
         {loading ? (
           <>
             <Skeleton height={50} mt={15} radius="sm" />
@@ -522,18 +600,158 @@ function AdminDishes() {
                 <Table striped>
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Nombre</th>
-                      <th>Descripción</th>
-                      <th>Precio</th>
-                      <th>Categoría</th>
+                      <th>
+                        {' '}
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('id');
+                            setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            ID
+                          </Text>
+                          {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('name');
+                            setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Nombre
+                          </Text>
+                          {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('description');
+                            setOrderDirection(orderBy === 'description' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Descripción
+                          </Text>
+                          {orderBy === 'description' && orderDirection === 'asc' ? (
+                            <IconChevronUp />
+                          ) : (
+                            <IconChevronDown />
+                          )}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('price');
+                            setOrderDirection(orderBy === 'price' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Precio
+                          </Text>
+                          {orderBy === 'price' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('category');
+                            setOrderDirection(orderBy === 'category' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Categoría
+                          </Text>
+                          {orderBy === 'category' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {dishes.map((dish) => (
+                    {finalOrders.map((dish) => (
                       <tr key={dish.id}>
-                        <td>{dish.id}</td>
+                        <td>{dish.code}</td>
                         <td>{dish.name}</td>
                         <td>{dish.description ? dish.description : 'Sin descripción'}</td>
                         <td>$ {Number(dish.price).toFixed(2)}</td>

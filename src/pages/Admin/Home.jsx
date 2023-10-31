@@ -96,7 +96,7 @@ function AdminHome() {
                 />
               </Flex>
               <Flex direction="column" align="flex-start">
-                <Text weight={600}>Total de ordenes</Text>
+                <Text weight={600}>Monto total</Text>
                 <Chart
                   options={{
                     chart: {
@@ -108,8 +108,10 @@ function AdminHome() {
                   }}
                   series={[
                     {
-                      name: 'Total de ordenes',
-                      data: data.totalOrders.data,
+                      name: 'Monto total',
+                      data: data.totalOrders.data.map((item) => {
+                        return item.toFixed(2);
+                      }),
                     },
                   ]}
                   type="bar"
