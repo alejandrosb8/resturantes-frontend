@@ -28,6 +28,7 @@ import AdminPayments from './pages/Admin/Payments';
 import Payments from './pages/Payments';
 import { ModalsProvider } from '@mantine/modals';
 import Support from './pages/Support';
+import AdminVerifyOrders from './pages/Admin/VerifyOrders.jsx';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -182,6 +183,14 @@ export default function App() {
                   element={
                     <PrivateRouteAdmin>
                       <AdminVerifyPayments />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/verify-orders"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminVerifyOrders />
                     </PrivateRouteAdmin>
                   }
                 />

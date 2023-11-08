@@ -63,7 +63,7 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
               )}
 
               <Text size="xl" color="white" weight="bold">
-                Resturantes
+                Restaurantes
               </Text>
             </div>
           </Header>
@@ -93,7 +93,7 @@ export default function Layout({ children, header, footer, navbar, navbarActive 
               )}
 
               <Text size="xl" color="white" weight="bold">
-                Resturantes
+                Restaurantes
               </Text>
             </div>
           </Header>

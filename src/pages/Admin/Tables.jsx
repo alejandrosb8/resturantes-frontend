@@ -24,6 +24,7 @@ import { QRCode } from 'react-qrcode-logo';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
+import qrcodeImage from './../../assets/logowhite.png';
 
 const ENVIRONMENT = import.meta.env.VITE_ENV;
 
@@ -307,9 +308,11 @@ function AdminTables() {
           setTableId(null);
           closeQr();
         }}
-        title="Imagen"
+        title="Código QR"
       >
-        <Center>{tableId && <QRCode value={`${DOMAIN}/login/${tableId}`} size={256} />}</Center>
+        <Center>
+          {tableId && <QRCode logoWidth={64} value={`${DOMAIN}/login/${tableId}`} size={256} logoImage={qrcodeImage} />}
+        </Center>
       </Modal>
 
       {/* Main Page */}

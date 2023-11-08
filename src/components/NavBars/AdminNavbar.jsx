@@ -15,6 +15,16 @@ const linksDataRaw = [
     id: 'admin-verify-payments',
   },
   {
+    label: 'Verificar pedidos',
+    to: '/admin/verify-orders',
+    id: 'admin-verify-orders',
+  },
+  {
+    label: 'Clientes',
+    to: '/admin/customers',
+    id: 'admin-customers',
+  },
+  {
     label: 'Mesas',
     to: '/admin/tables',
     id: 'admin-tables',
