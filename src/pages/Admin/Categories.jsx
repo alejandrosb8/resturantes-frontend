@@ -13,6 +13,7 @@ import {
   Image,
   Divider,
   ScrollArea,
+  UnstyledButton,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -21,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconPencil, IconTrash, IconPhoto } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 
 function AdminCategories() {
@@ -29,6 +31,11 @@ function AdminCategories() {
   const [modalLoading, setModalLoading] = useState(false);
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
+
+  const [orderBy, setOrderBy] = useState('');
+  const [orderDirection, setOrderDirection] = useState('asc');
+  const [finalOrders, setFinalOrders] = useState([]);
+  const [search, setSearch] = useState('');
 
   // edit modal
   const [openedEdit, { open: openEdit, close: closeEdit }] = useDisclosure(false);
@@ -192,6 +199,38 @@ function AdminCategories() {
   };
 
   useEffect(() => {
+    setFinalOrders(
+      categories
+        .sort((a, b) => {
+          if (orderBy) {
+            if (orderBy === 'id') {
+              if (orderDirection === 'asc') {
+                return b.code - a.code;
+              } else {
+                return a.code - b.code;
+              }
+            }
+            if (orderBy === 'name') {
+              if (orderDirection === 'asc') {
+                return b.name.localeCompare(a.name);
+              } else {
+                return a.name.localeCompare(b.name);
+              }
+            }
+          } else {
+            return;
+          }
+        })
+        .filter(
+          (order) =>
+            order?.code?.toString().includes(search) ||
+            order?.name?.toLowerCase().includes(search.toLowerCase()) ||
+            search === '',
+        ),
+    );
+  }, [categories, orderBy, orderDirection, search]);
+
+  useEffect(() => {
     getCategories();
   }, [getCategories]);
 
@@ -316,6 +355,16 @@ function AdminCategories() {
         <Text mt={20} mb={10}>
           Lista de categorías
         </Text>
+        <TextInput
+          label="Buscar"
+          placeholder="Buscar"
+          mt={10}
+          mb={10}
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+          }}
+        />
         {loading ? (
           <>
             <Skeleton height={50} radius="sm" />
@@ -346,15 +395,69 @@ function AdminCategories() {
                 <Table striped>
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Nombre</th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('id');
+                            setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            ID
+                          </Text>
+                          {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('name');
+                            setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Nombre
+                          </Text>
+                          {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {categories.map((category) => (
+                    {finalOrders.map((category) => (
                       <tr key={category.id}>
-                        <td>{category.id}</td>
+                        <td>{category.code}</td>
                         <td>{category.name}</td>
                         <td>
                           <Flex align="center" gap="xs">

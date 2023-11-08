@@ -187,9 +187,9 @@ function AdminTables() {
           if (orderBy) {
             if (orderBy === 'id') {
               if (orderDirection === 'asc') {
-                return b.id.localeCompare(a.id);
+                return b.code - a.code;
               } else {
-                return a.id.localeCompare(b.id);
+                return a.code - b.code;
               }
             }
             if (orderBy === 'name') {
@@ -205,7 +205,7 @@ function AdminTables() {
         })
         .filter(
           (order) =>
-            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.code?.toString().includes(search) ||
             order?.description?.toLowerCase().includes(search.toLowerCase()) ||
             search === '',
         ),
@@ -426,7 +426,7 @@ function AdminTables() {
                   <tbody>
                     {finalOrders.map((table) => (
                       <tr key={table.id}>
-                        <td>{table.id}</td>
+                        <td>{table.code}</td>
                         <td>{table.description}</td>
                         <td>
                           <Flex align="center" gap="xs">

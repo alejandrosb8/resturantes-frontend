@@ -176,9 +176,9 @@ function AdminBanks() {
           if (orderBy) {
             if (orderBy === 'id') {
               if (orderDirection === 'asc') {
-                return b.id.localeCompare(a.id);
+                return b.code - a.code;
               } else {
-                return a.id.localeCompare(b.id);
+                return a.code - b.code;
               }
             }
             if (orderBy === 'name') {
@@ -194,7 +194,7 @@ function AdminBanks() {
         })
         .filter(
           (order) =>
-            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.code?.toString().includes(search) ||
             order?.name?.toLowerCase().includes(search.toLowerCase()) ||
             search === '',
         ),
@@ -401,7 +401,7 @@ function AdminBanks() {
                   <tbody>
                     {finalOrders.map((bank) => (
                       <tr key={bank.id}>
-                        <td>{bank.id}</td>
+                        <td>{bank.code}</td>
                         <td>{bank.name}</td>
                         <td>
                           <Flex align="center" gap="xs">
