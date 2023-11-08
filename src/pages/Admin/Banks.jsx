@@ -49,6 +49,8 @@ function AdminBanks() {
   const bankCreateForm = useForm({
     initialValues: {
       name: '',
+      dni: '',
+      number: '',
     },
 
     validate: {
@@ -57,12 +59,24 @@ function AdminBanks() {
           return 'El nombre es requerida';
         }
       },
+      dni: (value) => {
+        if (!value) {
+          return 'El DNI es requerido';
+        }
+      },
+      number: (value) => {
+        if (!value) {
+          return 'El número de cuenta es requerido';
+        }
+      },
     },
   });
 
   const bankEditForm = useForm({
     initialValues: {
       name: '',
+      dni: '',
+      number: '',
     },
   });
 
@@ -72,6 +86,7 @@ function AdminBanks() {
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .get(`/banks`)
       .then((response) => {
+        console.log(response.data.data);
         setBanks(response.data.data);
         setLoading(false);
       })
@@ -112,8 +127,10 @@ function AdminBanks() {
   const createBank = (values) => {
     setModalLoading(true);
 
+    console.log(values);
+
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .post('/banks', { name: values.name })
+      .post('/banks', { name: values.name, dni: values.dni, number: values.number })
       .then(() => {
         getBanks();
         closeCreate();
@@ -139,14 +156,28 @@ function AdminBanks() {
     setModalLoading(true);
 
     if (!values.name) {
+      values.name = banks.filter((bank) => bank.id === bankId)[0].name;
+    }
+
+    if (!values.dni) {
+      values.dni = banks.filter((bank) => bank.id === bankId)[0].dni;
+    }
+
+    if (!values.number) {
+      values.number = banks.filter((bank) => bank.id === bankId)[0].number;
+    }
+
+    if (!values.name && !values.dni && !values.number) {
       closeEdit();
       setModalLoading(false);
       bankEditForm.reset();
       return;
     }
 
+    console.log(values);
+
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .patch(`/banks/${bankId}`, { name: values.name })
+      .patch(`/banks/${bankId}`, { name: values.name, dni: values.dni, number: values.number })
       .then(() => {
         getBanks();
         closeEdit();
@@ -188,6 +219,20 @@ function AdminBanks() {
                 return a.name.localeCompare(b.name);
               }
             }
+            if (orderBy === 'dni') {
+              if (orderDirection === 'asc') {
+                return b.dni.localeCompare(a.dni);
+              } else {
+                return a.dni.localeCompare(b.dni);
+              }
+            }
+            if (orderBy === 'number') {
+              if (orderDirection === 'asc') {
+                return b.number.localeCompare(a.number);
+              } else {
+                return a.number.localeCompare(b.number);
+              }
+            }
           } else {
             return;
           }
@@ -221,6 +266,14 @@ function AdminBanks() {
       >
         <form onSubmit={bankCreateForm.onSubmit((values) => createBank(values))}>
           <TextInput placeholder="Nombre" label="Nombre" required {...bankCreateForm.getInputProps('name')} />
+          <TextInput mt={10} placeholder="DNI" label="DNI" required {...bankCreateForm.getInputProps('dni')} />
+          <TextInput
+            mt={10}
+            placeholder="Número de cuenta"
+            label="Número de cuenta"
+            required
+            {...bankCreateForm.getInputProps('number')}
+          />
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
             Confirmar
           </Button>
@@ -244,6 +297,22 @@ function AdminBanks() {
             label="Nuevo nombre"
             name="Si no ingresa un nombre, se mantendrá el actual"
             {...bankEditForm.getInputProps('name')}
+          />
+
+          <TextInput
+            placeholder="DNI"
+            label="Nuevo DNI"
+            name="Si no ingresa un DNI, se mantendrá el actual"
+            mt={10}
+            {...bankEditForm.getInputProps('dni')}
+          />
+
+          <TextInput
+            placeholder="Número de cuenta"
+            label="Nuevo número de cuenta"
+            name="Si no ingresa un número de cuenta, se mantendrá el actual"
+            mt={10}
+            {...bankEditForm.getInputProps('number')}
           />
 
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
@@ -394,6 +463,62 @@ function AdminBanks() {
                           {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
                         </UnstyledButton>
                       </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('dni');
+                            setOrderDirection(orderBy === 'dni' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            DNI
+                          </Text>
+                          {orderBy === 'dni' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('number');
+                            setOrderDirection(orderBy === 'number' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Número de cuenta
+                          </Text>
+                          {orderBy === 'number' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
 
                       <th>Acciones</th>
                     </tr>
@@ -403,6 +528,8 @@ function AdminBanks() {
                       <tr key={bank.id}>
                         <td>{bank.code}</td>
                         <td>{bank.name}</td>
+                        <td>{bank.dni}</td>
+                        <td>{bank.number}</td>
                         <td>
                           <Flex align="center" gap="xs">
                             <ActionIcon
