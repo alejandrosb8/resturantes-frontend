@@ -19,11 +19,11 @@ const linksDataRaw = [
     to: '/admin/verify-orders',
     id: 'admin-verify-orders',
   },
-  {
+  /* {
     label: 'Clientes',
     to: '/admin/customers',
     id: 'admin-customers',
-  },
+  }, */
   {
     label: 'Mesas',
     to: '/admin/tables',

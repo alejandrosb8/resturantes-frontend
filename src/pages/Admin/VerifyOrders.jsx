@@ -291,7 +291,7 @@ function AdminVerifyOrders() {
                 }}
               >
                 <Text weight={600}>Total:</Text>
-                <Text>$ {Number(orderDetails?.total).toFixed(2)}</Text>
+                <Text>Bs. {Number(orderDetails?.total).toFixed(2)}</Text>
               </Flex>
               <Flex
                 justify="space-between"
@@ -326,7 +326,7 @@ function AdminVerifyOrders() {
                     <tr key={dish.id}>
                       <td>{dish.dish.name}</td>
                       <td>{dish.quantity}</td>
-                      <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                      <td>Bs. {Number(dish.dish.price).toFixed(2)}</td>
                       <td>
                         <Popover width={200} position="bottom" withArrow shadow="md">
                           <Popover.Target>

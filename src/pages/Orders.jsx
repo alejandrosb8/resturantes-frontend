@@ -70,7 +70,7 @@ function Orders() {
               {order?.dishes_orders.map((dish) => (
                 <tr key={dish.id}>
                   <td>{dish.dish.name}</td>
-                  <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                  <td>Bs. {Number(dish.dish.price).toFixed(2)}</td>
                   <td>
                     <Text>{dish.quantity}</Text>
                   </td>
@@ -111,7 +111,7 @@ function Orders() {
               {orders?.map((order) => (
                 <tr key={order.id}>
                   <td>{formatDate(order.createdAt)}</td>
-                  <td>$ {Number(order.total).toFixed(2)}</td>
+                  <td>Bs. {Number(order.total).toFixed(2)}</td>
                   <td>
                     {order.debt <= 0 ? <Badge color="green">Pagado</Badge> : <Badge color="red">Pendiente</Badge>}
                   </td>

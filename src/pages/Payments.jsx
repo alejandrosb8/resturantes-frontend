@@ -137,7 +137,7 @@ function Payments() {
               }}
             >
               <Text weight={600}>Monto:</Text>
-              <Text>$ {Number(paymentData?.amount).toFixed(2)}</Text>
+              <Text>Bs. {Number(paymentData?.amount).toFixed(2)}</Text>
             </Flex>
             <Flex
               justify="space-between"
@@ -226,7 +226,7 @@ function Payments() {
                       }}
                     >
                       <Text weight={600}>Total:</Text>
-                      <Text>$ {Number(currentOrder?.total).toFixed(2)}</Text>
+                      <Text>Bs. {Number(currentOrder?.total).toFixed(2)}</Text>
                     </Flex>
 
                     <Flex
@@ -236,7 +236,7 @@ function Payments() {
                       }}
                     >
                       <Text weight={600}>Deuda actual:</Text>
-                      <Text>$ {Number(currentOrder?.debt).toFixed(2)}</Text>
+                      <Text>Bs. {Number(currentOrder?.debt).toFixed(2)}</Text>
                     </Flex>
 
                     <Text>
@@ -258,7 +258,7 @@ function Payments() {
                           <tr key={dish.id}>
                             <td>{dish.dish.name}</td>
                             <td>{dish.quantity}</td>
-                            <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                            <td>Bs. {Number(dish.dish.price).toFixed(2)}</td>
                             <td>
                               <Popover width={200} position="bottom" withArrow shadow="md">
                                 <Popover.Target>
@@ -301,7 +301,7 @@ function Payments() {
               {payments?.map((payment) => (
                 <tr key={payment.id}>
                   <td>{formatDate(payment.createdAt)}</td>
-                  <td>$ {Number(payment.amount).toFixed(2)}</td>
+                  <td>Bs. {Number(payment.amount).toFixed(2)}</td>
                   <td>
                     <Badge color={formatStatus(payment.status).color} variant="light">
                       {formatStatus(payment.status).text}

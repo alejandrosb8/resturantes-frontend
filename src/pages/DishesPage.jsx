@@ -370,7 +370,7 @@ export const DishesPage = () => {
                             </Flex>
                             <Divider mt={10} mb={10} />
                             <Flex justify="space-between" align="center">
-                              <Text color="gray.8">$ {dish.price}</Text>
+                              <Text color="gray.8">Bs. {dish.price}</Text>
                               <Button
                                 color="orange"
                                 variant="light"

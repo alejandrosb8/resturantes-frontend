@@ -29,6 +29,7 @@ import Payments from './pages/Payments';
 import { ModalsProvider } from '@mantine/modals';
 import Support from './pages/Support';
 import AdminVerifyOrders from './pages/Admin/VerifyOrders.jsx';
+import AdminCustomers from './pages/Admin/Customers.jsx';
 
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
@@ -167,6 +168,14 @@ export default function App() {
                   element={
                     <PrivateRouteAdmin>
                       <AdminCategories />
+                    </PrivateRouteAdmin>
+                  }
+                />
+                <Route
+                  path="/admin/customers"
+                  element={
+                    <PrivateRouteAdmin>
+                      <AdminCustomers />
                     </PrivateRouteAdmin>
                   }
                 />

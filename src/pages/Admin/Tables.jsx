@@ -216,6 +216,19 @@ function AdminTables() {
     getTables();
   }, []);
 
+  const downloadCode = () => {
+    const canvas = document.getElementById('qrImage');
+    if (canvas) {
+      const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      let downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      downloadLink.download = `codigo_qr.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+  };
+
   return (
     <>
       {/* Modals */}
@@ -310,8 +323,24 @@ function AdminTables() {
         }}
         title="Código QR"
       >
+        <Text>Descargue el código QR para que los clientes puedan escanearlo y acceder a la mesa</Text>
+
         <Center>
-          {tableId && <QRCode logoWidth={64} value={`${DOMAIN}/login/${tableId}`} size={256} logoImage={qrcodeImage} />}
+          <Flex direction="column" align="center" justify="center" mt={20}>
+            {tableId && (
+              <QRCode
+                logoWidth={64}
+                value={`${DOMAIN}/login/${tableId}`}
+                size={256}
+                logoImage={qrcodeImage}
+                enableCORS={true}
+                id="qrImage"
+              />
+            )}
+            <Button onClick={downloadCode} color="orange">
+              Descargar
+            </Button>
+          </Flex>
         </Center>
       </Modal>
 

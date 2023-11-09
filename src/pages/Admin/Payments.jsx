@@ -227,7 +227,7 @@ function AdminPayments() {
               }}
             >
               <Text weight={600}>Monto:</Text>
-              <Text>$ {Number(paymentData?.amount).toFixed(2)}</Text>
+              <Text>Bs. {Number(paymentData?.amount).toFixed(2)}</Text>
             </Flex>
             <Flex
               justify="space-between"
@@ -325,7 +325,7 @@ function AdminPayments() {
                       }}
                     >
                       <Text weight={600}>Total:</Text>
-                      <Text>$ {Number(currentOrder?.total).toFixed(2)}</Text>
+                      <Text>Bs. {Number(currentOrder?.total).toFixed(2)}</Text>
                     </Flex>
 
                     <Flex
@@ -335,7 +335,7 @@ function AdminPayments() {
                       }}
                     >
                       <Text weight={600}>Deuda actual:</Text>
-                      <Text>$ {Number(currentOrder?.debt).toFixed(2)}</Text>
+                      <Text>Bs. {Number(currentOrder?.debt).toFixed(2)}</Text>
                     </Flex>
 
                     <Text pt={20}>
@@ -362,7 +362,7 @@ function AdminPayments() {
                           <tr key={dish.id}>
                             <td>{dish.dish.name}</td>
                             <td>{dish.quantity}</td>
-                            <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                            <td>Bs. {Number(dish.dish.price).toFixed(2)}</td>
                             <td>
                               <Popover width={200} position="bottom" withArrow shadow="md">
                                 <Popover.Target>

@@ -227,7 +227,7 @@ function Payment() {
               {currentOrder && (
                 <>
                   <Text size="sm" mt={0} mb={20}>
-                    Total a pagar: $ {Number.parseFloat(currentOrder?.total).toFixed(2)}
+                    Total a pagar: Bs. {Number.parseFloat(currentOrder?.total).toFixed(2)}
                   </Text>
 
                   <Select
@@ -252,8 +252,8 @@ function Payment() {
                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                     formatter={(value) =>
                       !Number.isNaN(parseFloat(value))
-                        ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
-                        : '$ '
+                        ? `Bs. ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
+                        : 'Bs. '
                     }
                   />
                   <TextInput

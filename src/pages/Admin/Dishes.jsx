@@ -395,7 +395,7 @@ function AdminDishes() {
             {...dishCreateForm.getInputProps('price')}
             parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
             formatter={(value) =>
-              !Number.isNaN(parseFloat(value)) ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : '$ '
+              !Number.isNaN(parseFloat(value)) ? `Bs. ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : 'Bs. '
             }
           />
           <Select
@@ -457,7 +457,7 @@ function AdminDishes() {
             {...dishEditForm.getInputProps('price')}
             parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
             formatter={(value) =>
-              !Number.isNaN(parseFloat(value)) ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : '$ '
+              !Number.isNaN(parseFloat(value)) ? `Bs. ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : 'Bs. '
             }
           />
           <Select
@@ -754,7 +754,7 @@ function AdminDishes() {
                         <td>{dish.code}</td>
                         <td>{dish.name}</td>
                         <td>{dish.description ? dish.description : 'Sin descripción'}</td>
-                        <td>$ {Number(dish.price).toFixed(2)}</td>
+                        <td>Bs. {Number(dish.price).toFixed(2)}</td>
                         <td>{dish.categoryName ? dish.categoryName : 'Sin categoría'}</td>
                         <td>
                           <Flex align="center" gap="xs">

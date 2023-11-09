@@ -235,7 +235,7 @@ function OrderPage() {
                           </ActionIcon>
                         </Flex>
                       </td>
-                      <td>$ {Number(dish.price).toFixed(2)}</td>
+                      <td>Bs. {Number(dish.price).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -246,7 +246,7 @@ function OrderPage() {
                 </Text>
                 <Divider sx={{ width: '100%' }} variant="dashed" size="sm" />
                 <Text size="lg" weight={500} sx={{ flexShrink: 0 }}>
-                  $ {Number(orderDishes.reduce((acc, dish) => acc + dish.price * dish.quantity, 0)).toFixed(2)}
+                  Bs. {Number(orderDishes.reduce((acc, dish) => acc + dish.price * dish.quantity, 0)).toFixed(2)}
                 </Text>
               </Flex>
 

@@ -277,7 +277,7 @@ function AdminOrders() {
               }}
             >
               <Text weight={600}>Total:</Text>
-              <Text>$ {Number(orderData?.total).toFixed(2)}</Text>
+              <Text>Bs. {Number(orderData?.total).toFixed(2)}</Text>
             </Flex>
             <Flex
               justify="space-between"
@@ -286,7 +286,7 @@ function AdminOrders() {
               }}
             >
               <Text weight={600}>Deuda</Text>
-              <Text>$ {Number(orderData?.debt).toFixed(2)}</Text>
+              <Text>Bs. {Number(orderData?.debt).toFixed(2)}</Text>
             </Flex>
 
             <Flex justify="space-between" pt={20}>
@@ -312,7 +312,7 @@ function AdminOrders() {
                     <tr key={dish.dish.id}>
                       <td>{dish.dish.name}</td>
                       <td>{dish.quantity}</td>
-                      <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                      <td>Bs. {Number(dish.dish.price).toFixed(2)}</td>
                       <td>
                         <Popover width={200} position="bottom" withArrow shadow="md">
                           <Popover.Target>

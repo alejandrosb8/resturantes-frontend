@@ -299,7 +299,7 @@ function AdminVerifyPayments() {
               }}
             >
               <Text weight={600}>Monto:</Text>
-              <Text>$ {Number(paymentDetails?.amount).toFixed(2)}</Text>
+              <Text>Bs. {Number(paymentDetails?.amount).toFixed(2)}</Text>
             </Flex>
             <Flex
               justify="space-between"
@@ -388,7 +388,7 @@ function AdminVerifyPayments() {
                       }}
                     >
                       <Text weight={600}>Total:</Text>
-                      <Text>$ {Number(currentOrder?.total).toFixed(2)}</Text>
+                      <Text>Bs. {Number(currentOrder?.total).toFixed(2)}</Text>
                     </Flex>
                     <Flex
                       justify="space-between"
@@ -423,7 +423,7 @@ function AdminVerifyPayments() {
                           <tr key={dish.id}>
                             <td>{dish.dish.name}</td>
                             <td>{dish.quantity}</td>
-                            <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                            <td>Bs. {Number(dish.dish.price).toFixed(2)}</td>
                             <td>
                               <Popover width={200} position="bottom" withArrow shadow="md">
                                 <Popover.Target>
@@ -704,7 +704,7 @@ function AdminVerifyPayments() {
                         <td>{formatDate(payment.createdAt)}</td>
                         <td>{payment.customer[0].fullName}</td>
                         <td>{payment.customer[0].dni}</td>
-                        <td>$ {Number(payment.amount).toFixed(2)}</td>
+                        <td>Bs. {Number(payment.amount).toFixed(2)}</td>
                         <td>
                           <Box
                             sx={{
