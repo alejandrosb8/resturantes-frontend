@@ -7,15 +7,13 @@ import {
   Skeleton,
   Flex,
   Modal,
-  Image,
-  Divider,
+  Select,
   Box,
   ScrollArea,
-  Accordion,
-  Center,
   Popover,
   UnstyledButton,
   TextInput,
+  Badge,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -33,22 +31,45 @@ function formatDate(date) {
   return `${day}-${month}-${year}`;
 }
 
-function formatPaymentType(type) {
-  switch (type) {
-    case 'cash':
-      return 'Efectivo';
-    case 'card':
-      return 'Tarjeta';
-    case 'transfer':
-      return 'Transferencia';
-    default:
-      return 'Desconocido';
+function formatStatus(status) {
+  if (status === 'pending') {
+    return {
+      color: 'orange',
+      text: 'Pendiente',
+    };
+  } else if (status === 'wait') {
+    return {
+      color: 'yellow',
+      text: 'En espera',
+    };
+  } else if (status === 'delivered') {
+    return {
+      color: 'green',
+      text: 'Entregado',
+    };
+  } else if (status === 'rejected') {
+    return {
+      color: 'red',
+      text: 'Rechazado',
+    };
+  }
+}
+
+function formatPayment(debt) {
+  if (debt > 0) {
+    return {
+      color: 'red',
+      text: 'Pendiente',
+    };
+  } else {
+    return {
+      color: 'green',
+      text: 'Pagado',
+    };
   }
 }
 
 function AdminVerifyOrders() {
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [modalLoading, setModalLoading] = useState(false);
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
@@ -59,29 +80,28 @@ function AdminVerifyOrders() {
   // confirm modal
   const [openedConfirm, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
 
-  const [paymentId, setPaymentId] = useState(null);
-  const [paymentDetails, setPaymentDetails] = useState(null);
-  const [bank, setBank] = useState(null);
-  const [currentOrder, setCurrentOrder] = useState(null);
-  const [currentAction, setCurrentAction] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [ordersFiltered, setOrdersFiltered] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const [orderBy, setOrderBy] = useState('');
   const [orderDirection, setOrderDirection] = useState('asc');
   const [finalOrders, setFinalOrders] = useState([]);
   const [search, setSearch] = useState('');
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [currentAction, setCurrentAction] = useState(null);
 
-  const getPayments = useCallback(
+  const getOrders = useCallback(
     (query, withoutLoading) => {
       if (!withoutLoading) {
         setLoading(true);
       }
 
-      const requestUrl = query ? `/payments?status=${query}` : '/payments';
-
       axiosPrivate(authTokens, setAuthTokens, setUser)
-        .get(requestUrl)
+        .get('/orders')
         .then((response) => {
-          setPayments(response.data.data);
+          setOrders(response.data.data);
+          console.log(response.data.data);
 
           setLoading(false);
         })
@@ -89,17 +109,19 @@ function AdminVerifyOrders() {
           if (err?.response?.status === 404) {
             setLoading(false);
           } else {
-            setPayments([]);
+            setOrders([]);
           }
         });
     },
     [authTokens, setAuthTokens, setUser, navigate],
   );
 
-  const getPaymentsFilteredBySearch = useCallback(() => {
-    console.log('Getting payments filtered by search...');
+  const getOrdersFilteredBySearch = useCallback(() => {
+    console.log(orders);
     setFinalOrders(
-      payments
+      orders
+        .filter((order) => order.status === ordersFiltered || ordersFiltered === '' || !ordersFiltered)
+        .filter((order) => order.status !== 'delivered' && order.status !== 'rejected')
         .sort((a, b) => {
           if (orderBy) {
             if (orderBy === 'createdAt') {
@@ -109,18 +131,33 @@ function AdminVerifyOrders() {
                 return new Date(b.createdAt) - new Date(a.createdAt);
               }
             }
+            if (orderBy === 'id') {
+              if (orderDirection === 'asc') {
+                return b.code - a.code;
+              } else {
+                return a.code - b.code;
+              }
+            }
+            if (orderBy === 'table') {
+              if (orderDirection === 'asc') {
+                return b.tableDescription.localeCompare(a.tableDescription);
+              } else {
+                return a.tableDescription.localeCompare(b.tableDescription);
+              }
+            }
+
             if (orderBy === 'name') {
               if (orderDirection === 'asc') {
-                return b.customer[0].fullName.localeCompare(a.customer[0].fullName);
+                return b.customer.fullName.localeCompare(a.customer.fullName);
               } else {
-                return a.customer[0].fullName.localeCompare(b.customer[0].fullName);
+                return a.customer.fullName.localeCompare(b.customer.fullName);
               }
             }
             if (orderBy === 'dni') {
               if (orderDirection === 'asc') {
-                return b.customer[0].dni - a.customer[0].dni;
+                return b.customer.dni - a.customer.dni;
               } else {
-                return a.customer[0].dni - b.customer[0].dni;
+                return a.customer.dni - b.customer.dni;
               }
             }
             if (orderBy === 'amount') {
@@ -137,93 +174,54 @@ function AdminVerifyOrders() {
         .filter(
           (order) =>
             order?.id?.toLowerCase().includes(search.toLowerCase()) ||
-            order?.customer[0]?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.customer?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
             order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
             order?.amount?.toString()?.toLowerCase().includes(search.toLowerCase()) ||
             formatDate(order?.createdAt)?.toLowerCase().includes(search.toLowerCase()) ||
             search === '',
         ),
     );
-  }, [payments, orderBy, orderDirection, search]);
+  }, [orders, orderBy, orderDirection, search]);
 
   useEffect(() => {
-    getPaymentsFilteredBySearch(search);
-  }, [payments, search, getPaymentsFilteredBySearch]);
-
-  const getBank = useCallback(
-    (id) => {
-      setModalLoading(true);
-      if (!id) {
-        setModalLoading(false);
-        return;
-      }
-
-      axiosPrivate(authTokens, setAuthTokens, setUser)
-        .get(`/banks/${id}`)
-        .then((response) => {
-          setBank(response.data.data);
-        })
-        .catch((err) => {
-          if (err.response.status === 404) {
-            setModalLoading(false);
-          } else {
-            setBank(null);
-          }
-        });
-    },
-    [authTokens, setAuthTokens, setUser, navigate],
-  );
-
-  const getOrder = useCallback(
-    (id) => {
-      setModalLoading(true);
-      if (!id) {
-        setModalLoading(false);
-        return;
-      }
-
-      axiosPrivate(authTokens, setAuthTokens, setUser)
-        .get(`/orders/${id}`)
-        .then((response) => {
-          setCurrentOrder(response.data.data);
-          setModalLoading(false);
-        })
-        .catch((err) => {
-          if (err.response.status === 404) {
-            setModalLoading(false);
-          } else {
-            setCurrentOrder(null);
-          }
-        });
-    },
-    [authTokens, setAuthTokens, setUser, navigate],
-  );
+    getOrdersFilteredBySearch(search);
+  }, [orders, search, getOrdersFilteredBySearch]);
 
   const verifyPayment = (id, action) => {
     setLoading(true);
     setModalLoading(true);
 
+    console.log(id, action);
+
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .patch(`/payments/${id}`, {
+      .patch(`/orders/${id}`, {
         status: action,
       })
       .then(() => {
         setModalLoading(false);
-        getPayments('pending');
+        getOrders('pending');
         closeConfirm();
         closeDetails();
 
-        if (action === 'approved') {
+        if (action === 'rejected') {
           notifications.show({
-            title: 'Pago aprobado',
-            message: 'El pago se aprobó correctamente',
-            color: 'teal',
+            title: 'Pedido rechazado',
+            message: 'El pedido fue rechazado',
+            color: 'red',
           });
-        } else {
+        }
+        if (action === 'wait') {
           notifications.show({
-            title: 'Pago rechazado',
-            message: 'El pago se rechazó correctamente',
-            color: 'orange',
+            title: 'Pedido aceptado',
+            message: 'El pedido fue aceptado',
+            color: 'green',
+          });
+        }
+        if (action === 'delivered') {
+          notifications.show({
+            title: 'Pedido entregado',
+            message: 'El pedido fue entregado',
+            color: 'green',
           });
         }
       })
@@ -239,12 +237,12 @@ function AdminVerifyOrders() {
   };
 
   useEffect(() => {
-    getPayments('pending');
+    getOrders('pending');
 
     //create interval to get new payments every 5 seconds
     const interval = setInterval(() => {
       console.log('Getting new payments...');
-      getPayments('pending', true);
+      getOrders('pending', true);
     }, 5000);
 
     return () => {
@@ -261,11 +259,7 @@ function AdminVerifyOrders() {
       <Modal
         opened={openedDetails}
         onClose={() => {
-          setPaymentId(null);
-          setPaymentDetails(null);
-          setBank(null);
-          setCurrentOrder(null);
-          setCurrentAction(null);
+          setOrderDetails(null);
 
           closeDetails();
         }}
@@ -275,177 +269,83 @@ function AdminVerifyOrders() {
         <ScrollArea>
           <Flex direction="column" gap={15}>
             <Flex
-              justify="space-between"
+              direction="column"
+              gap={15}
               sx={{
-                borderBottom: '1px solid #DDD',
+                width: '100%',
               }}
             >
-              <Text weight={600}>Fecha:</Text>
-              <Text>{formatDate(paymentDetails?.createdAt)}</Text>
+              <Flex
+                justify="space-between"
+                sx={{
+                  borderBottom: '1px solid #DDD',
+                }}
+              >
+                <Text weight={600}>Fecha:</Text>
+                <Text>{formatDate(orderDetails?.createdAt)}</Text>
+              </Flex>
+              <Flex
+                justify="space-between"
+                sx={{
+                  borderBottom: '1px solid #DDD',
+                }}
+              >
+                <Text weight={600}>Total:</Text>
+                <Text>$ {Number(orderDetails?.total).toFixed(2)}</Text>
+              </Flex>
+              <Flex
+                justify="space-between"
+                sx={{
+                  borderBottom: '1px solid #DDD',
+                }}
+              >
+                <Text weight={600}>Deuda:</Text>
+                <Text>{orderDetails?.debt}</Text>
+              </Flex>
+              <Text pt={20}>
+                <Text weight={600}>Platos:</Text>
+              </Text>
             </Flex>
-            <Flex
-              justify="space-between"
-              sx={{
-                borderBottom: '1px solid #DDD',
-              }}
-            >
-              <Text weight={600}>Usuario:</Text>
-              <Text>{paymentDetails?.customer[0].fullName}</Text>
-            </Flex>
-            <Flex
-              justify="space-between"
-              sx={{
-                borderBottom: '1px solid #DDD',
-              }}
-            >
-              <Text weight={600}>Monto:</Text>
-              <Text>$ {Number(paymentDetails?.amount).toFixed(2)}</Text>
-            </Flex>
-            <Flex
-              justify="space-between"
-              sx={{
-                borderBottom: '1px solid #DDD',
-              }}
-            >
-              <Text weight={600}>DNI:</Text>
-              <Text>{paymentDetails?.dni}</Text>
-            </Flex>
-            <Flex
-              justify="space-between"
-              sx={{
-                borderBottom: '1px solid #DDD',
-              }}
-            >
-              <Text weight={600}>Tipo de pago:</Text>
-              <Text>{formatPaymentType(paymentDetails?.type)}</Text>
-            </Flex>
-            {paymentDetails?.type === 'transfer' && (
-              <>
-                <Flex
-                  justify="space-between"
-                  sx={{
-                    borderBottom: '1px solid #DDD',
-                  }}
-                >
-                  <Text weight={600}>Banco:</Text>
-                  <Text>{bank?.name}</Text>
-                </Flex>
-                <Flex
-                  justify="space-between"
-                  sx={{
-                    borderBottom: '1px solid #DDD',
-                  }}
-                >
-                  <Text weight={600}>Número de referencia:</Text>
-                  <Text>{paymentDetails?.reference}</Text>
-                </Flex>
-                <Text>
-                  <Text weight={600}>Imagen de la transacción:</Text>
-                </Text>
-                <Center>
-                  <Image
-                    src={paymentDetails?.voucherUrl}
-                    alt="Imagen de la transacción"
-                    sx={{
-                      maxWidth: '400px',
-                    }}
-                  />
-                </Center>
-              </>
-            )}
-
-            <Divider />
-
-            <Accordion defaultValue={null}>
-              <Accordion.Item value="orderDetails">
-                <Accordion.Control>Detalles de la orden</Accordion.Control>
-                <Accordion.Panel
-                  sx={{
-                    padding: '0px',
-                    width: '100%',
-                  }}
-                >
-                  <Flex
-                    direction="column"
-                    gap={15}
-                    sx={{
-                      width: '100%',
-                    }}
-                  >
-                    <Flex
-                      justify="space-between"
-                      sx={{
-                        borderBottom: '1px solid #DDD',
-                      }}
-                    >
-                      <Text weight={600}>Fecha:</Text>
-                      <Text>{formatDate(currentOrder?.createdAt)}</Text>
-                    </Flex>
-                    <Flex
-                      justify="space-between"
-                      sx={{
-                        borderBottom: '1px solid #DDD',
-                      }}
-                    >
-                      <Text weight={600}>Total:</Text>
-                      <Text>$ {Number(currentOrder?.total).toFixed(2)}</Text>
-                    </Flex>
-                    <Flex
-                      justify="space-between"
-                      sx={{
-                        borderBottom: '1px solid #DDD',
-                      }}
-                    >
-                      <Text weight={600}>Deuda:</Text>
-                      <Text>{currentOrder?.debt}</Text>
-                    </Flex>
-                    <Text pt={20}>
-                      <Text weight={600}>Platos:</Text>
-                    </Text>
-                  </Flex>
-                  <ScrollArea pt={30}>
-                    <Table
-                      striped
-                      style={{
-                        minWidth: '400px',
-                      }}
-                    >
-                      <thead>
-                        <tr>
-                          <th>Nombre</th>
-                          <th>Cantidad</th>
-                          <th>Precio</th>
-                          <th>Detalles</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentOrder?.dishes_orders?.map((dish) => (
-                          <tr key={dish.id}>
-                            <td>{dish.dish.name}</td>
-                            <td>{dish.quantity}</td>
-                            <td>$ {Number(dish.dish.price).toFixed(2)}</td>
-                            <td>
-                              <Popover width={200} position="bottom" withArrow shadow="md">
-                                <Popover.Target>
-                                  <UnstyledButton>
-                                    <Text size="sm" color="blue">
-                                      Ver detalles
-                                    </Text>
-                                  </UnstyledButton>
-                                </Popover.Target>
-                                <Popover.Dropdown>
-                                  <Text size="sm">{dish.details ? dish.details : 'Sin detalles'}</Text>
-                                </Popover.Dropdown>
-                              </Popover>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </ScrollArea>
-                </Accordion.Panel>
-              </Accordion.Item>
-            </Accordion>
+            <ScrollArea pt={30}>
+              <Table
+                striped
+                style={{
+                  minWidth: '400px',
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Detalles</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orderDetails?.dishes_orders?.map((dish) => (
+                    <tr key={dish.id}>
+                      <td>{dish.dish.name}</td>
+                      <td>{dish.quantity}</td>
+                      <td>$ {Number(dish.dish.price).toFixed(2)}</td>
+                      <td>
+                        <Popover width={200} position="bottom" withArrow shadow="md">
+                          <Popover.Target>
+                            <UnstyledButton>
+                              <Text size="sm" color="blue">
+                                Ver detalles
+                              </Text>
+                            </UnstyledButton>
+                          </Popover.Target>
+                          <Popover.Dropdown>
+                            <Text size="sm">{dish.details ? dish.details : 'Sin detalles'}</Text>
+                          </Popover.Dropdown>
+                        </Popover>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </ScrollArea>
 
             <Flex justify="flex-end">
               <Button
@@ -463,12 +363,19 @@ function AdminVerifyOrders() {
                 color="green"
                 ml={10}
                 onClick={() => {
-                  setCurrentAction('approved');
+                  setCurrentAction(() => {
+                    console.log(orderDetails);
+                    if (orderDetails.status === 'pending') {
+                      return 'wait';
+                    } else {
+                      return 'delivered';
+                    }
+                  });
                   openConfirm();
                 }}
                 loading={modalLoading}
               >
-                Validar
+                {orderDetails?.status === 'pending' ? 'Aceptar pedido' : 'Marcar como entregado'}
               </Button>
             </Flex>
           </Flex>
@@ -483,21 +390,26 @@ function AdminVerifyOrders() {
         }}
         title="Confirmar acción"
       >
-        {currentAction === 'approved' ? (
-          <Text size="sm" mt={0} mb={30}>
-            ¿Estás seguro de que quieres aprobar el pago?
-          </Text>
-        ) : (
-          <Text size="sm" mt={0} mb={30}>
-            ¿Estás seguro de que quieres rechazar el pago?
-          </Text>
-        )}
+        <Text size="sm" mt={0} mb={30}>
+          {currentAction === 'rejected'
+            ? '¿Está seguro que desea rechazar el pedido?'
+            : currentAction === 'wait'
+            ? '¿Está seguro que desea aceptar el pedido?'
+            : currentAction === 'delivered'
+            ? '¿Está seguro que desea marcar el pedido como entregado?'
+            : ''}
+        </Text>
 
         <Flex justify="flex-end">
           <Button variant="outline" onClick={closeConfirm} color="red">
             Cancelar
           </Button>
-          <Button color="orange" ml={10} loading={modalLoading} onClick={() => verifyPayment(paymentId, currentAction)}>
+          <Button
+            color="orange"
+            ml={10}
+            loading={modalLoading}
+            onClick={() => verifyPayment(orderDetails?.id, currentAction)}
+          >
             Confirmar
           </Button>
         </Flex>
@@ -506,10 +418,26 @@ function AdminVerifyOrders() {
       {/* Main Page */}
 
       <Layout navbar="admin" navbarActive="admin-verify-orders" header>
-        <Title order={1}>Verificar pagos</Title>
+        <Title order={1}>Pedidos</Title>
         <Text mt={20} mb={10}>
-          Lista de pagos pendientes
+          Lista de pedidos
         </Text>
+
+        <Select
+          label="Filtrar por estado"
+          placeholder="Filtrar por estado"
+          value={ordersFiltered}
+          data={[
+            { value: '', label: 'Todos' },
+            { value: 'pending', label: 'Pendiente' },
+            { value: 'wait', label: 'En espera' },
+          ]}
+          onChange={(value) => {
+            setOrdersFiltered(value);
+            getOrders(value);
+            getOrdersFilteredBySearch(search);
+          }}
+        />
 
         <TextInput
           label="Buscar"
@@ -532,8 +460,8 @@ function AdminVerifyOrders() {
           </>
         ) : (
           <>
-            {payments.length <= 0 ? (
-              <Text mt={20}>No hay pagos pendientes</Text>
+            {finalOrders.length <= 0 ? (
+              <Text mt={20}>No hay pedidos</Text>
             ) : (
               <ScrollArea>
                 <Table striped>
@@ -557,28 +485,24 @@ function AdminVerifyOrders() {
                             },
                           }}
                           onClick={() => {
-                            setOrderBy('createdAt');
-                            setOrderDirection(orderBy === 'createdAt' && orderDirection === 'asc' ? 'desc' : 'asc');
+                            setOrderBy('id');
+                            setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
 
                             setFinalOrders(
                               finalOrders.sort((a, b) => {
-                                if (orderDirection === 'asc' && orderBy === 'createdAt') {
-                                  return new Date(a.createdAt) - new Date(b.createdAt);
+                                if (orderDirection === 'asc' && orderBy === 'id') {
+                                  return b.code - a.code;
                                 } else {
-                                  return new Date(b.createdAt) - new Date(a.createdAt);
+                                  return a.code - b.code;
                                 }
                               }),
                             );
                           }}
                         >
                           <Text weight={600} size="md">
-                            Fecha
+                            ID
                           </Text>
-                          {orderBy === 'createdAt' && orderDirection === 'asc' ? (
-                            <IconChevronUp />
-                          ) : (
-                            <IconChevronDown />
-                          )}
+                          {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
                         </UnstyledButton>
                       </th>
                       <th>
@@ -599,15 +523,52 @@ function AdminVerifyOrders() {
                             },
                           }}
                           onClick={() => {
+                            setOrderBy('table');
+                            setOrderDirection(orderBy === 'table' && orderDirection === 'asc' ? 'desc' : 'asc');
+                            setFinalOrders(
+                              finalOrders.sort((a, b) => {
+                                if (orderDirection === 'asc' && orderBy === 'table') {
+                                  return b.amount - a.amount;
+                                } else {
+                                  return a.amount - b.amount;
+                                }
+                              }),
+                            );
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Mesa
+                          </Text>
+                          {orderBy === 'table' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
                             setOrderBy('name');
                             setOrderDirection(orderBy === 'name' && orderDirection === 'asc' ? 'desc' : 'asc');
-
                             setFinalOrders(
                               finalOrders.sort((a, b) => {
                                 if (orderDirection === 'asc' && orderBy === 'name') {
-                                  return b.customer[0].fullName.localeCompare(a.customer[0].fullName);
+                                  return b.customer.fullName.localeCompare(a.customer.fullName);
                                 } else {
-                                  return a.customer[0].fullName.localeCompare(b.customer[0].fullName);
+                                  return a.customer.fullName.localeCompare(b.customer.fullName);
                                 }
                               }),
                             );
@@ -639,13 +600,12 @@ function AdminVerifyOrders() {
                           onClick={() => {
                             setOrderBy('dni');
                             setOrderDirection(orderBy === 'dni' && orderDirection === 'asc' ? 'desc' : 'asc');
-
                             setFinalOrders(
                               finalOrders.sort((a, b) => {
                                 if (orderDirection === 'asc' && orderBy === 'dni') {
-                                  return b.customer[0].dni.localeCompare(a.customer[0].dni);
+                                  return b.customer[0].dni - a.customer[0].dni;
                                 } else {
-                                  return a.customer[0].dni.localeCompare(b.customer[0].dni);
+                                  return a.customer[0].dni - b.customer[0].dni;
                                 }
                               }),
                             );
@@ -675,50 +635,66 @@ function AdminVerifyOrders() {
                             },
                           }}
                           onClick={() => {
-                            setOrderBy('amount');
-                            setOrderDirection(orderBy === 'amount' && orderDirection === 'asc' ? 'desc' : 'asc');
-
+                            setOrderBy('createdAt');
+                            setOrderDirection(orderBy === 'createdAt' && orderDirection === 'asc' ? 'desc' : 'asc');
                             setFinalOrders(
                               finalOrders.sort((a, b) => {
-                                if (orderDirection === 'asc' && orderBy === 'amount') {
-                                  return b.amount - a.amount;
+                                if (orderDirection === 'asc' && orderBy === 'createdAt') {
+                                  return new Date(a.createdAt) - new Date(b.createdAt);
                                 } else {
-                                  return a.amount - b.amount;
+                                  return new Date(b.createdAt) - new Date(a.createdAt);
                                 }
                               }),
                             );
                           }}
                         >
                           <Text weight={600} size="md">
-                            Monto
+                            Fecha
                           </Text>
-                          {orderBy === 'amount' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                          {orderBy === 'createdAt' && orderDirection === 'asc' ? (
+                            <IconChevronUp />
+                          ) : (
+                            <IconChevronDown />
+                          )}
                         </UnstyledButton>
                       </th>
-                      <th>Acciones</th>
+                      <th>
+                        <Text align="center">Pago</Text>
+                      </th>
+                      <th>
+                        <Text align="center">Estado</Text>
+                      </th>
+                      <th>
+                        <Text align="center">Detalles</Text>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {finalOrders?.map((payment) => (
-                      <tr key={payment.id}>
-                        <td>{formatDate(payment.createdAt)}</td>
-                        <td>{payment.customer[0].fullName}</td>
-                        <td>{payment.customer[0].dni}</td>
-                        <td>$ {Number(payment.amount).toFixed(2)}</td>
+                    {finalOrders.map((order) => (
+                      <tr key={order.id}>
+                        <td>{order.code}</td>
+                        <td>{order.tableDescription}</td>
+                        <td>{order.customer.fullName}</td>
+                        <td>{order.customer.dni}</td>
+                        <td>{formatDate(order.createdAt)}</td>
+                        <td>
+                          <Badge color={formatPayment(order.debt).color}>{formatPayment(order.debt).text}</Badge>
+                        </td>
+                        <td>
+                          <Badge color={formatStatus(order.status).color}>{formatStatus(order.status).text}</Badge>
+                        </td>
                         <td>
                           <Box
                             sx={{
                               cursor: 'pointer',
                             }}
                             onClick={() => {
-                              setPaymentId(payment.id);
-                              setPaymentDetails(payment);
-                              getBank(payment.bankId);
-                              getOrder(payment.orderId);
+                              console.log(order);
+                              setOrderDetails(order);
                               openDetails();
                             }}
                           >
-                            <Text color="blue">Verificar</Text>
+                            <Text color="blue">Ver detalles</Text>
                           </Box>
                         </td>
                       </tr>

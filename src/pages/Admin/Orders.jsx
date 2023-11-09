@@ -21,7 +21,39 @@ import { useNavigate } from 'react-router-dom';
 import { useDisclosure } from '@mantine/hooks';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 
-function formatStatus(debt) {
+function formatDate(date) {
+  const newDate = new Date(date);
+  const day = newDate.getDate();
+  const month = newDate.getMonth() + 1;
+  const year = newDate.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+function formatStatus(status) {
+  if (status === 'pending') {
+    return {
+      color: 'orange',
+      text: 'Pendiente',
+    };
+  } else if (status === 'wait') {
+    return {
+      color: 'yellow',
+      text: 'En espera',
+    };
+  } else if (status === 'delivered') {
+    return {
+      color: 'green',
+      text: 'Entregado',
+    };
+  } else if (status === 'rejected') {
+    return {
+      color: 'red',
+      text: 'Rechazado',
+    };
+  }
+}
+
+function formatPayment(debt) {
   if (debt > 0) {
     return {
       color: 'red',
@@ -35,14 +67,6 @@ function formatStatus(debt) {
   }
 }
 
-function formatDate(date) {
-  const newDate = new Date(date);
-  const day = newDate.getDate();
-  const month = newDate.getMonth() + 1;
-  const year = newDate.getFullYear();
-  return `${day}-${month}-${year}`;
-}
-
 function formatDetails(details) {
   if (details) {
     return details;
@@ -51,21 +75,67 @@ function formatDetails(details) {
   }
 }
 
-function filterDishes(orders, status) {
-  return orders.filter((order) => {
-    if (status === '') {
-      return true;
-    } else if (status === 'pending') {
-      return order.debt > 0;
-    } else if (status === 'paid') {
-      return order.debt <= 0;
+function filterDishes(orders, payment, status) {
+  console.log(payment, status);
+  if (payment === '' && status === '') {
+    return orders;
+  }
+  if (status !== '' && payment === '') {
+    if (status === 'status_pending') {
+      return orders.filter((order) => order.status === 'pending');
     }
-  });
+    if (status === 'status_wait') {
+      return orders.filter((order) => order.status === 'wait');
+    }
+    if (status === 'status_delivered') {
+      return orders.filter((order) => order.status === 'delivered');
+    }
+    if (status === 'status_rejected') {
+      return orders.filter((order) => order.status === 'rejected');
+    }
+  }
+  if (payment !== '' && status === '') {
+    if (payment === 'payment_pending') {
+      return orders.filter((order) => order.debt > 0);
+    }
+    if (payment === 'payment_paid') {
+      return orders.filter((order) => order.debt === 0);
+    }
+  }
+  if (payment !== '' && status !== '') {
+    if (payment === 'payment_pending' && status === 'status_pending') {
+      return orders.filter((order) => order.debt > 0 && order.status === 'pending');
+    }
+    if (payment === 'payment_pending' && status === 'status_wait') {
+      return orders.filter((order) => order.debt > 0 && order.status === 'wait');
+    }
+    if (payment === 'payment_pending' && status === 'status_delivered') {
+      return orders.filter((order) => order.debt > 0 && order.status === 'delivered');
+    }
+    if (payment === 'payment_pending' && status === 'status_rejected') {
+      return orders.filter((order) => order.debt > 0 && order.status === 'rejected');
+    }
+    if (payment === 'payment_paid' && status === 'status_pending') {
+      return orders.filter((order) => order.debt === 0 && order.status === 'pending');
+    }
+    if (payment === 'payment_paid' && status === 'status_wait') {
+      return orders.filter((order) => order.debt === 0 && order.status === 'wait');
+    }
+    if (payment === 'payment_paid' && status === 'status_delivered') {
+      return orders.filter((order) => order.debt === 0 && order.status === 'delivered');
+    }
+    if (payment === 'payment_paid' && status === 'status_rejected') {
+      return orders.filter((order) => order.debt === 0 && order.status === 'rejected');
+    }
+  }
+
+  return orders;
 }
 
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [ordersFiltered, setOrdersFiltered] = useState('');
+  const [ordersFilteredByStatus, setOrdersFilteredByStatus] = useState('');
   const [loading, setLoading] = useState(true);
 
   const [orderBy, setOrderBy] = useState('');
@@ -82,14 +152,14 @@ function AdminOrders() {
   const [orderData, setOrderData] = useState(null);
 
   const getOrders = useCallback(
-    (status) => {
+    (payment, status) => {
       setLoading(true);
 
       axiosPrivate(authTokens, setAuthTokens, setUser)
         .get(`/orders`)
         .then((response) => {
           console.log(response.data.data);
-          setOrders(filterDishes(response.data.data, status || ordersFiltered));
+          setOrders(filterDishes(response.data.data, payment, status));
           setLoading(false);
         })
         .catch((err) => {
@@ -150,6 +220,25 @@ function AdminOrders() {
                 borderBottom: '1px solid #EEE',
               }}
             >
+              <Text weight={600}>ID:</Text>
+              <Text>{orderData?.code}</Text>
+            </Flex>
+            <Flex
+              justify="space-between"
+              sx={{
+                borderBottom: '1px solid #EEE',
+              }}
+            >
+              <Text weight={600}>Mesa:</Text>
+              <Text>{orderData?.tableDescription}</Text>
+            </Flex>
+
+            <Flex
+              justify="space-between"
+              sx={{
+                borderBottom: '1px solid #EEE',
+              }}
+            >
               <Text weight={600}>Usuario:</Text>
               <Text>{orderData?.customer?.fullName}</Text>
             </Flex>
@@ -168,9 +257,19 @@ function AdminOrders() {
                 borderBottom: '1px solid #EEE',
               }}
             >
-              <Text weight={600}>Estado:</Text>
-              <Text>{formatStatus(orderData?.debt).text}</Text>
+              <Text weight={600}>Pago:</Text>
+              <Text>{formatPayment(orderData?.debt).text}</Text>
             </Flex>
+            <Flex
+              justify="space-between"
+              sx={{
+                borderBottom: '1px solid #EEE',
+              }}
+            >
+              <Text weight={600}>Estado:</Text>
+              <Text>{orderData?.status && formatStatus(orderData?.status).text}</Text>
+            </Flex>
+
             <Flex
               justify="space-between"
               sx={{
@@ -246,17 +345,36 @@ function AdminOrders() {
         </Text>
 
         <Select
-          label="Filtrar por estado"
-          placeholder="Filtrar por estado"
+          label="Filtrar por pago"
+          placeholder="Filtrar por pago"
           value={ordersFiltered}
           data={[
             { value: '', label: 'Todos' },
-            { value: 'pending', label: 'Pendiente' },
-            { value: 'paid', label: 'Pagado' },
+            { value: 'payment_pending', label: 'Pendiente' },
+            { value: 'payment_paid', label: 'Pagado' },
           ]}
           onChange={(value) => {
             setOrdersFiltered(value);
-            getOrders(value);
+            getOrders(value, ordersFilteredByStatus);
+            getOrdersFilteredBySearch(search);
+          }}
+        />
+
+        <Select
+          label="Filtrar por estado"
+          placeholder="Filtrar por estado"
+          mt={10}
+          value={ordersFilteredByStatus}
+          data={[
+            { value: '', label: 'Todos' },
+            { value: 'status_pending', label: 'Pendiente' },
+            { value: 'status_wait', label: 'En espera' },
+            { value: 'status_delivered', label: 'Entregado' },
+            { value: 'status_rejected', label: 'Rechazado' },
+          ]}
+          onChange={(value) => {
+            setOrdersFilteredByStatus(value);
+            getOrders(ordersFiltered, value);
             getOrdersFilteredBySearch(search);
           }}
         />
@@ -442,8 +560,15 @@ function AdminOrders() {
                           )}
                         </UnstyledButton>
                       </th>
-                      <th>Estado</th>
-                      <th>Detalles</th>
+                      <th>
+                        <Text align="center">Pago</Text>
+                      </th>
+                      <th>
+                        <Text align="center">Estado</Text>
+                      </th>
+                      <th>
+                        <Text align="center">Detalles</Text>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -454,7 +579,10 @@ function AdminOrders() {
                         <td>{order.customer.dni}</td>
                         <td>{formatDate(order.createdAt)}</td>
                         <td>
-                          <Badge color={formatStatus(order.debt).color}>{formatStatus(order.debt).text}</Badge>
+                          <Badge color={formatPayment(order.debt).color}>{formatPayment(order.debt).text}</Badge>
+                        </td>
+                        <td>
+                          <Badge color={formatStatus(order.status).color}>{formatStatus(order.status).text}</Badge>
                         </td>
                         <td>
                           <Box

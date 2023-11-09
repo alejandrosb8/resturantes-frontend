@@ -86,7 +86,6 @@ function AdminBanks() {
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .get(`/banks`)
       .then((response) => {
-        console.log(response.data.data);
         setBanks(response.data.data);
         setLoading(false);
       })
@@ -126,8 +125,6 @@ function AdminBanks() {
 
   const createBank = (values) => {
     setModalLoading(true);
-
-    console.log(values);
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .post('/banks', { name: values.name, dni: values.dni, number: values.number })
@@ -173,8 +170,6 @@ function AdminBanks() {
       bankEditForm.reset();
       return;
     }
-
-    console.log(values);
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .patch(`/banks/${bankId}`, { name: values.name, dni: values.dni, number: values.number })
