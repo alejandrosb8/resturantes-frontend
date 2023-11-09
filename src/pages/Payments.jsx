@@ -136,6 +136,28 @@ function Payments() {
                 borderBottom: '1px solid #DDD',
               }}
             >
+              <Text weight={600}>Estado:</Text>
+              <Text>{paymentData?.status && formatStatus(paymentData?.status)?.text}</Text>
+            </Flex>
+
+            {paymentData?.status === 'rejected' && (
+              <Flex
+                justify="space-between"
+                sx={{
+                  borderBottom: '1px solid #DDD',
+                }}
+              >
+                <Text weight={600}>Motivo de rechazo:</Text>
+                <Text>{paymentData?.message || 'Ninguno'}</Text>
+              </Flex>
+            )}
+
+            <Flex
+              justify="space-between"
+              sx={{
+                borderBottom: '1px solid #DDD',
+              }}
+            >
               <Text weight={600}>Monto:</Text>
               <Text>Bs. {Number(paymentData?.amount).toFixed(2)}</Text>
             </Flex>

@@ -14,6 +14,7 @@ import {
   UnstyledButton,
   TextInput,
   Badge,
+  Textarea,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -90,6 +91,8 @@ function AdminVerifyOrders() {
   const [search, setSearch] = useState('');
   const [orderDetails, setOrderDetails] = useState(null);
   const [currentAction, setCurrentAction] = useState(null);
+
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const getOrders = useCallback(
     (query, withoutLoading) => {
@@ -196,9 +199,11 @@ function AdminVerifyOrders() {
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .patch(`/orders/${id}`, {
         status: action,
+        message: rejectionReason,
       })
       .then(() => {
         setModalLoading(false);
+        setRejectionReason('');
         getOrders('pending');
         closeConfirm();
         closeDetails();
@@ -227,12 +232,17 @@ function AdminVerifyOrders() {
       })
       .catch(() => {
         setModalLoading(false);
+        setRejectionReason('');
         closeDetails();
         notifications.show({
           title: 'Error',
           message: 'Ocurrió un error con el pago',
           color: 'red',
         });
+      })
+      .finally(() => {
+        setLoading(false);
+        setRejectionReason('');
       });
   };
 
@@ -300,7 +310,7 @@ function AdminVerifyOrders() {
                 }}
               >
                 <Text weight={600}>Deuda:</Text>
-                <Text>{orderDetails?.debt}</Text>
+                <Text>Bs. {Number(orderDetails?.debt).toFixed(2)}</Text>
               </Flex>
               <Text pt={20}>
                 <Text weight={600}>Platos:</Text>
@@ -399,6 +409,18 @@ function AdminVerifyOrders() {
             ? '¿Está seguro que desea marcar el pedido como entregado?'
             : ''}
         </Text>
+
+        {currentAction === 'rejected' && (
+          <Textarea
+            mb={20}
+            label="Motivo del rechazo"
+            placeholder="Motivo del rechazo"
+            value={rejectionReason}
+            onChange={(event) => {
+              setRejectionReason(event.target.value);
+            }}
+          />
+        )}
 
         <Flex justify="flex-end">
           <Button variant="outline" onClick={closeConfirm} color="red">
@@ -678,10 +700,14 @@ function AdminVerifyOrders() {
                         <td>{order.customer.dni}</td>
                         <td>{formatDate(order.createdAt)}</td>
                         <td>
-                          <Badge color={formatPayment(order.debt).color}>{formatPayment(order.debt).text}</Badge>
+                          {order.debt && (
+                            <Badge color={formatPayment(order.debt).color}>{formatPayment(order?.debt).text}</Badge>
+                          )}
                         </td>
                         <td>
-                          <Badge color={formatStatus(order.status).color}>{formatStatus(order.status).text}</Badge>
+                          {order.status && (
+                            <Badge color={formatStatus(order.status).color}>{formatStatus(order?.status).text}</Badge>
+                          )}
                         </td>
                         <td>
                           <Box

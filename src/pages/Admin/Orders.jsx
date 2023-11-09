@@ -270,6 +270,18 @@ function AdminOrders() {
               <Text>{orderData?.status && formatStatus(orderData?.status).text}</Text>
             </Flex>
 
+            {orderData?.status === 'rejected' && (
+              <Flex
+                justify="space-between"
+                sx={{
+                  borderBottom: '1px solid #DDD',
+                }}
+              >
+                <Text weight={600}>Motivo de rechazo:</Text>
+                <Text>{orderData?.message || 'Ninguno'}</Text>
+              </Flex>
+            )}
+
             <Flex
               justify="space-between"
               sx={{

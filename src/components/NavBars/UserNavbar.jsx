@@ -11,7 +11,7 @@ const linksDataRaw = [
     id: 'home',
   },
   {
-    label: 'Ordenes',
+    label: 'Pedidos',
     to: '/orders',
     id: 'orders',
   },

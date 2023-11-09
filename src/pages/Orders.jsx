@@ -1,4 +1,4 @@
-import { Table, Title, Badge, Box, Text, Modal, Popover, UnstyledButton, ScrollArea } from '@mantine/core';
+import { Table, Title, Badge, Box, Text, Modal, Popover, UnstyledButton, ScrollArea, Flex } from '@mantine/core';
 import useUserTable from '../hooks/useTable';
 import { axiosPrivate } from '../utils/axios';
 import { useEffect, useState } from 'react';
@@ -55,7 +55,8 @@ function Orders() {
     axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
       .get(`/customers/${user.sub}/orders`)
       .then((response) => {
-        setOrders(response.data.status);
+        const currentOrders = response.data.status;
+        setOrders(currentOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
         setLoading(false);
       })
       .catch((error) => {
@@ -79,7 +80,71 @@ function Orders() {
   return (
     <>
       {/* Details Modal */}
-      <Modal opened={opened} onClose={close} size="xl" title="Platos de la orden" centered>
+      <Modal opened={opened} onClose={close} size="xl" title="Detalles de la orden" centered>
+        <Flex direction="column" gap={15}>
+          <Flex
+            justify="space-between"
+            sx={{
+              borderBottom: '1px solid #DDD',
+            }}
+          >
+            <Text weight={600}>Fecha:</Text>
+            <Text>{formatDate(order?.createdAt)}</Text>
+          </Flex>
+          <Flex
+            justify="space-between"
+            sx={{
+              borderBottom: '1px solid #DDD',
+            }}
+          >
+            <Text weight={600}>Total:</Text>
+            <Text>Bs. {Number(order?.total).toFixed(2)}</Text>
+          </Flex>
+          <Flex
+            justify="space-between"
+            sx={{
+              borderBottom: '1px solid #DDD',
+            }}
+          >
+            <Text weight={600}>Pago:</Text>
+            <Text>{order?.debt <= 0 ? 'Pagado' : 'Pendiente'}</Text>
+          </Flex>
+          {order?.debt > 0 && order?.status !== 'rejected' && (
+            <Flex
+              justify="space-between"
+              sx={{
+                borderBottom: '1px solid #DDD',
+              }}
+            >
+              <Text weight={600}>Deuda:</Text>
+              <Text>Bs. {Number(order?.debt).toFixed(2)}</Text>
+            </Flex>
+          )}
+          <Flex
+            justify="space-between"
+            sx={{
+              borderBottom: '1px solid #DDD',
+            }}
+          >
+            <Text weight={600}>Estado:</Text>
+            <Text>{order?.status && formatStatus(order?.status).text}</Text>
+          </Flex>
+          {order?.status === 'rejected' && (
+            <Flex
+              justify="space-between"
+              sx={{
+                borderBottom: '1px solid #DDD',
+              }}
+            >
+              <Text weight={600}>Motivo de rechazo:</Text>
+              <Text>{order?.message || 'Ninguno'}</Text>
+            </Flex>
+          )}
+        </Flex>
+
+        <Text mt={20} weight={600}>
+          Articulos:
+        </Text>
         <ScrollArea pt={30}>
           <Table>
             <thead>
@@ -120,7 +185,7 @@ function Orders() {
       </Modal>
 
       <Layout navbarActive="orders" navbar="user" header>
-        <Title>Historial de ordenes</Title>
+        <Title>Historial de pedidos</Title>
         <ScrollArea>
           <Table mt={20}>
             <thead>
@@ -145,7 +210,7 @@ function Orders() {
                     Estado
                   </p>
                 </th>
-                <th>Platos</th>
+                <th>Detalles</th>
               </tr>
             </thead>
             <tbody>
@@ -170,7 +235,7 @@ function Orders() {
                         open();
                       }}
                     >
-                      <Text color="blue">Ver platos</Text>
+                      <Text color="blue">Ver detalles</Text>
                     </Box>
                   </td>
                 </tr>

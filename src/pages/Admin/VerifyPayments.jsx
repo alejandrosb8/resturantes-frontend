@@ -16,6 +16,7 @@ import {
   Popover,
   UnstyledButton,
   TextInput,
+  Textarea,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
@@ -69,6 +70,8 @@ function AdminVerifyPayments() {
   const [orderDirection, setOrderDirection] = useState('asc');
   const [finalOrders, setFinalOrders] = useState([]);
   const [search, setSearch] = useState('');
+
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const getPayments = useCallback(
     (query, withoutLoading) => {
@@ -206,9 +209,11 @@ function AdminVerifyPayments() {
     axiosPrivate(authTokens, setAuthTokens, setUser)
       .patch(`/payments/${id}`, {
         status: action,
+        message: rejectionReason,
       })
       .then(() => {
         setModalLoading(false);
+        setRejectionReason('');
         getPayments('pending');
         closeConfirm();
         closeDetails();
@@ -229,12 +234,17 @@ function AdminVerifyPayments() {
       })
       .catch(() => {
         setModalLoading(false);
+        setRejectionReason('');
         closeDetails();
         notifications.show({
           title: 'Error',
           message: 'Ocurrió un error con el pago',
           color: 'red',
         });
+      })
+      .finally(() => {
+        setLoading(false);
+        setRejectionReason('');
       });
   };
 
@@ -491,6 +501,18 @@ function AdminVerifyPayments() {
           <Text size="sm" mt={0} mb={30}>
             ¿Estás seguro de que quieres rechazar el pago?
           </Text>
+        )}
+
+        {currentAction === 'rejected' && (
+          <Textarea
+            mb={20}
+            label="Motivo del rechazo"
+            placeholder="Motivo del rechazo"
+            value={rejectionReason}
+            onChange={(event) => {
+              setRejectionReason(event.target.value);
+            }}
+          />
         )}
 
         <Flex justify="flex-end">

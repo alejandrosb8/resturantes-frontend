@@ -217,6 +217,26 @@ function AdminPayments() {
                 borderBottom: '1px solid #DDD',
               }}
             >
+              <Text weight={600}>Estado:</Text>
+              {paymentData?.status && formatStatus(paymentData?.status).text}
+            </Flex>
+            {paymentData?.status === 'rejected' && (
+              <Flex
+                justify="space-between"
+                sx={{
+                  borderBottom: '1px solid #DDD',
+                }}
+              >
+                <Text weight={600}>Motivo de rechazo:</Text>
+                <Text>{paymentData?.message || 'Ninguno'}</Text>
+              </Flex>
+            )}
+            <Flex
+              justify="space-between"
+              sx={{
+                borderBottom: '1px solid #DDD',
+              }}
+            >
               <Text weight={600}>Usuario:</Text>
               <Text>{paymentData?.customer[0].fullName}</Text>
             </Flex>
@@ -578,10 +598,10 @@ function AdminPayments() {
 
                             setFinalOrders(
                               finalOrders.sort((a, b) => {
-                                if (orderDirection === 'asc' && orderBy === 'dni') {
-                                  return b.customer[0].dni - a.customer[0].dni;
+                                if (orderDirection === 'asc' && orderBy === 'createdAt') {
+                                  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
                                 } else {
-                                  return a.customer[0].dni - b.customer[0].dni;
+                                  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
                                 }
                               }),
                             );
