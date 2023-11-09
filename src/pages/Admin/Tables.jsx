@@ -27,9 +27,15 @@ import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 import qrcodeImage from './../../assets/logowhite.png';
 
 const ENVIRONMENT = import.meta.env.VITE_ENV;
+const DOMAIN_ENV = import.meta.env.VITE_DOMAIN;
 
-const DOMAIN =
-  ENVIRONMENT === 'development' ? 'http://localhost:5173' : 'https://green-stone-04b86be10.3.azurestaticapps.net';
+let DOMAIN = '';
+
+if (ENVIRONMENT === 'development') {
+  DOMAIN = DOMAIN_ENV || 'http://localhost:5173';
+} else {
+  DOMAIN = 'https://green-stone-04b86be10.3.azurestaticapps.net';
+}
 
 function AdminTables() {
   const [tables, setTables] = useState([]);

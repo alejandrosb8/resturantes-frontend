@@ -1,7 +1,17 @@
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 
-const BASE_URL = 'https://api-resturantes.azurewebsites.net/api/v1';
+const ENVIRONMENT = import.meta.env.VITE_ENV;
+const BACKEND = import.meta.env.VITE_BACKEND;
+
+let BASE_URL = '';
+
+if (ENVIRONMENT === 'development') {
+  BASE_URL = `${BACKEND}/api/v1` || 'http://localhost:3000/api/v1';
+} else {
+  BASE_URL = 'https://api-resturantes.azurewebsites.net/api/v1';
+}
+
 const REFRESH_TOKEN_URL = `${BASE_URL}/auth/refresh-token`;
 const REFRESH_TOKEN_ADMIN_URL = `${BASE_URL}/admin/auth/refresh-token`;
 
