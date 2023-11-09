@@ -21,7 +21,7 @@ import {
   Image,
   Textarea,
 } from '@mantine/core';
-import { useInputState } from '@mantine/hooks';
+import { useInputState, useWindowScroll } from '@mantine/hooks';
 import Layout from '../layouts/Default.jsx';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { AnimatedLink } from '../components/AnimatedLink.jsx';
@@ -101,6 +101,8 @@ export const DishesPage = () => {
         });
     }
   }, [authTokens, setAuthTokens, setUser, navigate, table, pcategory]);
+
+  const [, scrollTo] = useWindowScroll();
 
   return (
     <>
@@ -189,7 +191,7 @@ export const DishesPage = () => {
                               {dishes.filter((dish) => dish.id === dishId).map((dish) => dish.name)}
                             </Title>
                             <Text size={rem(18)} align="center" color="dark.4">
-                              ${' '}
+                              Bs{' '}
                               {Number(dishes.filter((dish) => dish.id === dishId).map((dish) => dish.price)).toFixed(2)}
                             </Text>
                             <Text size={rem(16)} align="center" color="dark.4">
@@ -216,7 +218,7 @@ export const DishesPage = () => {
                               Precio por la cantidad seleccionada
                             </Text>
                             <Text size={rem(22)} align="center" color="dark.5">
-                              ${' '}
+                              Bs{' '}
                               {(
                                 dishes.filter((dish) => dish.id === dishId).map((dish) => dish.price) * dishQuantity
                               ).toFixed(2)}
@@ -261,6 +263,17 @@ export const DishesPage = () => {
                                 }}
                               >
                                 Borrar del pedido
+                              </Button>
+                              <Button
+                                variant="outline"
+                                color="yellow"
+                                size="lg"
+                                fullWidth
+                                onClick={() => {
+                                  setDishId(null);
+                                }}
+                              >
+                                Salir
                               </Button>
                             </Flex>
                           </Container>
@@ -376,6 +389,7 @@ export const DishesPage = () => {
                                 variant="light"
                                 onClick={() => {
                                   handleOpenDetailsClick(dish.id);
+                                  scrollTo({ y: 0 });
                                 }}
                               >
                                 Agregar al pedido

@@ -51,7 +51,8 @@ function Payment() {
     axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
       .get(`/customers/${user.sub}/orders?inDebt=true`)
       .then((response) => {
-        setOrders(response.data.status);
+        const currentOrders = response.data.status;
+        setOrders(currentOrders.filter((order) => order.status !== 'rejected' && order.status !== 'pending'));
         setLoading(false);
       })
       .catch((error) => {
@@ -249,11 +250,11 @@ function Payment() {
                     min={0.01}
                     precision={2}
                     {...form.getInputProps('amount')}
-                    parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                    parser={(value) => value.replace(/Bs\s?|(,*)/g, '')}
                     formatter={(value) =>
                       !Number.isNaN(parseFloat(value))
-                        ? `Bs. ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
-                        : 'Bs. '
+                        ? `Bs ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
+                        : 'Bs '
                     }
                   />
                   <TextInput

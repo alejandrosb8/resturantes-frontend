@@ -9,6 +9,30 @@ import LoadingView from '../components/LoadingView';
 import SideFixesButtons from '../components/SideFixesButtons';
 import { useDisclosure } from '@mantine/hooks';
 
+function formatStatus(status) {
+  if (status === 'pending') {
+    return {
+      color: 'orange',
+      text: 'Pendiente',
+    };
+  } else if (status === 'wait') {
+    return {
+      color: 'yellow',
+      text: 'En espera',
+    };
+  } else if (status === 'delivered') {
+    return {
+      color: 'green',
+      text: 'Entregado',
+    };
+  } else if (status === 'rejected') {
+    return {
+      color: 'red',
+      text: 'Rechazado',
+    };
+  }
+}
+
 function Orders() {
   const { table } = useUserTable();
 
@@ -103,7 +127,24 @@ function Orders() {
               <tr>
                 <th>Fecha</th>
                 <th>Total</th>
-                <th>Estado</th>
+                <th>
+                  <p
+                    style={{
+                      textAlign: 'center',
+                    }}
+                  >
+                    Pago
+                  </p>
+                </th>
+                <th>
+                  <p
+                    style={{
+                      textAlign: 'center',
+                    }}
+                  >
+                    Estado
+                  </p>
+                </th>
                 <th>Platos</th>
               </tr>
             </thead>
@@ -114,6 +155,9 @@ function Orders() {
                   <td>Bs. {Number(order.total).toFixed(2)}</td>
                   <td>
                     {order.debt <= 0 ? <Badge color="green">Pagado</Badge> : <Badge color="red">Pendiente</Badge>}
+                  </td>
+                  <td>
+                    <Badge color={formatStatus(order.status).color}>{formatStatus(order.status).text}</Badge>
                   </td>
                   <td>
                     <Box

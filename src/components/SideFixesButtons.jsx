@@ -15,17 +15,26 @@ function SideFixesButtons() {
   const { authTokens, setAuthTokens, setUser, user } = useAuth();
 
   useEffect(() => {
-    axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
-      .get(`/customers/${user.sub}/orders?inDebt=true`)
-      .then((response) => {
-        const orders = response.data.status;
-        if (orders && orders.length > 0) {
-          setInDebt(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const interval = setInterval(() => {
+      axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
+        .get(`/customers/${user.sub}/orders?inDebt=true`)
+        .then((response) => {
+          const orders = response.data.status;
+          setInDebt(false);
+          for (const order of orders) {
+            if (order.status !== 'pending' && order.status !== 'rejected') {
+              setInDebt(true);
+              break;
+            }
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }, 5000); // 5000 milliseconds = 5 seconds
+
+    // Clear interval on component unmount
+    return () => clearInterval(interval);
   }, [authTokens, setAuthTokens, setUser, user.sub]);
 
   return (
