@@ -83,6 +83,8 @@ function Login() {
       setErrorMsg('La contraseña es incorrecta');
     } else if (response.data.message === 'USER_NOT_VERIFIED') {
       setErrorMsg('La cuenta no está verificada');
+    } else if (response.data.message === 'USER_BANNED') {
+      setErrorMsg('La cuenta ha sido bloqueada');
     } else {
       setErrorMsg('Ha ocurrido un error');
     }

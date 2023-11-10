@@ -253,7 +253,7 @@ function AdminCustomers() {
           <Checkbox
             mt={10}
             {...customerEditForm.getInputProps('isDeleted', { type: 'checkbox' })}
-            label="Banear cliente"
+            label="Bloquear cliente"
           />
 
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
