@@ -467,6 +467,7 @@ function AdminCategories() {
                               onClick={() => {
                                 setCategoryId(category.id);
                                 setCategoryData({ name: category.name });
+                                categoryEditForm.setValues({ name: category.name });
                                 openEdit();
                               }}
                             >

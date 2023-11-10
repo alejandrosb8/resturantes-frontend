@@ -444,8 +444,9 @@ function AdminDishes() {
           <Textarea
             mt={15}
             placeholder="Descripción"
-            label="Descripción"
-            {...dishCreateForm.getInputProps('description')}
+            label="Nueva descripción"
+            description="Si no ingresa una descripción, se mantendrá la actual"
+            {...dishEditForm.getInputProps('description')}
           />
           <NumberInput
             mt={15}
@@ -764,6 +765,13 @@ function AdminDishes() {
                               onClick={() => {
                                 setDishId(dish.id);
                                 setDishData({ name: dish.name, price: dish.price });
+                                console.log(dish.description);
+                                dishEditForm.setValues({
+                                  name: dish.name,
+                                  description: dish.description,
+                                  price: dish.price,
+                                  categoryId: dish.categoryId,
+                                });
                                 openEdit();
                               }}
                             >

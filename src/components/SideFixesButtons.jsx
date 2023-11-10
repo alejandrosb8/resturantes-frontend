@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useShopping } from '../contexts/ShoppingContext';
 import { IconShoppingCart, IconTrash, IconCreditCard } from '@tabler/icons-react';
@@ -14,23 +14,28 @@ function SideFixesButtons() {
   const [inDebt, setInDebt] = useState(false);
   const { authTokens, setAuthTokens, setUser, user } = useAuth();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
-        .get(`/customers/${user.sub}/orders?inDebt=true`)
-        .then((response) => {
-          const orders = response.data.status;
-          setInDebt(false);
-          for (const order of orders) {
-            if (order.status !== 'pending' && order.status !== 'rejected') {
-              setInDebt(true);
-              break;
-            }
+  const checkInDebt = useCallback(() => {
+    axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
+      .get(`/customers/${user.sub}/orders?inDebt=true`)
+      .then((response) => {
+        const orders = response.data.status;
+        setInDebt(false);
+        for (const order of orders) {
+          if (order.status !== 'pending' && order.status !== 'rejected') {
+            setInDebt(true);
+            break;
           }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [authTokens, setAuthTokens, setUser, user.sub]);
+
+  useEffect(() => {
+    checkInDebt();
+    const interval = setInterval(() => {
+      checkInDebt();
     }, 5000); // 5000 milliseconds = 5 seconds
 
     // Clear interval on component unmount

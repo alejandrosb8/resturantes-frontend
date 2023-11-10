@@ -470,6 +470,7 @@ function AdminTables() {
                               color="orange"
                               onClick={() => {
                                 setTableId(table.id);
+                                tableEditForm.setValues({ description: table.description });
                                 openEdit();
                               }}
                             >

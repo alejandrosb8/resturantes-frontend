@@ -276,6 +276,24 @@ function Payment() {
                         {...form.getInputProps('bankId')}
                       />
 
+                      <Flex direction="column">
+                        <Text size="sm" weight={600} mt={0}>
+                          Número de cuenta
+                        </Text>
+                        <Text size="sm" mt={0}>
+                          {banks.find((bank) => bank.id === form.values.bankId)?.number}
+                        </Text>
+                      </Flex>
+
+                      <Flex direction="column">
+                        <Text weight={600} size="sm" mt={0}>
+                          DNI del titular de la cuenta
+                        </Text>
+                        <Text size="sm" mt={0}>
+                          {banks.find((bank) => bank.id === form.values.bankId)?.dni}
+                        </Text>
+                      </Flex>
+
                       <TextInput
                         label="Referencia"
                         placeholder="Ingresa el número referencia"

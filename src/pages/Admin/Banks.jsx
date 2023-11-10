@@ -532,6 +532,11 @@ function AdminBanks() {
                               color="orange"
                               onClick={() => {
                                 setBankId(bank.id);
+                                bankEditForm.setValues({
+                                  name: bank.name,
+                                  dni: bank.dni,
+                                  number: bank.number,
+                                });
                                 openEdit();
                               }}
                             >
