@@ -456,9 +456,9 @@ function AdminDishes() {
             precision={2}
             min={0.01}
             {...dishEditForm.getInputProps('price')}
-            parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+            parser={(value) => value.replace(/Bs\s?|(,*)/g, '')}
             formatter={(value) =>
-              !Number.isNaN(parseFloat(value)) ? `Bs. ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : 'Bs. '
+              !Number.isNaN(parseFloat(value)) ? `Bs ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : 'Bs '
             }
           />
           <Select
