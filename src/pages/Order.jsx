@@ -95,6 +95,7 @@ function OrderPage() {
           </Button>
           <Button
             color="orange"
+            loading={loading}
             ml={10}
             onClick={() => {
               const dataToSend = {
@@ -105,6 +106,8 @@ function OrderPage() {
                   details: shoppingCart.filter((sdish) => sdish.id === dish.id).map((sdish) => sdish.details)[0],
                 })),
               };
+
+              setLoading(true);
 
               axiosPrivate(authTokens, setAuthTokens, setUser, 'customer')
                 .post('/orders', {
@@ -127,6 +130,9 @@ function OrderPage() {
                     message: 'No se ha podido confirmar el pedido',
                     color: 'red',
                   });
+                })
+                .finally(() => {
+                  setLoading(false);
                 });
             }}
           >
