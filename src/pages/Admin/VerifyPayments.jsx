@@ -105,6 +105,13 @@ function AdminVerifyPayments() {
       payments
         .sort((a, b) => {
           if (orderBy) {
+            if (orderBy === 'id') {
+              if (orderDirection === 'asc') {
+                return b.code - a.code;
+              } else {
+                return a.code - b.code;
+              }
+            }
             if (orderBy === 'createdAt') {
               if (orderDirection === 'asc') {
                 return new Date(a.createdAt) - new Date(b.createdAt);
@@ -139,7 +146,7 @@ function AdminVerifyPayments() {
         })
         .filter(
           (order) =>
-            order?.id?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.code?.toString()?.toLowerCase().includes(search.toLowerCase()) ||
             order?.customer[0]?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
             order?.customer?.dni?.toLowerCase().includes(search.toLowerCase()) ||
             order?.amount?.toString()?.toLowerCase().includes(search.toLowerCase()) ||
@@ -579,6 +586,44 @@ function AdminVerifyPayments() {
                             },
                           }}
                           onClick={() => {
+                            setOrderBy('id');
+                            setOrderDirection(orderBy === 'id' && orderDirection === 'asc' ? 'desc' : 'asc');
+
+                            setFinalOrders(
+                              finalOrders.sort((a, b) => {
+                                if (orderDirection === 'asc' && orderBy === 'id') {
+                                  return b.code - a.code;
+                                } else {
+                                  return a.code - b.code;
+                                }
+                              }),
+                            );
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            ID
+                          </Text>
+                          {orderBy === 'id' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
                             setOrderBy('createdAt');
                             setOrderDirection(orderBy === 'createdAt' && orderDirection === 'asc' ? 'desc' : 'asc');
 
@@ -723,6 +768,7 @@ function AdminVerifyPayments() {
                   <tbody>
                     {finalOrders?.map((payment) => (
                       <tr key={payment.id}>
+                        <td>{payment.code}</td>
                         <td>{formatDate(payment.createdAt)}</td>
                         <td>{payment.customer[0].fullName}</td>
                         <td>{payment.customer[0].dni}</td>

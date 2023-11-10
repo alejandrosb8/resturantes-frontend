@@ -700,8 +700,8 @@ function AdminVerifyOrders() {
                         <td>{order.customer.dni}</td>
                         <td>{formatDate(order.createdAt)}</td>
                         <td>
-                          {order.debt && (
-                            <Badge color={formatPayment(order.debt).color}>{formatPayment(order?.debt).text}</Badge>
+                          {(order.debt || order.debt === 0) && (
+                            <Badge color={formatPayment(order?.debt).color}>{formatPayment(order?.debt).text}</Badge>
                           )}
                         </td>
                         <td>
