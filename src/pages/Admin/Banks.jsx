@@ -9,36 +9,22 @@ import {
   Flex,
   Modal,
   TextInput,
-  Center,
   Divider,
-  ScrollArea,
   UnstyledButton,
+  ScrollArea,
 } from '@mantine/core';
 import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { IconPencil, IconTrash, IconQrcode } from '@tabler/icons-react';
+import { IconPencil, IconTrash } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { QRCode } from 'react-qrcode-logo';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
-import qrcodeImage from './../../assets/logowhite.png';
 
-const ENVIRONMENT = import.meta.env.VITE_ENV;
-const DOMAIN_ENV = import.meta.env.VITE_DOMAIN;
-
-let DOMAIN = '';
-
-if (ENVIRONMENT === 'development') {
-  DOMAIN = DOMAIN_ENV || 'http://localhost:5173';
-} else {
-  DOMAIN = 'https://green-stone-04b86be10.3.azurestaticapps.net';
-}
-
-function AdminTables() {
-  const [tables, setTables] = useState([]);
+function AdminBanks() {
+  const [banks, setBanks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalLoading, setModalLoading] = useState(false);
   const { authTokens, setAuthTokens, setUser } = useAuth();
@@ -47,71 +33,82 @@ function AdminTables() {
   // edit modal
   const [openedEdit, { open: openEdit, close: closeEdit }] = useDisclosure(false);
 
-  // qr modal
-  const [openedQr, { open: openQr, close: closeQr }] = useDisclosure(false);
-
   // create modal
   const [openedCreate, { open: openCreate, close: closeCreate }] = useDisclosure(false);
 
   // delete modal
   const [openedDelete, { open: openDelete, close: closeDelete }] = useDisclosure(false);
 
-  const [tableId, setTableId] = useState(null);
+  const [bankId, setBankId] = useState(null);
 
   const [orderBy, setOrderBy] = useState('');
   const [orderDirection, setOrderDirection] = useState('asc');
   const [finalOrders, setFinalOrders] = useState([]);
   const [search, setSearch] = useState('');
 
-  const tableCreateForm = useForm({
+  const bankCreateForm = useForm({
     initialValues: {
-      description: '',
+      name: '',
+      dni: '',
+      number: '',
     },
 
     validate: {
-      description: (value) => {
+      name: (value) => {
         if (!value) {
-          return 'La descripción es requerida';
+          return 'El nombre es requerida';
+        }
+      },
+      dni: (value) => {
+        if (!value) {
+          return 'El DNI es requerido';
+        }
+      },
+      number: (value) => {
+        if (!value) {
+          return 'El número de cuenta es requerido';
         }
       },
     },
   });
 
-  const tableEditForm = useForm({
+  const bankEditForm = useForm({
     initialValues: {
-      description: '',
+      name: '',
+      dni: '',
+      number: '',
     },
   });
 
-  const getTables = useCallback(() => {
+  const getBanks = useCallback(() => {
     setLoading(true);
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .get(`/tables`)
+      .get(`/banks`)
       .then((response) => {
-        setTables(response.data.data);
+        setBanks(response.data.data);
         setLoading(false);
       })
       .catch((err) => {
         if (err.response.status === 404) {
           setLoading(false);
         } else {
-          setTables([]);
+          setBanks([]);
         }
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);
 
-  const deleteTable = (id) => {
+  const deleteBank = (id) => {
     setLoading(true);
     setModalLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .delete(`/tables/${id}`)
+      .delete(`/banks/${id}`)
       .then(() => {
         setModalLoading(false);
-        getTables();
+        getBanks();
         notifications.show({
-          title: 'Mesa eliminada',
-          message: 'La mesa se eliminó correctamente',
+          title: 'Banco eliminado',
+          message: 'El banco se eliminó correctamente',
           color: 'teal',
         });
       })
@@ -120,25 +117,25 @@ function AdminTables() {
         closeDelete();
         notifications.show({
           title: 'Error',
-          message: 'Ocurrió un error al eliminar la mesa',
+          message: 'Ocurrió un error al eliminar el banco',
           color: 'red',
         });
       });
   };
 
-  const createTable = (values) => {
+  const createBank = (values) => {
     setModalLoading(true);
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .post('/tables', { description: values.description })
+      .post('/banks', { name: values.name, dni: values.dni, number: values.number })
       .then(() => {
-        getTables();
+        getBanks();
         closeCreate();
         setModalLoading(false);
-        tableCreateForm.reset();
+        bankCreateForm.reset();
         notifications.show({
-          title: 'Mesa creada',
-          message: 'La mesa se creó correctamente',
+          title: 'Banco creado',
+          message: 'El banco se creó correctamente',
           color: 'teal',
         });
       })
@@ -147,31 +144,43 @@ function AdminTables() {
         setModalLoading(false);
         notifications.show({
           title: 'Error',
-          message: 'Ocurrió un error al crear la mesa',
+          message: 'Ocurrió un error al crear el banco',
           color: 'red',
         });
       });
   };
-  const editTable = (values) => {
+  const editBank = (values) => {
     setModalLoading(true);
 
-    if (!values.description) {
+    if (!values.name) {
+      values.name = banks.filter((bank) => bank.id === bankId)[0].name;
+    }
+
+    if (!values.dni) {
+      values.dni = banks.filter((bank) => bank.id === bankId)[0].dni;
+    }
+
+    if (!values.number) {
+      values.number = banks.filter((bank) => bank.id === bankId)[0].number;
+    }
+
+    if (!values.name && !values.dni && !values.number) {
       closeEdit();
       setModalLoading(false);
-      tableEditForm.reset();
+      bankEditForm.reset();
       return;
     }
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .patch(`/tables/${tableId}`, { description: values.description })
+      .patch(`/banks/${bankId}`, { name: values.name, dni: values.dni, number: values.number })
       .then(() => {
-        getTables();
+        getBanks();
         closeEdit();
         setModalLoading(false);
-        tableEditForm.reset();
+        bankEditForm.reset();
         notifications.show({
-          title: 'Mesa editada',
-          message: 'La mesa se editó correctamente',
+          title: 'Banco editado',
+          message: 'El banco se editó correctamente',
           color: 'teal',
         });
       })
@@ -180,7 +189,7 @@ function AdminTables() {
         setModalLoading(false);
         notifications.show({
           title: 'Error',
-          message: 'Ocurrió un error al editar la mesa',
+          message: 'Ocurrió un error al editar el banco',
           color: 'red',
         });
       });
@@ -188,7 +197,7 @@ function AdminTables() {
 
   useEffect(() => {
     setFinalOrders(
-      tables
+      banks
         .sort((a, b) => {
           if (orderBy) {
             if (orderBy === 'id') {
@@ -200,9 +209,23 @@ function AdminTables() {
             }
             if (orderBy === 'name') {
               if (orderDirection === 'asc') {
-                return b.description.localeCompare(a.description);
+                return b.name.localeCompare(a.name);
               } else {
-                return a.description.localeCompare(b.description);
+                return a.name.localeCompare(b.name);
+              }
+            }
+            if (orderBy === 'dni') {
+              if (orderDirection === 'asc') {
+                return b.dni.localeCompare(a.dni);
+              } else {
+                return a.dni.localeCompare(b.dni);
+              }
+            }
+            if (orderBy === 'number') {
+              if (orderDirection === 'asc') {
+                return b.number.localeCompare(a.number);
+              } else {
+                return a.number.localeCompare(b.number);
               }
             }
           } else {
@@ -212,28 +235,15 @@ function AdminTables() {
         .filter(
           (order) =>
             order?.code?.toString().includes(search) ||
-            order?.description?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.name?.toLowerCase().includes(search.toLowerCase()) ||
             search === '',
         ),
     );
-  }, [tables, orderBy, orderDirection, search]);
+  }, [banks, orderBy, orderDirection, search]);
 
   useEffect(() => {
-    getTables();
+    getBanks();
   }, []);
-
-  const downloadCode = () => {
-    const canvas = document.getElementById('qrImage');
-    if (canvas) {
-      const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-      let downloadLink = document.createElement('a');
-      downloadLink.href = pngUrl;
-      downloadLink.download = `codigo_qr.png`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    }
-  };
 
   return (
     <>
@@ -245,12 +255,20 @@ function AdminTables() {
         opened={openedCreate}
         onClose={() => {
           closeCreate();
-          tableCreateForm.reset();
+          bankCreateForm.reset();
         }}
-        title="Crear mesa"
+        title="Crear banco"
       >
-        <form onSubmit={tableCreateForm.onSubmit((values) => createTable(values))}>
-          <TextInput placeholder="Nombre" label="Nombre" required {...tableCreateForm.getInputProps('description')} />
+        <form onSubmit={bankCreateForm.onSubmit((values) => createBank(values))}>
+          <TextInput placeholder="Nombre" label="Nombre" required {...bankCreateForm.getInputProps('name')} />
+          <TextInput mt={10} placeholder="DNI" label="DNI" required {...bankCreateForm.getInputProps('dni')} />
+          <TextInput
+            mt={10}
+            placeholder="Número de cuenta"
+            label="Número de cuenta"
+            required
+            {...bankCreateForm.getInputProps('number')}
+          />
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
             Confirmar
           </Button>
@@ -262,18 +280,34 @@ function AdminTables() {
       <Modal
         opened={openedEdit}
         onClose={() => {
-          setTableId(null);
+          setBankId(null);
           closeEdit();
-          tableEditForm.reset();
+          bankEditForm.reset();
         }}
-        title="Editar mesa"
+        title="Editar banco"
       >
-        <form onSubmit={tableEditForm.onSubmit((values) => editTable(values))}>
+        <form onSubmit={bankEditForm.onSubmit((values) => editBank(values))}>
           <TextInput
             placeholder="Nombre"
             label="Nuevo nombre"
-            description="Si no ingresa un nombre, se mantendrá el actual"
-            {...tableEditForm.getInputProps('description')}
+            name="Si no ingresa un nombre, se mantendrá el actual"
+            {...bankEditForm.getInputProps('name')}
+          />
+
+          <TextInput
+            placeholder="DNI"
+            label="Nuevo DNI"
+            name="Si no ingresa un DNI, se mantendrá el actual"
+            mt={10}
+            {...bankEditForm.getInputProps('dni')}
+          />
+
+          <TextInput
+            placeholder="Número de cuenta"
+            label="Nuevo número de cuenta"
+            name="Si no ingresa un número de cuenta, se mantendrá el actual"
+            mt={10}
+            {...bankEditForm.getInputProps('number')}
           />
 
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
@@ -287,16 +321,16 @@ function AdminTables() {
       <Modal
         opened={openedDelete}
         onClose={() => {
-          setTableId(null);
+          setBankId(null);
           closeDelete();
         }}
-        title="Eliminar mesa"
+        title="Eliminar banco"
       >
         <Text>¿Está seguro que desea eliminar la categoría?</Text>
         <Flex mt={20} justify="end" gap="xs">
           <Button
             onClick={() => {
-              setTableId(null);
+              setBankId(null);
               closeDelete();
             }}
             color="orange"
@@ -307,8 +341,8 @@ function AdminTables() {
           </Button>
           <Button
             onClick={() => {
-              deleteTable(tableId);
-              setTableId(null);
+              deleteBank(bankId);
+              setBankId(null);
               closeDelete();
             }}
             color="red"
@@ -319,43 +353,12 @@ function AdminTables() {
         </Flex>
       </Modal>
 
-      {/* Qr Modal */}
-
-      <Modal
-        opened={openedQr}
-        onClose={() => {
-          setTableId(null);
-          closeQr();
-        }}
-        title="Código QR"
-      >
-        <Text>Descargue el código QR para que los clientes puedan escanearlo y acceder a la mesa</Text>
-
-        <Center>
-          <Flex direction="column" align="center" justify="center" mt={20}>
-            {tableId && (
-              <QRCode
-                logoWidth={64}
-                value={`${DOMAIN}/login/${tableId}`}
-                size={256}
-                logoImage={qrcodeImage}
-                enableCORS={true}
-                id="qrImage"
-              />
-            )}
-            <Button onClick={downloadCode} color="orange">
-              Descargar
-            </Button>
-          </Flex>
-        </Center>
-      </Modal>
-
       {/* Main Page */}
 
-      <Layout navbar="admin" navbarActive="admin-tables" header>
-        <Title order={1}>Mesas</Title>
+      <Layout navbar="admin" navbarActive="admin-banks" header>
+        <Title order={1}>Bancos</Title>
         <Text mt={20} mb={10}>
-          Lista de mesas
+          Lista de bancos
         </Text>
 
         <TextInput
@@ -388,12 +391,12 @@ function AdminTables() {
                 leftIcon={'+'}
                 variant="outline"
               >
-                Crear mesa
+                Crear banco
               </Button>
             </Flex>
             <Divider />
             {finalOrders.length <= 0 ? (
-              <Text mt={20}>No hay mesas</Text>
+              <Text mt={20}>No hay bancos</Text>
             ) : (
               <ScrollArea>
                 <Table striped>
@@ -455,22 +458,85 @@ function AdminTables() {
                           {orderBy === 'name' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
                         </UnstyledButton>
                       </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('dni');
+                            setOrderDirection(orderBy === 'dni' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            DNI
+                          </Text>
+                          {orderBy === 'dni' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+                      <th>
+                        <UnstyledButton
+                          color="gray"
+                          ml={5}
+                          px={4}
+                          variant="outline"
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 'md',
+
+                            '&:hover': {
+                              color: 'orange',
+                              backgroundColor: '#f6f6f6',
+                            },
+                          }}
+                          onClick={() => {
+                            setOrderBy('number');
+                            setOrderDirection(orderBy === 'number' && orderDirection === 'asc' ? 'desc' : 'asc');
+                          }}
+                        >
+                          <Text weight={600} size="md">
+                            Número de cuenta
+                          </Text>
+                          {orderBy === 'number' && orderDirection === 'asc' ? <IconChevronUp /> : <IconChevronDown />}
+                        </UnstyledButton>
+                      </th>
+
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {finalOrders.map((table) => (
-                      <tr key={table.id}>
-                        <td>{table.code}</td>
-                        <td>{table.description}</td>
+                    {finalOrders.map((bank) => (
+                      <tr key={bank.id}>
+                        <td>{bank.code}</td>
+                        <td>{bank.name}</td>
+                        <td>{bank.dni}</td>
+                        <td>{bank.number}</td>
                         <td>
                           <Flex align="center" gap="xs">
                             <ActionIcon
                               variant="transparent"
                               color="orange"
                               onClick={() => {
-                                setTableId(table.id);
-                                tableEditForm.setValues({ description: table.description });
+                                setBankId(bank.id);
+                                bankEditForm.setValues({
+                                  name: bank.name,
+                                  dni: bank.dni,
+                                  number: bank.number,
+                                });
                                 openEdit();
                               }}
                             >
@@ -480,21 +546,11 @@ function AdminTables() {
                               variant="transparent"
                               color="orange"
                               onClick={() => {
-                                setTableId(table.id);
+                                setBankId(bank.id);
                                 openDelete();
                               }}
                             >
                               <IconTrash />
-                            </ActionIcon>
-                            <ActionIcon
-                              variant="transparent"
-                              color="orange"
-                              onClick={() => {
-                                setTableId(table.id);
-                                openQr();
-                              }}
-                            >
-                              <IconQrcode />
                             </ActionIcon>
                           </Flex>
                         </td>
@@ -511,4 +567,4 @@ function AdminTables() {
   );
 }
 
-export default AdminTables;
+export default AdminBanks;

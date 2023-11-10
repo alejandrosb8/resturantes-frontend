@@ -9,7 +9,8 @@ import {
   Flex,
   Modal,
   TextInput,
-  Center,
+  FileInput,
+  Image,
   Divider,
   ScrollArea,
   UnstyledButton,
@@ -18,37 +19,29 @@ import { axiosPrivate } from '../../utils/axios';
 import { useEffect, useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { IconPencil, IconTrash, IconQrcode } from '@tabler/icons-react';
-import { useDisclosure } from '@mantine/hooks';
-import { QRCode } from 'react-qrcode-logo';
+import { IconPencil, IconTrash, IconPhoto } from '@tabler/icons-react';
+import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
-import qrcodeImage from './../../assets/logowhite.png';
+import { notifications } from '@mantine/notifications';
 
-const ENVIRONMENT = import.meta.env.VITE_ENV;
-const DOMAIN_ENV = import.meta.env.VITE_DOMAIN;
-
-let DOMAIN = '';
-
-if (ENVIRONMENT === 'development') {
-  DOMAIN = DOMAIN_ENV || 'http://localhost:5173';
-} else {
-  DOMAIN = 'https://green-stone-04b86be10.3.azurestaticapps.net';
-}
-
-function AdminTables() {
-  const [tables, setTables] = useState([]);
+function AdminCategories() {
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalLoading, setModalLoading] = useState(false);
   const { authTokens, setAuthTokens, setUser } = useAuth();
   const navigate = useNavigate();
 
+  const [orderBy, setOrderBy] = useState('');
+  const [orderDirection, setOrderDirection] = useState('asc');
+  const [finalOrders, setFinalOrders] = useState([]);
+  const [search, setSearch] = useState('');
+
   // edit modal
   const [openedEdit, { open: openEdit, close: closeEdit }] = useDisclosure(false);
 
-  // qr modal
-  const [openedQr, { open: openQr, close: closeQr }] = useDisclosure(false);
+  // image modal
+  const [openedImg, { open: openImg, close: closeImg }] = useDisclosure(false);
 
   // create modal
   const [openedCreate, { open: openCreate, close: closeCreate }] = useDisclosure(false);
@@ -56,62 +49,56 @@ function AdminTables() {
   // delete modal
   const [openedDelete, { open: openDelete, close: closeDelete }] = useDisclosure(false);
 
-  const [tableId, setTableId] = useState(null);
+  const [categoryId, setCategoryId] = useState(null);
+  const [categoryData, setCategoryData] = useInputState(null);
 
-  const [orderBy, setOrderBy] = useState('');
-  const [orderDirection, setOrderDirection] = useState('asc');
-  const [finalOrders, setFinalOrders] = useState([]);
-  const [search, setSearch] = useState('');
-
-  const tableCreateForm = useForm({
+  const categoryCreateForm = useForm({
     initialValues: {
-      description: '',
+      name: '',
+      image: '',
     },
 
     validate: {
-      description: (value) => {
-        if (!value) {
-          return 'La descripción es requerida';
-        }
-      },
+      name: (value) => (value.toString().trim().length > 0 ? null : 'Debe ingresar un nombre'),
+      image: (value) => (value.toString().trim().length > 0 ? null : 'Debe ingresar una imagen'),
     },
   });
 
-  const tableEditForm = useForm({
+  const categoryEditForm = useForm({
     initialValues: {
-      description: '',
+      name: '',
+      image: '',
     },
   });
 
-  const getTables = useCallback(() => {
+  const getCategories = useCallback(() => {
     setLoading(true);
-
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .get(`/tables`)
+      .get('/categories')
       .then((response) => {
-        setTables(response.data.data);
+        setCategories(response.data.data);
         setLoading(false);
       })
       .catch((err) => {
         if (err.response.status === 404) {
           setLoading(false);
         } else {
-          setTables([]);
+          setCategories([]);
         }
       });
   }, [authTokens, setAuthTokens, setUser, navigate]);
 
-  const deleteTable = (id) => {
+  const deleteCategories = (id) => {
     setLoading(true);
     setModalLoading(true);
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .delete(`/tables/${id}`)
+      .delete(`/categories/${id}`)
       .then(() => {
         setModalLoading(false);
-        getTables();
+        getCategories();
         notifications.show({
-          title: 'Mesa eliminada',
-          message: 'La mesa se eliminó correctamente',
+          title: 'Categoría eliminada',
+          message: 'La categoría se eliminó correctamente',
           color: 'teal',
         });
       })
@@ -120,67 +107,92 @@ function AdminTables() {
         closeDelete();
         notifications.show({
           title: 'Error',
-          message: 'Ocurrió un error al eliminar la mesa',
+          message: 'Ocurrió un error al eliminar la categoría',
           color: 'red',
         });
       });
   };
 
-  const createTable = (values) => {
+  const createCategories = (values) => {
     setModalLoading(true);
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('image', values.image);
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .post('/tables', { description: values.description })
+      .post('/categories', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       .then(() => {
-        getTables();
+        setCategoryData(null);
+        getCategories();
         closeCreate();
         setModalLoading(false);
-        tableCreateForm.reset();
+        categoryCreateForm.reset();
         notifications.show({
-          title: 'Mesa creada',
-          message: 'La mesa se creó correctamente',
+          title: 'Categoría creada',
+          message: 'La categoría se creó correctamente',
           color: 'teal',
         });
       })
       .catch(() => {
+        setCategoryData(null);
         closeCreate();
         setModalLoading(false);
         notifications.show({
           title: 'Error',
-          message: 'Ocurrió un error al crear la mesa',
+          message: 'Ocurrió un error al crear la categoría',
           color: 'red',
         });
       });
   };
-  const editTable = (values) => {
+  const editCategories = (values) => {
     setModalLoading(true);
+    const formData = new FormData();
 
-    if (!values.description) {
+    if (values.name) {
+      formData.append('name', values.name);
+    }
+
+    if (values.image) {
+      formData.append('image', values.image);
+    }
+
+    if (!values.name && !values.image) {
+      setCategoryData(null);
       closeEdit();
       setModalLoading(false);
-      tableEditForm.reset();
+      categoryEditForm.reset();
       return;
     }
 
     axiosPrivate(authTokens, setAuthTokens, setUser)
-      .patch(`/tables/${tableId}`, { description: values.description })
+      .patch(`/categories/${categoryId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       .then(() => {
-        getTables();
+        setCategoryData(null);
+        getCategories();
         closeEdit();
         setModalLoading(false);
-        tableEditForm.reset();
+        categoryEditForm.reset();
         notifications.show({
-          title: 'Mesa editada',
-          message: 'La mesa se editó correctamente',
+          title: 'Categoría editada',
+          message: 'La categoría se editó correctamente',
           color: 'teal',
         });
       })
       .catch(() => {
+        setCategoryData(null);
         closeEdit();
         setModalLoading(false);
         notifications.show({
           title: 'Error',
-          message: 'Ocurrió un error al editar la mesa',
+          message: 'Ocurrió un error al editar la categoría',
           color: 'red',
         });
       });
@@ -188,7 +200,7 @@ function AdminTables() {
 
   useEffect(() => {
     setFinalOrders(
-      tables
+      categories
         .sort((a, b) => {
           if (orderBy) {
             if (orderBy === 'id') {
@@ -200,9 +212,9 @@ function AdminTables() {
             }
             if (orderBy === 'name') {
               if (orderDirection === 'asc') {
-                return b.description.localeCompare(a.description);
+                return b.name.localeCompare(a.name);
               } else {
-                return a.description.localeCompare(b.description);
+                return a.name.localeCompare(b.name);
               }
             }
           } else {
@@ -212,28 +224,15 @@ function AdminTables() {
         .filter(
           (order) =>
             order?.code?.toString().includes(search) ||
-            order?.description?.toLowerCase().includes(search.toLowerCase()) ||
+            order?.name?.toLowerCase().includes(search.toLowerCase()) ||
             search === '',
         ),
     );
-  }, [tables, orderBy, orderDirection, search]);
+  }, [categories, orderBy, orderDirection, search]);
 
   useEffect(() => {
-    getTables();
-  }, []);
-
-  const downloadCode = () => {
-    const canvas = document.getElementById('qrImage');
-    if (canvas) {
-      const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-      let downloadLink = document.createElement('a');
-      downloadLink.href = pngUrl;
-      downloadLink.download = `codigo_qr.png`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    }
-  };
+    getCategories();
+  }, [getCategories]);
 
   return (
     <>
@@ -244,13 +243,22 @@ function AdminTables() {
       <Modal
         opened={openedCreate}
         onClose={() => {
+          setCategoryId(null);
           closeCreate();
-          tableCreateForm.reset();
+          categoryCreateForm.reset();
         }}
-        title="Crear mesa"
+        title="Crear categoría"
       >
-        <form onSubmit={tableCreateForm.onSubmit((values) => createTable(values))}>
-          <TextInput placeholder="Nombre" label="Nombre" required {...tableCreateForm.getInputProps('description')} />
+        <form onSubmit={categoryCreateForm.onSubmit((values) => createCategories(values))}>
+          <TextInput placeholder="Nombre" label="Nombre" required {...categoryCreateForm.getInputProps('name')} />
+          <FileInput
+            mt={15}
+            placeholder="Imagen"
+            label="Imagen"
+            required
+            accept="image/*"
+            {...categoryCreateForm.getInputProps('image')}
+          />
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
             Confirmar
           </Button>
@@ -262,18 +270,26 @@ function AdminTables() {
       <Modal
         opened={openedEdit}
         onClose={() => {
-          setTableId(null);
+          setCategoryId(null);
           closeEdit();
-          tableEditForm.reset();
+          categoryEditForm.reset();
         }}
-        title="Editar mesa"
+        title="Editar categoría"
       >
-        <form onSubmit={tableEditForm.onSubmit((values) => editTable(values))}>
+        <form onSubmit={categoryEditForm.onSubmit((values) => editCategories(values))}>
           <TextInput
             placeholder="Nombre"
             label="Nuevo nombre"
             description="Si no ingresa un nombre, se mantendrá el actual"
-            {...tableEditForm.getInputProps('description')}
+            {...categoryEditForm.getInputProps('name')}
+          />
+          <FileInput
+            mt={15}
+            label="Nueva imagen"
+            placeholder="Selecciona imagen"
+            description="Si no selecciona una imagen, se mantendrá la actual"
+            accept="image/*"
+            {...categoryEditForm.getInputProps('image')}
           />
 
           <Button type="submit" color="orange" fullWidth mt={20} loading={modalLoading}>
@@ -287,16 +303,16 @@ function AdminTables() {
       <Modal
         opened={openedDelete}
         onClose={() => {
-          setTableId(null);
+          setCategoryId(null);
           closeDelete();
         }}
-        title="Eliminar mesa"
+        title="Eliminar categoría"
       >
         <Text>¿Está seguro que desea eliminar la categoría?</Text>
         <Flex mt={20} justify="end" gap="xs">
           <Button
             onClick={() => {
-              setTableId(null);
+              setCategoryId(null);
               closeDelete();
             }}
             color="orange"
@@ -307,8 +323,8 @@ function AdminTables() {
           </Button>
           <Button
             onClick={() => {
-              deleteTable(tableId);
-              setTableId(null);
+              deleteCategories(categoryId);
+              setCategoryId(null);
               closeDelete();
             }}
             color="red"
@@ -319,45 +335,26 @@ function AdminTables() {
         </Flex>
       </Modal>
 
-      {/* Qr Modal */}
+      {/* Image Modal */}
 
       <Modal
-        opened={openedQr}
+        opened={openedImg}
         onClose={() => {
-          setTableId(null);
-          closeQr();
+          setCategoryId(null);
+          closeImg();
         }}
-        title="Código QR"
+        title="Imagen"
       >
-        <Text>Descargue el código QR para que los clientes puedan escanearlo y acceder a la mesa</Text>
-
-        <Center>
-          <Flex direction="column" align="center" justify="center" mt={20}>
-            {tableId && (
-              <QRCode
-                logoWidth={64}
-                value={`${DOMAIN}/login/${tableId}`}
-                size={256}
-                logoImage={qrcodeImage}
-                enableCORS={true}
-                id="qrImage"
-              />
-            )}
-            <Button onClick={downloadCode} color="orange">
-              Descargar
-            </Button>
-          </Flex>
-        </Center>
+        <Image src={categoryData?.image} alt="Imagen Categoría" />
       </Modal>
 
       {/* Main Page */}
 
-      <Layout navbar="admin" navbarActive="admin-tables" header>
-        <Title order={1}>Mesas</Title>
+      <Layout navbar="admin" navbarActive="admin-categories" header>
+        <Title order={1}>Categorías</Title>
         <Text mt={20} mb={10}>
-          Lista de mesas
+          Lista de categorías
         </Text>
-
         <TextInput
           label="Buscar"
           placeholder="Buscar"
@@ -368,10 +365,9 @@ function AdminTables() {
             setSearch(event.target.value);
           }}
         />
-
         {loading ? (
           <>
-            <Skeleton height={50} mt={15} radius="sm" />
+            <Skeleton height={50} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
             <Skeleton height={50} mt={6} radius="sm" />
@@ -388,12 +384,12 @@ function AdminTables() {
                 leftIcon={'+'}
                 variant="outline"
               >
-                Crear mesa
+                Crear categoría
               </Button>
             </Flex>
             <Divider />
-            {finalOrders.length <= 0 ? (
-              <Text mt={20}>No hay mesas</Text>
+            {categories.length <= 0 ? (
+              <Text mt={20}>No hay categorías</Text>
             ) : (
               <ScrollArea>
                 <Table striped>
@@ -459,18 +455,19 @@ function AdminTables() {
                     </tr>
                   </thead>
                   <tbody>
-                    {finalOrders.map((table) => (
-                      <tr key={table.id}>
-                        <td>{table.code}</td>
-                        <td>{table.description}</td>
+                    {finalOrders.map((category) => (
+                      <tr key={category.id}>
+                        <td>{category.code}</td>
+                        <td>{category.name}</td>
                         <td>
                           <Flex align="center" gap="xs">
                             <ActionIcon
                               variant="transparent"
                               color="orange"
                               onClick={() => {
-                                setTableId(table.id);
-                                tableEditForm.setValues({ description: table.description });
+                                setCategoryId(category.id);
+                                setCategoryData({ name: category.name });
+                                categoryEditForm.setValues({ name: category.name });
                                 openEdit();
                               }}
                             >
@@ -480,7 +477,7 @@ function AdminTables() {
                               variant="transparent"
                               color="orange"
                               onClick={() => {
-                                setTableId(table.id);
+                                setCategoryId(category.id);
                                 openDelete();
                               }}
                             >
@@ -490,11 +487,12 @@ function AdminTables() {
                               variant="transparent"
                               color="orange"
                               onClick={() => {
-                                setTableId(table.id);
-                                openQr();
+                                setCategoryId(category.id);
+                                setCategoryData((prev) => ({ ...prev, image: category.imageUrl }));
+                                openImg();
                               }}
                             >
-                              <IconQrcode />
+                              <IconPhoto />
                             </ActionIcon>
                           </Flex>
                         </td>
@@ -511,4 +509,4 @@ function AdminTables() {
   );
 }
 
-export default AdminTables;
+export default AdminCategories;

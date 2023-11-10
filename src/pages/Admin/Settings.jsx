@@ -3,6 +3,7 @@ import { Title, Container, Text, Stack, Box, TextInput, PasswordInput, Button } 
 import { useForm } from '@mantine/form';
 import useAuth from '../../hooks/useAuth';
 import { useState } from 'react';
+import { notifications } from '@mantine/notifications';
 
 function AdminSettings() {
   const { adminUpdate } = useAuth();
@@ -17,8 +18,12 @@ function AdminSettings() {
     },
 
     validate: {
-      username: (value) => (/^[a-zA-Z0-9_]{3,16}$/.test(value) ? null : 'El nombre de usuario no es válido'),
-      password: (value) => (/^[\s\S]{5,}$/.test(value) ? null : 'La contraseña debe contener al menos 8 caracteres'),
+      username: (value) =>
+        /^[a-zA-Z0-9_]{3,16}$/.test(value)
+          ? null
+          : 'El nombre de usuario no es válido, debe tener entre 3 y 16 caracteres',
+      password: (value) =>
+        /^[\s\S]{5,}$/.test(value) ? null : 'La contraseña no es válida, debe tener al menos 5 caracteres',
       confirmPassword: (value) => (value === adminDataForm.values.password ? null : 'Las contraseñas no coinciden'),
     },
   });
@@ -31,7 +36,13 @@ function AdminSettings() {
     const response = responseRaw.response;
 
     if (responseRaw.status === 200) {
-      setErrorMsg('Cambios guardados correctamente');
+      setErrorMsg('');
+      notifications.show({
+        title: 'Datos actualizados',
+        color: 'teal',
+        message: 'Los datos de la cuenta de administrador se han actualizado correctamente',
+      });
+      adminDataForm.reset();
     } else if (response.data.message === 'USER_NOT_FOUND') {
       setErrorMsg('El nombre de usuario no existe');
     } else {

@@ -1,4 +1,4 @@
-import axios from '../utils/axios';
+import axios, { axiosPrivate } from '../utils/axios';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import jwt_decode from 'jwt-decode';
@@ -17,14 +17,14 @@ const CHANGE_PASSWORD_URL = `${USER_AUTH}/change-password`;
 // admin auth
 
 const ADMIN_LOGIN_URL = `${ADMIN_AUTH}/login`;
-const ADMIN_UPDATE_URL = `${ADMIN_AUTH}/change-username-password `;
+const ADMIN_UPDATE_URL = `${ADMIN_AUTH}/change-username-password`;
 
 function useAuth() {
   const { authTokens, setAuthTokens, setUser, user } = useContext(AuthContext);
 
-  async function register(fullName, email, dni, phone, password) {
+  async function register(fullName, email, dni, phone, password, tableId) {
     return axios
-      .post(REGISTRATION_URL, { fullName, email, dni, phone, password })
+      .post(REGISTRATION_URL, { fullName, email, dni, phone, password, tableId })
       .then((response) => {
         setAuthTokens(response.data);
         setUser(response.data.user);
@@ -68,9 +68,9 @@ function useAuth() {
     localStorage.removeItem('user');
   }
 
-  async function recoverPassword(email) {
+  async function recoverPassword(email, tableId) {
     return axios
-      .post(RECOVER_PASSWORD_URL, { email })
+      .post(RECOVER_PASSWORD_URL, { email, tableId })
       .then((response) => {
         return response;
       })
@@ -111,13 +111,10 @@ function useAuth() {
   }
 
   async function adminUpdate(username, password) {
-    return axios
+    return axiosPrivate(authTokens, setAuthTokens, setUser)
       .patch(ADMIN_UPDATE_URL, { username, password })
       .then((response) => {
         return response;
-      })
-      .catch((error) => {
-        return error;
       });
   }
 
@@ -132,6 +129,8 @@ function useAuth() {
     changePassword,
     adminLogin,
     adminUpdate,
+    setAuthTokens,
+    setUser,
   };
 }
 

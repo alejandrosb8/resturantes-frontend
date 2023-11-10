@@ -3,6 +3,7 @@ import useAuth from '../../hooks/useAuth';
 import { useForm } from '@mantine/form';
 import { Button, TextInput, Title, Stack, Text, PasswordInput } from '@mantine/core';
 import { useSearchParams } from 'react-router-dom';
+import useUserTable from '../../hooks/useTable';
 
 function RecoverPassword({ setShowRecoverPassword }) {
   const [tokenValid, setTokenValid] = useState('');
@@ -12,6 +13,8 @@ function RecoverPassword({ setShowRecoverPassword }) {
   const [errorMsg, setErrorMsg] = useState('');
 
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { table } = useUserTable();
 
   const token = searchParams.get('token');
 
@@ -54,12 +57,12 @@ function RecoverPassword({ setShowRecoverPassword }) {
   const handleSubmitEmail = async (values) => {
     setLoading(true);
     const { email } = values;
-    const response = await recoverPassword(email);
+    const response = await recoverPassword(email, table);
 
     if (response.status === 200) {
       setTokenSent(true);
     } else {
-      setErrorMsg('Ha ocurrido un al enviar el correo electrónico');
+      setErrorMsg('Ha ocurrido un error al enviar el correo electrónico');
     }
 
     setLoading(false);

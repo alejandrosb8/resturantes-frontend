@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../layouts/Default';
-import { Button, TextInput, Container, Divider, Anchor, Title, Stack, Text, PasswordInput } from '@mantine/core';
+import {
+  Button,
+  TextInput,
+  Container,
+  Divider,
+  Anchor,
+  Title,
+  Stack,
+  Text,
+  PasswordInput,
+  UnstyledButton,
+} from '@mantine/core';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { useForm } from '@mantine/form';
 import RecoverPassword from './RecoverPassword';
+import useTable from '../../hooks/useTable';
 
 function Login() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,6 +25,8 @@ function Login() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRecoverPassword, setShowRecoverPassword] = useState(false);
+
+  const { table } = useTable();
 
   const { verifyAccount, login } = useAuth();
   const navigate = useNavigate();
@@ -59,14 +73,18 @@ function Login() {
     const responseRaw = await login(email, password);
     const response = responseRaw.response;
 
+    console.log(responseRaw);
+
     if (responseRaw.status === 200) {
-      navigate('/');
+      navigate(`/${table}`);
     } else if (response.data.message === 'EMAIL_NOT_FOUND') {
       setErrorMsg('El correo electrónico no está registrado');
     } else if (response.data.message === 'WRONG_PASSWORD') {
       setErrorMsg('La contraseña es incorrecta');
     } else if (response.data.message === 'USER_NOT_VERIFIED') {
       setErrorMsg('La cuenta no está verificada');
+    } else if (response.data.message === 'USER_BANNED') {
+      setErrorMsg('La cuenta ha sido bloqueada');
     } else {
       setErrorMsg('Ha ocurrido un error');
     }
@@ -254,7 +272,15 @@ function Login() {
               <Button type="submit" fullWidth loading={loading}>
                 Iniciar sesión
               </Button>
-              <Anchor href="/" align="center" size="sm">
+              <Anchor
+                align="center"
+                size="sm"
+                component={UnstyledButton}
+                onClick={() => {
+                  setSearchParams({ recoverPassword: true });
+                  setShowRecoverPassword(true);
+                }}
+              >
                 ¿Olvidaste tu contraseña?
               </Anchor>
               <Divider
@@ -263,8 +289,11 @@ function Login() {
                 label={<Text color="#666">¿No tienes una cuenta?</Text>}
               />
 
-              <Button component={Link} to="/register" variant="outline" fullWidth>
+              <Button component={Link} to={`/register/${table}`} variant="outline" fullWidth>
                 Regístrate
+              </Button>
+              <Button component={Link} to={`/support/${table}`} variant="subtle" fullWidth>
+                Soporte
               </Button>
             </Stack>
           </form>

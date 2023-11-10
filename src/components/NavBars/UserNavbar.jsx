@@ -2,62 +2,28 @@ import { Navbar, NavLink, Button } from '@mantine/core';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import useTable from '../../hooks/useTable.js';
 
 const linksDataRaw = [
   {
     label: 'Inicio',
-    to: '/admin',
-    id: 'admin-home',
-  },
-  {
-    label: 'Verificar pagos',
-    to: '/admin/verify-payments',
-    id: 'admin-verify-payments',
-  },
-  {
-    label: 'Verificar pedidos',
-    to: '/admin/verify-orders',
-    id: 'admin-verify-orders',
-  },
-  {
-    label: 'Clientes',
-    to: '/admin/customers',
-    id: 'admin-customers',
-  },
-  {
-    label: 'Mesas',
-    to: '/admin/tables',
-    id: 'admin-tables',
-  },
-  {
-    label: 'Categoría',
-    to: '/admin/categories',
-    id: 'admin-categories',
-  },
-  {
-    label: 'Platos',
-    to: '/admin/dishes',
-    id: 'admin-dishes',
+    to: '/',
+    id: 'home',
   },
   {
     label: 'Pedidos',
-    to: '/admin/orders',
-    id: 'admin-orders',
+    to: '/orders',
+    id: 'orders',
   },
   {
     label: 'Pagos',
-    to: '/admin/payments',
-    id: 'admin-payments',
+    to: '/payments',
+    id: 'payments',
   },
   {
-    label: 'Bancos',
-    to: '/admin/banks',
-    id: 'admin-banks',
-  },
-  {
-    label: 'Configuración',
-    to: '/admin/settings',
-    id: 'admin-settings',
+    label: 'Soporte',
+    to: '/support',
+    id: 'support',
   },
 ];
 
@@ -66,13 +32,22 @@ const linksData = linksDataRaw.map((link, index) => ({
   idNumber: index,
 }));
 
-function AdminNavbar({ opened, currentActive }) {
+function UserNavbar({ opened, currentActive }) {
   const [active, setActive] = useState(
     linksData.filter((data) => currentActive === data.id).map((data) => data.idNumber)[0] || 0,
   );
 
   const { logout } = useAuth();
   const navigate = useNavigate();
+
+  const { table } = useTable();
+  if (!table) {
+    return null;
+  }
+  linksData[0].to = `/${table}`;
+  linksData[1].to = `/orders/${table}`;
+  linksData[2].to = `/payments/${table}`;
+  linksData[3].to = `/support/${table}`;
 
   return (
     <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }} zIndex={50}>
@@ -92,7 +67,7 @@ function AdminNavbar({ opened, currentActive }) {
         mt={20}
         onClick={() => {
           logout();
-          navigate('/admin/login');
+          navigate('/');
         }}
       >
         Cerrar sesión
@@ -101,4 +76,4 @@ function AdminNavbar({ opened, currentActive }) {
   );
 }
 
-export default AdminNavbar;
+export default UserNavbar;
